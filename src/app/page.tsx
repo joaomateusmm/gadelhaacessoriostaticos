@@ -15,6 +15,8 @@ export default function Home() {
         <ProductCatalog />
       </div>
 
+      {/* ADD */}
+
       <TestimonialsSection />
       <FaqSection />
       <Footer />
