@@ -3,6 +3,8 @@
 import {
   Building,
   Check,
+  ChevronDown,
+  ChevronRight,
   Pencil,
   Phone,
   Search,
@@ -34,12 +36,33 @@ export function TabelaPedidosSistema({
   const [filtroStatus, setFiltroStatus] = useState<
     "todos" | "Devendo" | "Entregue"
   >("todos");
+  const [filtroProduto, setFiltroProduto] = useState<string>("todos");
+  const [openDropdownProduto, setOpenDropdownProduto] = useState(false);
   const [ordemData, setOrdemData] = useState<"recentes" | "antigos">(
     "recentes",
   );
   const [excluindoId, setExcluindoId] = useState<string | null>(null);
   const [selecionados, setSelecionados] = useState<string[]>([]);
   const [excluindoEmMassa, setExcluindoEmMassa] = useState(false);
+  const [datasFechadas, setDatasFechadas] = useState<Record<string, boolean>>(
+    {},
+  );
+
+  // Lista única de nomes de produtos extraída dos pedidos
+  const produtosUnicos = Array.from(
+    new Set(
+      pedidos
+        .flatMap((p) => p.itens.map((item) => item.nome.trim()))
+        .filter(Boolean),
+    ),
+  ).sort();
+
+  const toggleDataFechada = (data: string) => {
+    setDatasFechadas((prev) => ({
+      ...prev,
+      [data]: !prev[data],
+    }));
+  };
 
   const handleToggleStatusPacote = async (
     pedidoId: string,
@@ -157,7 +180,13 @@ export function TabelaPedidosSistema({
       p.unidade.toLowerCase().includes(busca.toLowerCase());
     const matchStatus =
       filtroStatus === "todos" || p.statusPedido === filtroStatus;
-    return matchBusca && matchStatus;
+    const matchProduto =
+      filtroProduto === "todos" ||
+      p.itens.some(
+        (item) =>
+          item.nome.trim().toLowerCase() === filtroProduto.toLowerCase(),
+      );
+    return matchBusca && matchStatus && matchProduto;
   });
 
   const todosSelecionados =
@@ -271,6 +300,71 @@ export function TabelaPedidosSistema({
         </div>
 
         <div className="flex items-center justify-center gap-2">
+          {/* Filtro por Produto (Dropdown Customizado com Largura Dinâmica) */}
+          <div className="relative inline-block font-mono text-xs">
+            <button
+              type="button"
+              onClick={() => setOpenDropdownProduto((prev) => !prev)}
+              className={`flex cursor-pointer items-center gap-2 border px-3 py-1.5 text-xs whitespace-nowrap uppercase transition-all focus:outline-none ${
+                filtroProduto !== "todos"
+                  ? "border-emerald-600 bg-emerald-950/60 font-bold text-emerald-400"
+                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-600 hover:text-white"
+              }`}
+            >
+              <span>
+                {filtroProduto === "todos"
+                  ? "TODOS OS PRODUTOS"
+                  : filtroProduto.toUpperCase()}
+              </span>
+              <ChevronDown className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+            </button>
+
+            {openDropdownProduto && (
+              <>
+                {/* Backdrop para fechar ao clicar fora */}
+                <div
+                  className="fixed inset-0 z-20"
+                  onClick={() => setOpenDropdownProduto(false)}
+                />
+                <div className="absolute top-full left-0 z-30 mt-1 max-h-60 min-w-full overflow-y-auto rounded border border-neutral-800 bg-neutral-900 font-mono text-xs whitespace-nowrap shadow-xl">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFiltroProduto("todos");
+                      setOpenDropdownProduto(false);
+                    }}
+                    className={`block w-full px-3 py-2 text-left uppercase transition-colors hover:bg-neutral-800 ${
+                      filtroProduto === "todos"
+                        ? "bg-neutral-800 font-bold text-emerald-400"
+                        : "text-neutral-300"
+                    }`}
+                  >
+                    TODOS OS PRODUTOS
+                  </button>
+                  {produtosUnicos.map((prod) => (
+                    <button
+                      key={prod}
+                      type="button"
+                      onClick={() => {
+                        setFiltroProduto(prod);
+                        setOpenDropdownProduto(false);
+                      }}
+                      className={`block w-full px-3 py-2 text-left uppercase transition-colors hover:bg-neutral-800 ${
+                        filtroProduto === prod
+                          ? "bg-neutral-800 font-bold text-emerald-400"
+                          : "text-neutral-300"
+                      }`}
+                    >
+                      {prod.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          <span className="text-neutral-500">|</span>
+
           {/* Filtros por Data */}
           <div className="flex items-center space-x-2 font-mono text-xs">
             <button
@@ -287,7 +381,7 @@ export function TabelaPedidosSistema({
               onClick={() => setOrdemData("antigos")}
               className={`border px-3 py-1.5 uppercase transition-all ${
                 ordemData === "antigos"
-                  ? "border-white bg-white font-bold text-black"
+                  ? "border-neutral-600 bg-neutral-700 font-bold text-white"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-600 hover:text-white"
               }`}
             >
@@ -316,7 +410,7 @@ export function TabelaPedidosSistema({
         </div>
       </div>
 
-      <div className="relative my-10 w-full">
+      <div className="relative mt-10 -mb-6 w-full">
         <input
           type="text"
           value={busca}
@@ -334,248 +428,289 @@ export function TabelaPedidosSistema({
         </div>
       ) : (
         <div className="space-y-10">
-          {datasOrdenadas.map((data) => (
-            <div key={data} className="space-y-6">
-              {/* Separador por Dia */}
-              <div className="mt-20 flex items-center gap-4 font-mono text-xs text-neutral-400">
-                <span className="text-sm font-bold whitespace-nowrap text-white">
-                  {data}
-                </span>
-                <div className="h-[1px] w-full bg-neutral-800" />
-              </div>
+          {datasOrdenadas.map((data) => {
+            const isFechada = datasFechadas[data];
 
-              <div className="grid grid-cols-1 gap-6">
-                {pedidosAgrupadosPorData[data].map((pedido) => {
-                  const totalItens = pedido.itens.length;
-                  const itensSeparados = pedido.itens.filter(
-                    (i) => i.separado,
-                  ).length;
-                  const totalValor = pedido.itens.reduce(
-                    (acc, item) => acc + item.precoUnitario * item.quantidade,
-                    0,
-                  );
-                  const isChecked = selecionados.includes(pedido.id);
+            return (
+              <div key={data} className="space-y-6">
+                <button
+                  type="button"
+                  onClick={() => toggleDataFechada(data)}
+                  className="group mt-14 flex w-full cursor-pointer items-center gap-4 font-mono text-xs text-neutral-400 select-none focus:outline-none"
+                >
+                  <div className="flex items-center gap-2 px-3 py-1.5">
+                    {isFechada ? (
+                      <ChevronRight className="h-4 w-4 text-neutral-400 group-hover:text-white" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-neutral-400 group-hover:text-white" />
+                    )}
+                    <span className="text-sm font-bold whitespace-nowrap text-neutral-200 transition-all group-hover:text-white">
+                      {data}
+                    </span>
+                  </div>
+                  <div className="h-[1px] w-full bg-neutral-800 transition-colors group-hover:bg-neutral-700" />
+                </button>
 
-                  return (
-                    <div
-                      key={pedido.id}
-                      className={`space-y-4 rounded-xl border p-5 transition-colors ${
-                        isChecked
-                          ? "border-neutral-700 bg-neutral-900/40"
-                          : "border-neutral-800 bg-neutral-950"
-                      }`}
-                    >
-                      {/* Header do Card */}
-                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 font-mono text-xs">
-                        <div className="flex items-center space-x-3">
-                          <div>
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => handleToggleSelect(pedido.id)}
-                              className="h-4 w-4 cursor-pointer rounded border-neutral-700 bg-neutral-900 text-white focus:ring-0"
-                            />
-                          </div>
-                          <span className="text-sm font-bold text-white">
-                            {pedido.codigo}
-                          </span>
-                          <span className="border border-neutral-700 bg-neutral-900 px-2 py-0.5 text-neutral-300">
-                            {pedido.corporacao}
-                          </span>
-                          <span className="text-neutral-500">
-                            {pedido.dataPedido} às {pedido.horarioRegistrado}
-                          </span>
-                        </div>
+                {!isFechada && (
+                  <div className="grid grid-cols-1 gap-6">
+                    {pedidosAgrupadosPorData[data].map((pedido) => {
+                      const totalItens = pedido.itens.length;
+                      const itensSeparados = pedido.itens.filter(
+                        (i) => i.separado,
+                      ).length;
+                      const totalValor = pedido.itens.reduce(
+                        (acc, item) =>
+                          acc + item.precoUnitario * item.quantidade,
+                        0,
+                      );
+                      const isChecked = selecionados.includes(pedido.id);
 
-                        <div className="flex items-center space-x-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleToggleStatusPacote(
-                                pedido.id,
-                                pedido.statusPacote,
-                              )
-                            }
-                            className={`cursor-pointer px-2 py-0.5 text-[10px] font-bold uppercase transition-all hover:opacity-80 ${
-                              pedido.statusPacote === "Criado"
-                                ? "border border-emerald-500/40 bg-emerald-600/20 text-emerald-400"
-                                : "border border-neutral-700 bg-neutral-900 text-neutral-400"
-                            }`}
-                          >
-                            Pacote: {pedido.statusPacote || "Não criado"}
-                          </button>
-                          <span
-                            className={`px-2 py-0.5 text-[10px] font-bold uppercase ${
-                              pedido.statusPagamento === "Pago"
-                                ? "border border-emerald-500/40 bg-emerald-600/20 text-emerald-400"
-                                : "border border-amber-500/40 bg-amber-500/20 text-amber-400"
-                            }`}
-                          >
-                            {pedido.statusPagamento || "Não Pago"}
-                          </span>
-                          <span
-                            className={`px-2 py-0.5 text-[10px] font-bold uppercase ${
-                              pedido.statusPedido === "Entregue"
-                                ? "border border-emerald-500/40 bg-emerald-600/20 text-emerald-400"
-                                : "border border-amber-500/40 bg-amber-500/20 text-amber-400"
-                            }`}
-                          >
-                            {pedido.statusPedido}
-                          </span>
-                          <span className="ml-2 text-sm font-bold text-white">
-                            {brl(totalValor)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Dados do Agente */}
-                      <div className="flex items-center gap-6 rounded-lg border border-neutral-900 bg-neutral-900/60 p-3 font-mono text-xs text-neutral-300 sm:grid-cols-3">
-                        <div className="flex items-center space-x-2">
-                          <User className="h-3.5 w-3.5 text-neutral-500" />
-                          <span className="font-bold text-white">
-                            {pedido.cliente ? (
-                              pedido.cliente
-                            ) : (
-                              <span className="font-normal text-neutral-500 italic">
-                                vazio
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                        <span className="text-neutral-500">|</span>
-                        <div className="flex items-center space-x-2">
-                          <Building className="h-3.5 w-3.5 text-neutral-500" />
-                          {pedido.unidade ? (
-                            <span>{pedido.unidade}</span>
-                          ) : (
-                            <span className="text-neutral-500 italic">
-                              vazio
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-neutral-500">|</span>
-                        <div className="flex items-center space-x-2">
-                          <Phone className="h-3.5 w-3.5 text-neutral-500" />
-                          {pedido.contato ? (
-                            <span>{pedido.contato}</span>
-                          ) : (
-                            <span className="text-neutral-500 italic">
-                              vazio
-                            </span>
-                          )}
-                        </div>
-                        {pedido.observacao && (
-                          <>
-                            <span className="text-neutral-500">|</span>
-                            <div>
-                              <span className="font-semibold text-neutral-400">
-                                obs:{" "}
-                              </span>
-                              <span className="text-neutral-300">
-                                {pedido.observacao}
-                              </span>
-                            </div>
-                          </>
-                        )}
-                      </div>
-
-                      {/* Lista de Itens com Checkbox de Separação */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between font-mono text-[11px] text-neutral-400">
-                          <span>ITENS DO PEDIDO:</span>
-                          <span>
-                            SEPARADOS: [{itensSeparados}/{totalItens}]
-                          </span>
-                        </div>
-
-                        <ul className="space-y-1.5 font-mono text-xs">
-                          {pedido.itens.map((item) => (
-                            <li
-                              key={item.id}
-                              onClick={() =>
-                                handleToggleItem(
-                                  pedido.id,
-                                  item.id!,
-                                  !!item.separado,
-                                )
-                              }
-                              className={`flex cursor-pointer items-center justify-between rounded-lg border p-2.5 transition-colors ${
-                                item.separado
-                                  ? "border-neutral-800 bg-neutral-900/40 text-neutral-500 line-through"
-                                  : "border-neutral-800 bg-neutral-900 text-white hover:border-neutral-700"
-                              }`}
-                            >
-                              <div className="flex items-center space-x-3">
+                      return (
+                        <div
+                          key={pedido.id}
+                          className={`rounded- space-y-4 border p-5 transition-colors ${
+                            isChecked
+                              ? "border-neutral-700 bg-neutral-900/40"
+                              : "border-neutral-800 bg-neutral-950"
+                          }`}
+                        >
+                          {/* Header do Card */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 font-mono text-xs">
+                            <div className="flex items-center justify-center space-x-3">
+                              <div className="flex h-5 w-5 items-center justify-center bg-neutral-900">
                                 <input
                                   type="checkbox"
-                                  checked={!!item.separado}
-                                  onChange={() => {}}
-                                  className="h-4 w-4 cursor-pointer rounded border-neutral-700 bg-neutral-950 text-white focus:ring-0"
+                                  checked={isChecked}
+                                  onChange={() => handleToggleSelect(pedido.id)}
+                                  className="h-5 w-5 cursor-pointer rounded border-neutral-700 bg-neutral-900 text-white focus:ring-0"
                                 />
-                                <span>
-                                  {item.quantidade}x {item.nome} —{" "}
-                                  {item.tamanho} ({item.cor})
-                                </span>
                               </div>
-                              <span className="font-bold tabular-nums">
-                                {brl(item.precoUnitario * item.quantidade)}
+
+                              <span className="border border-neutral-700 bg-neutral-900 px-2 py-0.5 text-[11px] text-neutral-300">
+                                {pedido.corporacao}
                               </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                              <span className="text-neutral-500">
+                                {pedido.dataPedido} às{" "}
+                                {pedido.horarioRegistrado}
+                              </span>
+                              <span className="hidden text-neutral-500 sm:inline">
+                                |
+                              </span>
+                              <span className="text-xs font-normal text-neutral-500">
+                                {pedido.codigo}
+                              </span>
+                            </div>
 
-                      {/* Ações Rápidas */}
-                      <div className="flex items-center justify-between pt-2 font-mono text-xs">
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/admin/pedidos/novo?id=${pedido.id}`}
-                            className="flex cursor-pointer items-center space-x-1 border border-neutral-800 bg-neutral-900/40 px-4 py-2 font-bold text-neutral-300 uppercase transition-colors hover:bg-neutral-900/70 hover:text-white"
-                          >
-                            <Pencil className="mr-1 h-3.5 w-3.5" />
-                            <span>Editar</span>
-                          </Link>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleToggleStatusPacote(
+                                    pedido.id,
+                                    pedido.statusPacote,
+                                  )
+                                }
+                                className={`cursor-pointer px-2 py-0.5 text-[10px] font-bold uppercase transition-all hover:opacity-80 ${
+                                  pedido.statusPacote === "Criado"
+                                    ? "border border-emerald-500/40 bg-emerald-600/20 text-emerald-400"
+                                    : "border border-neutral-700 bg-neutral-900 text-neutral-400"
+                                }`}
+                              >
+                                Pacote: {pedido.statusPacote || "Não criado"}
+                              </button>
+                              <span
+                                className={`px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                  pedido.statusPagamento === "Pago"
+                                    ? "border border-emerald-500/40 bg-emerald-600/20 text-emerald-400"
+                                    : "border border-amber-500/40 bg-amber-500/20 text-amber-400"
+                                }`}
+                              >
+                                {pedido.statusPagamento || "Não Pago"}
+                              </span>
+                              <span
+                                className={`px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                  pedido.statusPedido === "Entregue"
+                                    ? "border border-emerald-500/40 bg-emerald-600/20 text-emerald-400"
+                                    : "border border-amber-500/40 bg-amber-500/20 text-amber-400"
+                                }`}
+                              >
+                                {pedido.statusPedido}
+                              </span>
+                              <span className="ml-2 text-sm font-bold text-white">
+                                {brl(totalValor)}
+                              </span>
+                            </div>
+                          </div>
 
-                          <button
-                            onClick={() =>
-                              handleExcluir(pedido.id, pedido.codigo)
-                            }
-                            disabled={excluindoId === pedido.id}
-                            className="flex cursor-pointer items-center space-x-1 border border-neutral-800 bg-neutral-900/40 px-4 py-2 font-bold text-neutral-300 uppercase transition-colors hover:bg-neutral-900/70 hover:text-white disabled:opacity-50"
-                          >
-                            <Trash2 className="mr-1 h-3.5 w-3.5" />
-                            <span>
-                              {excluindoId === pedido.id
-                                ? "Excluindo..."
-                                : "Excluir"}
+                          {/* Dados do Agente */}
+                          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-neutral-900 bg-neutral-900/60 p-3 font-mono text-xs text-neutral-300">
+                            <div className="flex min-w-0 items-center space-x-2">
+                              <User className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+                              <span className="font-bold break-words text-white">
+                                {pedido.cliente ? (
+                                  pedido.cliente
+                                ) : (
+                                  <span className="font-normal text-neutral-500 italic">
+                                    vazio
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                            <span className="hidden text-neutral-500 sm:inline">
+                              |
                             </span>
-                          </button>
-                        </div>
+                            <div className="flex shrink-0 items-center space-x-2 whitespace-nowrap">
+                              <Building className="h-3.5 w-3.5 text-neutral-500" />
+                              {pedido.unidade ? (
+                                <span>{pedido.unidade}</span>
+                              ) : (
+                                <span className="text-neutral-500 italic">
+                                  vazio
+                                </span>
+                              )}
+                            </div>
+                            <span className="hidden text-neutral-500 sm:inline">
+                              |
+                            </span>
+                            <div className="flex shrink-0 items-center space-x-2 whitespace-nowrap">
+                              <Phone className="h-3.5 w-3.5 text-neutral-500" />
+                              {pedido.contato ? (
+                                <span>{pedido.contato}</span>
+                              ) : (
+                                <span className="text-neutral-500 italic">
+                                  vazio
+                                </span>
+                              )}
+                            </div>
+                            {pedido.observacao && (
+                              <>
+                                <span className="hidden text-neutral-500 sm:inline">
+                                  |
+                                </span>
+                                <div className="min-w-0 break-words">
+                                  <span className="font-semibold text-neutral-400">
+                                    obs:{" "}
+                                  </span>
+                                  <span className="text-neutral-300">
+                                    {pedido.observacao}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                          </div>
 
-                        {pedido.statusPedido === "Devendo" ? (
-                          <button
-                            onClick={() => handleConcluir(pedido.id)}
-                            className="flex cursor-pointer items-center space-x-1 border border-emerald-800 bg-emerald-900/40 px-4 py-2 font-bold text-emerald-600 uppercase transition-colors hover:bg-emerald-900/70 hover:text-white disabled:opacity-50"
-                          >
-                            <Check className="mr-1 h-3.5 w-3.5" />
-                            CONCLUIR PEDIDO
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleReverter(pedido.id)}
-                            className="flex cursor-pointer items-center space-x-1 border border-neutral-800 bg-neutral-900/40 px-4 py-2 font-bold text-neutral-300 uppercase transition-colors hover:bg-neutral-900/70 hover:text-white disabled:opacity-50"
-                          >
-                            <Check className="mr-1 h-3.5 w-3.5" />
-                            NÃO CONCLUÍDO
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                          {/* Lista de Itens com Checkbox de Separação */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between font-mono text-[11px] text-neutral-400">
+                              <span>ITENS DO PEDIDO:</span>
+                              <span>
+                                SEPARADOS: [{itensSeparados}/{totalItens}]
+                              </span>
+                            </div>
+
+                            <ul className="space-y-1.5 font-mono text-xs">
+                              {pedido.itens.map((item) => {
+                                const isProdutoDestacado =
+                                  filtroProduto !== "todos" &&
+                                  item.nome.trim().toLowerCase() ===
+                                    filtroProduto.toLowerCase();
+
+                                return (
+                                  <li
+                                    key={item.id}
+                                    onClick={() =>
+                                      handleToggleItem(
+                                        pedido.id,
+                                        item.id!,
+                                        !!item.separado,
+                                      )
+                                    }
+                                    className={`flex cursor-pointer items-center justify-between rounded-lg border p-2.5 transition-colors ${
+                                      isProdutoDestacado
+                                        ? item.separado
+                                          ? "border-emerald-500/20 bg-emerald-950/10 text-emerald-400/40 line-through ring-1 ring-emerald-500/20"
+                                          : "border-emerald-500/60 bg-emerald-950/30 font-semibold text-emerald-400 ring-1 ring-emerald-500/40"
+                                        : item.separado
+                                          ? "border-neutral-800 bg-neutral-900/40 text-neutral-500 line-through"
+                                          : "border-neutral-800 bg-neutral-900 text-white hover:border-neutral-700"
+                                    }`}
+                                  >
+                                    <div className="flex items-center space-x-3">
+                                      <input
+                                        type="checkbox"
+                                        checked={!!item.separado}
+                                        onChange={() => {}}
+                                        className="h-4 w-4 cursor-pointer rounded border-neutral-700 bg-neutral-950 text-white focus:ring-0"
+                                      />
+                                      <span>
+                                        {item.quantidade}x {item.nome} —{" "}
+                                        {item.tamanho} ({item.cor})
+                                      </span>
+                                    </div>
+                                    <span className="font-bold tabular-nums">
+                                      {brl(
+                                        item.precoUnitario * item.quantidade,
+                                      )}
+                                    </span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+
+                          {/* Ações Rápidas */}
+                          <div className="flex items-center justify-between pt-2 font-mono text-xs">
+                            <div className="flex items-center gap-2">
+                              <Link
+                                href={`/admin/pedidos/novo?id=${pedido.id}`}
+                                className="flex cursor-pointer items-center space-x-1 border border-neutral-800 bg-neutral-900/40 px-4 py-2 font-bold text-neutral-300 uppercase transition-colors hover:bg-neutral-900/70 hover:text-white"
+                              >
+                                <Pencil className="mr-1 h-3.5 w-3.5" />
+                                <span>Editar</span>
+                              </Link>
+
+                              <button
+                                onClick={() =>
+                                  handleExcluir(pedido.id, pedido.codigo)
+                                }
+                                disabled={excluindoId === pedido.id}
+                                className="flex cursor-pointer items-center space-x-1 border border-neutral-800 bg-neutral-900/40 px-4 py-2 font-bold text-neutral-300 uppercase transition-colors hover:bg-neutral-900/70 hover:text-white disabled:opacity-50"
+                              >
+                                <Trash2 className="mr-1 h-3.5 w-3.5" />
+                                <span>
+                                  {excluindoId === pedido.id
+                                    ? "Excluindo..."
+                                    : "Excluir"}
+                                </span>
+                              </button>
+                            </div>
+
+                            {pedido.statusPedido === "Devendo" ? (
+                              <button
+                                onClick={() => handleConcluir(pedido.id)}
+                                className="flex cursor-pointer items-center space-x-1 border border-emerald-800 bg-emerald-900/40 px-4 py-2 font-bold text-emerald-600 uppercase transition-colors hover:bg-emerald-900/70 hover:text-white disabled:opacity-50"
+                              >
+                                <Check className="mr-1 h-3.5 w-3.5" />
+                                CONCLUIR PEDIDO
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleReverter(pedido.id)}
+                                className="flex cursor-pointer items-center space-x-1 border border-neutral-800 bg-neutral-900/40 px-4 py-2 font-bold text-neutral-300 uppercase transition-colors hover:bg-neutral-900/70 hover:text-white disabled:opacity-50"
+                              >
+                                <Check className="mr-1 h-3.5 w-3.5" />
+                                NÃO CONCLUÍDO
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -42,7 +42,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   return (
     <Sidebar className="border-r border-white/10 bg-[#0A0A0A] text-white">
       {/* --- HEADER (Logo) --- */}
-      <SidebarHeader className="flex h-20 justify-center border-b border-white/5 px-6">
+      <SidebarHeader className="flex h-16 justify-center border-b border-white/5 px-6">
         <div className="flex items-center justify-center gap-2 py-6">
           <Image
             src="/images/icons/logo.png"
