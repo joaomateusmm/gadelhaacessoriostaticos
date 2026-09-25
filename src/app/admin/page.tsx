@@ -429,7 +429,7 @@ export default async function AdminDashboard() {
           </h2>
           <p className="text-neutral-400">
             Organizado do maior tamanho para o menor tamanho, baseado nos
-            pedidos com status devendo.
+            pedidos com status &quot;A Entregar&quot;.
           </p>
         </div>
 
@@ -487,9 +487,7 @@ export default async function AdminDashboard() {
                             {mudouCor && (
                               <div className="my-1.5 border-t border-white/[0.06]" />
                             )}
-                            <div
-                              className="flex items-center justify-between py-2 font-mono text-xs"
-                            >
+                            <div className="flex items-center justify-between py-2 font-mono text-xs">
                               <span className="flex items-center gap-1.5 text-neutral-300">
                                 {v.cor &&
                                   (() => {

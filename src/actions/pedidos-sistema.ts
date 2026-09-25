@@ -9,7 +9,7 @@ import { clientes, itensPedido, pedidos, product } from "@/db/schema";
 export type Corporacao = "Polícia Militar" | "Polícia Penal";
 export type StatusPagamento = "Pago" | "Não pago";
 export type StatusPedido = "Devendo" | "Entregue";
-export type StatusPacote = "Criado" | "Não criado";
+export type StatusPacote = "Criado" | "Não criado" | "Lacrado";
 
 export interface ItemPedidoItem {
   id?: string;

@@ -26,6 +26,7 @@ export const statusPedidoEnum = pgEnum("status_pedido", [
 export const statusPacoteEnum = pgEnum("status_pacote", [
   "Criado",
   "Não criado",
+  "Lacrado",
 ]);
 
 // --- TABELAS DE AUTENTICAÇÃO (BETTER AUTH) ---

@@ -35,7 +35,7 @@ export function TabelaPedidosSistema({
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState<
     "todos" | "Devendo" | "Entregue"
-  >("todos");
+  >("Devendo");
   const [filtroProduto, setFiltroProduto] = useState<string>("todos");
   const [openDropdownProduto, setOpenDropdownProduto] = useState(false);
   const [ordemData, setOrdemData] = useState<"recentes" | "antigos">(
@@ -46,6 +46,9 @@ export function TabelaPedidosSistema({
   const [excluindoEmMassa, setExcluindoEmMassa] = useState(false);
   const [datasFechadas, setDatasFechadas] = useState<Record<string, boolean>>(
     {},
+  );
+  const [openPacoteDropdown, setOpenPacoteDropdown] = useState<string | null>(
+    null,
   );
 
   // Lista única de nomes de produtos extraída dos pedidos
@@ -64,24 +67,19 @@ export function TabelaPedidosSistema({
     }));
   };
 
-  const handleToggleStatusPacote = async (
+  const handleAlterarStatusPacote = async (
     pedidoId: string,
-    currentStatus: StatusPacote,
+    novoStatus: StatusPacote,
   ) => {
-    const nextStatus: StatusPacote =
-      currentStatus === "Criado" ? "Não criado" : "Criado";
-
     setPedidos((prev) =>
       prev.map((p) => {
         if (p.id !== pedidoId) return p;
-        return {
-          ...p,
-          statusPacote: nextStatus,
-        };
+        return { ...p, statusPacote: novoStatus };
       }),
     );
+    setOpenPacoteDropdown(null);
 
-    const res = await alternarStatusPacoteAction(pedidoId, nextStatus);
+    const res = await alternarStatusPacoteAction(pedidoId, novoStatus);
     if (!res.success) {
       toast.error("Erro ao atualizar status do pacote.");
     }
@@ -146,7 +144,7 @@ export function TabelaPedidosSistema({
 
     const res = await reverterPedidoSistemaAction(pedidoId);
     if (res.success) {
-      toast.success("Pedido revertido para Devendo.");
+      toast.success("Pedido revertido para A Entregar.");
     } else {
       toast.error("Erro ao reverter pedido.");
     }
@@ -393,7 +391,7 @@ export function TabelaPedidosSistema({
 
           {/* Filtros por Status */}
           <div className="flex items-center space-x-2 font-mono text-xs">
-            {(["todos", "Devendo", "Entregue"] as const).map((status) => (
+            {(["Devendo", "todos", "Entregue"] as const).map((status) => (
               <button
                 key={status}
                 onClick={() => setFiltroStatus(status)}
@@ -403,14 +401,18 @@ export function TabelaPedidosSistema({
                     : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-600 hover:text-white"
                 }`}
               >
-                {status === "todos" ? "TODOS OS PEDIDOS" : status}
+                {status === "todos"
+                  ? "TODOS OS PEDIDOS"
+                  : status === "Devendo"
+                    ? "A ENTREGAR"
+                    : status}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="relative mt-10 -mb-6 w-full">
+      <div className="relative mt-10 -mb-8 w-full">
         <input
           type="text"
           value={busca}
@@ -502,22 +504,59 @@ export function TabelaPedidosSistema({
                             </div>
 
                             <div className="flex items-center space-x-2">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleToggleStatusPacote(
-                                    pedido.id,
-                                    pedido.statusPacote,
-                                  )
-                                }
-                                className={`cursor-pointer px-2 py-0.5 text-[10px] font-bold uppercase transition-all hover:opacity-80 ${
-                                  pedido.statusPacote === "Criado"
-                                    ? "border border-emerald-500/40 bg-emerald-600/20 text-emerald-400"
-                                    : "border border-neutral-700 bg-neutral-900 text-neutral-400"
-                                }`}
-                              >
-                                Pacote: {pedido.statusPacote || "Não criado"}
-                              </button>
+                              {/* Dropdown Status do Pacote */}
+                              <div className="relative">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setOpenPacoteDropdown(
+                                      openPacoteDropdown === pedido.id
+                                        ? null
+                                        : pedido.id,
+                                    )
+                                  }
+                                  className={`flex cursor-pointer items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase transition-all hover:opacity-80 ${
+                                    pedido.statusPacote === "Lacrado"
+                                      ? "border border-emerald-500/40 bg-emerald-600/20 text-emerald-400"
+                                      : pedido.statusPacote === "Criado"
+                                        ? "border border-violet-500/40 bg-violet-600/20 text-violet-400"
+                                        : "border border-neutral-700 bg-neutral-900 text-neutral-400"
+                                  }`}
+                                >
+                                  Pacote: {pedido.statusPacote || "Não criado"}
+                                  <ChevronDown className="h-2.5 w-2.5" />
+                                </button>
+
+                                {openPacoteDropdown === pedido.id && (
+                                  <div className="absolute top-full left-0 z-50 mt-1 min-w-[130px] overflow-hidden rounded border border-neutral-700 bg-neutral-950 shadow-xl">
+                                    {(
+                                      [
+                                        "Não criado",
+                                        "Criado",
+                                        "Lacrado",
+                                      ] as StatusPacote[]
+                                    ).map((opcao) => (
+                                      <button
+                                        key={opcao}
+                                        type="button"
+                                        onClick={() =>
+                                          handleAlterarStatusPacote(
+                                            pedido.id,
+                                            opcao,
+                                          )
+                                        }
+                                        className={`w-full px-3 py-1.5 text-left font-mono text-[10px] font-bold uppercase transition-colors hover:bg-neutral-800 ${
+                                          pedido.statusPacote === opcao
+                                            ? "text-white"
+                                            : "text-neutral-400"
+                                        }`}
+                                      >
+                                        {opcao}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
                               <span
                                 className={`px-2 py-0.5 text-[10px] font-bold uppercase ${
                                   pedido.statusPagamento === "Pago"
@@ -534,7 +573,9 @@ export function TabelaPedidosSistema({
                                     : "border border-amber-500/40 bg-amber-500/20 text-amber-400"
                                 }`}
                               >
-                                {pedido.statusPedido}
+                                {pedido.statusPedido === "Devendo"
+                                  ? "A ENTREGAR"
+                                  : pedido.statusPedido}
                               </span>
                               <span className="ml-2 text-sm font-bold text-white">
                                 {brl(totalValor)}
@@ -688,10 +729,10 @@ export function TabelaPedidosSistema({
                             {pedido.statusPedido === "Devendo" ? (
                               <button
                                 onClick={() => handleConcluir(pedido.id)}
-                                className="flex cursor-pointer items-center space-x-1 border border-emerald-800 bg-emerald-900/40 px-4 py-2 font-bold text-emerald-600 uppercase transition-colors hover:bg-emerald-900/70 hover:text-white disabled:opacity-50"
+                                className="flex cursor-pointer items-center space-x-1 border border-neutral-800 bg-neutral-900/40 px-4 py-2 font-bold text-neutral-300 uppercase transition-colors hover:bg-neutral-900/70 hover:text-white"
                               >
                                 <Check className="mr-1 h-3.5 w-3.5" />
-                                CONCLUIR PEDIDO
+                                Finalizar Pedido
                               </button>
                             ) : (
                               <button

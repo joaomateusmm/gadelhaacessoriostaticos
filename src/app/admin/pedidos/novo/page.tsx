@@ -591,7 +591,7 @@ export default function RegistrarPedidoPage() {
                     className="mt-1 h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"
                   >
                     <option value="Devendo" className="bg-[#111]">
-                      Devendo
+                      A Entregar
                     </option>
                     <option value="Entregue" className="bg-[#111]">
                       Entregue
