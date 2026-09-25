@@ -67,7 +67,18 @@ const SignInForm = ({ switchToSignUp }: { switchToSignUp?: () => void }) => {
   const handleSignInWithGoogle = async () => {
     setIsGoogleLoading(true);
     try {
-      await authClient.signIn.social({ provider: "google" });
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+        fetchOptions: {
+          onError: (ctx) => {
+            console.error("Erro Google Auth:", ctx.error);
+            toast.error(ctx.error.message || "Erro ao entrar com Google.");
+          },
+        },
+      });
+    } catch (err) {
+      console.error("Exceção Google Auth:", err);
     } finally {
       setIsGoogleLoading(false);
     }
