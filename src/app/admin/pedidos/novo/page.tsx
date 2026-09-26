@@ -65,9 +65,9 @@ export default function RegistrarPedidoPage() {
   const [statusPagamento, setStatusPagamento] = useState<"Pago" | "Não pago">(
     "Não pago",
   );
-  const [statusPacote, setStatusPacote] = useState<"Criado" | "Não criado">(
-    "Não criado",
-  );
+  const [statusPacote, setStatusPacote] = useState<
+    "Criado" | "Não criado" | "Lacrado"
+  >("Não criado");
   const [statusPedido, setStatusPedido] = useState<"Devendo" | "Entregue">(
     "Devendo",
   );
@@ -564,7 +564,9 @@ export default function RegistrarPedidoPage() {
                   <select
                     value={statusPacote}
                     onChange={(e) =>
-                      setStatusPacote(e.target.value as "Criado" | "Não criado")
+                      setStatusPacote(
+                        e.target.value as "Criado" | "Não criado" | "Lacrado",
+                      )
                     }
                     className="mt-1 h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"
                   >
@@ -573,6 +575,9 @@ export default function RegistrarPedidoPage() {
                     </option>
                     <option value="Criado" className="bg-[#111]">
                       Criado
+                    </option>
+                    <option value="Lacrado" className="bg-[#111]">
+                      Lacrado
                     </option>
                   </select>
                 </div>
