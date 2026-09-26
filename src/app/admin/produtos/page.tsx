@@ -54,10 +54,7 @@ export default async function AdminProductsPage({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <ImportJsonButton />
-          <AddProductButton />
-        </div>
+
       </div>
 
       {/* --- TABELA INTERATIVA --- */}

@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
-import { ExportJsonPedidosButton } from "./components/export-json-button";
-import { ImportJsonPedidosButton } from "./components/import-json-button";
 import { TabelaPedidosSistema } from "./components/tabela-pedidos";
 
 export default async function AdminPedidosPage() {
@@ -26,8 +24,6 @@ export default async function AdminPedidosPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <ImportJsonPedidosButton />
-          <ExportJsonPedidosButton pedidos={pedidosList} />
           <Link href="/admin/pedidos/novo">
             <Button className="flex items-center gap-2 border border-white/10 bg-white/5 text-white hover:bg-white/10">
               <Plus className="h-4 w-4" /> Registrar Pedido
