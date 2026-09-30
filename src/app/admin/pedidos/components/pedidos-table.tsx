@@ -342,7 +342,7 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
   // ─── Render ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 text-white">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Search */}
@@ -456,14 +456,14 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
       {/* Resumo */}
       <div className="flex items-center gap-6 text-sm text-neutral-500">
         <span>
-          <span className="font-semibold text-neutral-900">
+          <span className="font-semibold text-neutral-100">
             {pedidosFiltrados.length}
           </span>{" "}
           pedido(s)
         </span>
         <span>
           Total Volus:{" "}
-          <span className="font-semibold text-neutral-900">
+          <span className="font-semibold text-neutral-100">
             R${" "}
             {pedidosFiltrados
               .reduce((acc, p) => acc + Number(p.saldoVolus), 0)
@@ -472,7 +472,7 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
         </span>
         <span>
           Por Fora:{" "}
-          <span className="font-semibold text-neutral-900">
+          <span className="font-semibold text-neutral-100">
             R${" "}
             {pedidosFiltrados
               .reduce((acc, p) => acc + Number(p.saldoPorFora), 0)
@@ -482,10 +482,10 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
       </div>
 
       {/* Tabela */}
-      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-neutral-900 bg-neutral-950">
         <Table>
           <TableHeader>
-            <TableRow className="bg-neutral-50 hover:bg-neutral-50">
+            <TableRow className="bg-neutral-800 hover:bg-neutral-800">
               <TableHead className="w-10 pl-4">
                 <Checkbox
                   checked={
@@ -495,31 +495,31 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
                   onCheckedChange={toggleSelectAll}
                 />
               </TableHead>
-              <TableHead className="font-semibold text-neutral-700">
+              <TableHead className="font-semibold text-neutral-200">
                 Código
               </TableHead>
-              <TableHead className="font-semibold text-neutral-700">
+              <TableHead className="font-semibold text-neutral-200">
                 Cliente
               </TableHead>
-              <TableHead className="hidden font-semibold text-neutral-700 md:table-cell">
+              <TableHead className="hidden font-semibold text-neutral-200 md:table-cell">
                 Data
               </TableHead>
-              <TableHead className="hidden font-semibold text-neutral-700 lg:table-cell">
+              <TableHead className="hidden font-semibold text-neutral-200 lg:table-cell">
                 Itens
               </TableHead>
-              <TableHead className="hidden font-semibold text-neutral-700 md:table-cell">
+              <TableHead className="hidden font-semibold text-neutral-200 md:table-cell">
                 Pagamento
               </TableHead>
-              <TableHead className="hidden font-semibold text-neutral-700 md:table-cell">
+              <TableHead className="hidden font-semibold text-neutral-200 md:table-cell">
                 Pedido
               </TableHead>
-              <TableHead className="hidden font-semibold text-neutral-700 lg:table-cell">
+              <TableHead className="hidden font-semibold text-neutral-200 lg:table-cell">
                 Pacote
               </TableHead>
-              <TableHead className="hidden font-semibold text-neutral-700 lg:table-cell">
+              <TableHead className="hidden font-semibold text-neutral-200 lg:table-cell">
                 Volus
               </TableHead>
-              <TableHead className="w-20 text-right font-semibold text-neutral-700">
+              <TableHead className="w-20 text-right font-semibold text-neutral-200">
                 Ações
               </TableHead>
             </TableRow>
@@ -564,7 +564,7 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
                   <TableRow
                     key={pedido.id}
                     className={`group cursor-pointer transition-colors ${
-                      isSelected ? "bg-orange-50/60" : "hover:bg-neutral-50/80"
+                      isSelected ? "bg-orange-50/60" : "hover:bg-neutral-800/80"
                     }`}
                     onClick={() => toggleExpand(pedido.id)}
                   >
@@ -584,7 +584,7 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="text-sm font-medium text-neutral-900">
+                        <p className="text-sm font-medium text-neutral-100">
                           {pedido.clienteNome}
                         </p>
                         <p className="text-xs text-neutral-500">
@@ -704,7 +704,7 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
                     </TableCell>
                     <TableCell className="hidden text-sm lg:table-cell">
                       <div>
-                        <p className="font-medium text-neutral-900">
+                        <p className="font-medium text-neutral-100">
                           R${" "}
                           {Number(pedido.saldoVolus).toLocaleString("pt-BR", {
                             minimumFractionDigits: 2,
@@ -859,7 +859,7 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
                   {isExpanded && (
                     <TableRow
                       key={`${pedido.id}-expanded`}
-                      className="bg-neutral-50/50 hover:bg-neutral-50/50"
+                      className="bg-neutral-800/50 hover:bg-neutral-800/50"
                     >
                       <TableCell colSpan={10} className="px-6 py-3">
                         <div className="space-y-2">
@@ -871,10 +871,10 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
                               Nenhum item registrado.
                             </p>
                           ) : (
-                            <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+                            <div className="overflow-hidden rounded-lg border border-neutral-200 bg-neutral-800">
                               <table className="w-full text-sm">
                                 <thead>
-                                  <tr className="border-b border-neutral-100 bg-neutral-50">
+                                  <tr className="border-b border-neutral-100 bg-neutral-800">
                                     <th className="px-3 py-2 text-left text-xs font-semibold text-neutral-500">
                                       Produto
                                     </th>
@@ -983,7 +983,7 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
           </DialogHeader>
           {pedidoDetalhe && (
             <div className="space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-4 rounded-lg border border-neutral-100 bg-neutral-50 p-4">
+              <div className="grid grid-cols-2 gap-4 rounded-lg border border-neutral-100 bg-neutral-800 p-4">
                 <div>
                   <Label className="text-xs text-neutral-500">Corporação</Label>
                   <p className="font-medium">{pedidoDetalhe.corporacao}</p>
@@ -1013,7 +1013,7 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
                   <Label className="text-xs text-neutral-500">
                     Saldo Volus
                   </Label>
-                  <p className="font-semibold text-neutral-900">
+                  <p className="font-semibold text-neutral-100">
                     R${" "}
                     {Number(pedidoDetalhe.saldoVolus).toLocaleString("pt-BR", {
                       minimumFractionDigits: 2,
@@ -1022,7 +1022,7 @@ export function PedidosTable({ pedidos: pedidosIniciais }: PedidosTableProps) {
                 </div>
                 <div>
                   <Label className="text-xs text-neutral-500">Por Fora</Label>
-                  <p className="font-semibold text-neutral-900">
+                  <p className="font-semibold text-neutral-100">
                     R${" "}
                     {Number(pedidoDetalhe.saldoPorFora).toLocaleString(
                       "pt-BR",

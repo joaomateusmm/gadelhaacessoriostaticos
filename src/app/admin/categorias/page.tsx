@@ -14,13 +14,13 @@ export default async function CategoriesPage() {
     .orderBy(desc(category.createdAt));
 
   return (
-    <div className="space-y-4 p-2 pt-4">
+    <div className="space-y-4 p-2 pt-4 bg-neutral-900 text-white">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-clash-display text-3xl font-medium tracking-tight text-black">
+          <h2 className="font-clash-display text-3xl font-medium tracking-tight text-white">
             Categorias
           </h2>
-          <p className="text-neutral-700">
+          <p className="text-neutral-400">
             Gerencie as categorias da sua loja.
           </p>
         </div>

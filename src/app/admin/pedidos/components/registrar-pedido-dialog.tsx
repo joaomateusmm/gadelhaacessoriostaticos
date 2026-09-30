@@ -528,7 +528,7 @@ export function RegistrarPedidoDialog({
               {form.itens.map((item, index) => (
                 <div
                   key={index}
-                  className="rounded-lg border border-neutral-200 bg-neutral-50/50 p-3"
+                  className="rounded-lg border border-neutral-200 bg-neutral-800 p-3"
                 >
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-xs font-medium text-neutral-500">
