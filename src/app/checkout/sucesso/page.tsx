@@ -1,0 +1,275 @@
+"use client";
+
+import {
+  CheckCircle2,
+  Copy,
+  Home,
+  Loader2,
+  Package,
+  Truck,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+
+import { getOrderIdByPaymentIntent } from "@/actions/checkout";
+import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
+import { OrderReviewForm } from "@/components/order-review-form";
+import { Button } from "@/components/ui/button";
+// Importações do Modal (shadcn/ui)
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useCartStore } from "@/store/cart-store";
+
+function SuccessContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { clearCart, items: cartItems } = useCartStore();
+
+  const paymentIntent = searchParams.get("payment_intent");
+  const redirectStatus = searchParams.get("redirect_status");
+  const urlOrderId = searchParams.get("orderId");
+
+  const [finalOrderId, setFinalOrderId] = useState<string | null>(urlOrderId);
+  const [loadingId, setLoadingId] = useState(false);
+
+  // Estados do Modal de Avaliação
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [productIdToReview, setProductIdToReview] = useState<string | null>(
+    null,
+  );
+
+  // Estado do Timer (Começa em 10 segundos)
+  const [countdown, setCountdown] = useState(10);
+
+  // Usamos um ref para garantir que pegamos os itens exatos do momento do carregamento
+  const initialCartItems = useRef(cartItems);
+
+  // Função auxiliar para processar o sucesso e capturar o ID do produto antes de limpar o carrinho
+  const handleSuccessProcess = (orderId: string) => {
+    setFinalOrderId(orderId);
+
+    // 1. Pega o primeiro produto do carrinho ANTES de limpar
+    const items = initialCartItems.current;
+    if (items && items.length > 0) {
+      const productToReview = items[0].id || items[0].id;
+
+      if (productToReview) {
+        setProductIdToReview(productToReview);
+
+        // Abre o modal após 1.5s para a tela de sucesso renderizar antes e chamar atenção
+        setTimeout(() => {
+          setIsReviewModalOpen(true);
+        }, 1500);
+      }
+    }
+
+    // 2. AGORA SIM, com o ID do produto já salvo no Modal, limpamos o carrinho
+    clearCart();
+  };
+
+  // Efeito para resolver o ID do pedido
+  useEffect(() => {
+    const resolveOrderId = async () => {
+      if (urlOrderId) {
+        handleSuccessProcess(urlOrderId);
+        return;
+      }
+
+      if (paymentIntent && redirectStatus === "succeeded") {
+        setLoadingId(true);
+        try {
+          const id = await getOrderIdByPaymentIntent(paymentIntent);
+          if (id) {
+            handleSuccessProcess(id);
+          }
+        } catch (error) {
+          console.error("Erro ao recuperar ID do pedido", error);
+        } finally {
+          setLoadingId(false);
+        }
+      }
+    };
+
+    resolveOrderId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlOrderId, paymentIntent, redirectStatus]);
+
+  // Efeito para o Timer de Redirecionamento
+  useEffect(() => {
+    // Só inicia o timer se já tivermos o ID do pedido e o modal NÃO estiver aberto
+    if (loadingId || isReviewModalOpen) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          router.push("/minha-conta/compras"); // Redireciona
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [router, loadingId, isReviewModalOpen]); // O timer pausa se o isReviewModalOpen for true!
+
+  const isCardPayment = !!paymentIntent;
+
+  const handleCopyOrder = () => {
+    if (finalOrderId) {
+      navigator.clipboard.writeText(finalOrderId.slice(0, 8).toUpperCase());
+      toast.success("Código copiado!");
+    }
+  };
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center px-4 pt-22 text-center">
+      {/* Mensagem discreta do Timer */}
+      <div className="animate-fade-in mb-4 text-xs font-medium text-neutral-400">
+        Redirecionando para seus pedidos em{" "}
+        <span className="font-bold text-orange-600">{countdown}s</span>...
+      </div>
+
+      {/* --- IMAGEM DE SUCESSO AQUI --- */}
+      <div className="animate-in zoom-in mb-6 duration-500">
+        <Image
+          src="/images/illustration-sucess.svg"
+          alt="Pedido Confirmado"
+          width={150}
+          height={150}
+          className="h-55 w-auto object-contain duration-500 hover:scale-105"
+          priority
+        />
+      </div>
+
+      <h1 className="text-3xl font-bold text-neutral-900 md:text-4xl">
+        {isCardPayment ? "Pagamento Confirmado!" : "Pedido Realizado!"}
+      </h1>
+
+      <p className="my-5 max-w-md text-neutral-500">
+        {isCardPayment
+          ? "Obrigado pela sua compra. Seu pagamento foi processado com sucesso e já estamos preparando seu envio."
+          : "Recebemos seu pedido. O pagamento será realizado no momento da entrega."}
+      </p>
+
+      <div className="mb-8 w-full max-w-sm space-y-3 rounded-lg border border-neutral-200 bg-white p-5 text-sm shadow-sm">
+        <div className="flex flex-col gap-1 border-b border-neutral-100 pb-4">
+          <span className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+            Número do Pedido
+          </span>
+
+          <div className="flex items-center justify-center gap-2">
+            {loadingId ? (
+              <Loader2 className="h-5 w-5 animate-spin text-orange-600" />
+            ) : finalOrderId ? (
+              <>
+                <span className="font-mono text-2xl font-bold tracking-tight text-neutral-900">
+                  #{finalOrderId.slice(0, 8).toUpperCase()}
+                </span>
+                <button
+                  onClick={handleCopyOrder}
+                  className="rounded-md p-1 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600"
+                  title="Copiar código"
+                >
+                  <Copy className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <span className="text-neutral-400 italic">Processando ID...</span>
+            )}
+          </div>
+        </div>
+
+        {/* Informação Extra baseada no método */}
+        {!isCardPayment ? (
+          <div className="flex items-center justify-center gap-2 pt-2 font-medium text-orange-600">
+            <Truck className="h-4 w-4" /> Pagamento na Entrega
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-2 pt-2 font-medium text-green-600">
+            <CheckCircle2 className="h-4 w-4" /> Pagamento via Cartão
+          </div>
+        )}
+      </div>
+
+      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+        <Link href="/minha-conta/compras" className="w-full sm:w-auto">
+          <Button
+            variant="outline"
+            className="h-12 w-full gap-2 border-neutral-300 px-8 sm:w-auto"
+          >
+            <Package className="h-4 w-4" /> Meus Pedidos
+          </Button>
+        </Link>
+        <Link href="/" className="w-full sm:w-auto">
+          <Button className="h-12 w-full gap-2 bg-orange-600 px-8 font-bold text-white hover:bg-orange-700 sm:w-auto">
+            <Home className="h-4 w-4" /> Voltar para a Loja
+          </Button>
+        </Link>
+      </div>
+
+      {/* --- MODAL DE AVALIAÇÃO --- */}
+      <Dialog open={isReviewModalOpen} onOpenChange={setIsReviewModalOpen}>
+        <DialogContent
+          className="border-neutral-200 bg-white sm:max-w-md"
+          onInteractOutside={(e) => e.preventDefault()} // <-- CORREÇÃO: Impede o fechamento ao clicar fora!
+        >
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-neutral-900">
+              O que achou da experiência?
+            </DialogTitle>
+            <DialogDescription className="text-neutral-500">
+              Sua opinião nos ajuda a melhorar! Avalie sua experiência de fazer
+              os pedidos.
+            </DialogDescription>
+          </DialogHeader>
+
+          {productIdToReview && (
+            <div className="mt-2">
+              <OrderReviewForm
+                productId={productIdToReview}
+                onSuccess={() => setIsReviewModalOpen(false)}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <div className="flex min-h-screen flex-col bg-neutral-50 text-neutral-900">
+      <Suspense fallback={<div className="h-20 w-full bg-neutral-50" />}>
+        <Header />
+      </Suspense>
+
+      <main className="flex flex-1 flex-col items-center justify-center py-20">
+        <Suspense
+          fallback={
+            <div className="flex flex-col items-center justify-center gap-4">
+              <Loader2 className="h-10 w-10 animate-spin text-orange-600" />
+              <p className="text-neutral-500">Processando informações...</p>
+            </div>
+          }
+        >
+          <SuccessContent />
+        </Suspense>
+      </main>
+
+      <Suspense fallback={<div className="h-20 w-full bg-neutral-50" />}>
+        <Footer />
+      </Suspense>
+    </div>
+  );
+}
