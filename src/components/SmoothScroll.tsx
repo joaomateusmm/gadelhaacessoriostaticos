@@ -72,10 +72,10 @@ function SmoothScroll({ children }: SmoothScrollProps) {
       root
       options={{
         // CONFIGURAÇÕES DE "PESO" E SENSIBILIDADE
-        lerp: 0.065, // Reduzi para dar mais sensação de peso (inércia)
-        duration: 1.5, // Duração um pouco maior para suavizar a parada
+        lerp: 0.8, // Reduzi para dar mais sensação de peso (inércia)
+        duration: 1, // Duração um pouco maior para suavizar a parada
         smoothWheel: true,
-        wheelMultiplier: 0.8, // Roda do mouse percorre menos distância (mais controle)
+        wheelMultiplier: 1, // Roda do mouse percorre menos distância (mais controle)
 
         // CONFIGURAÇÕES MOBILE
         syncTouch: true,

@@ -23,18 +23,20 @@ export default async function AdminLayout({
   }
 
   return (
-    <SidebarProvider>
-      <div className="font-montserrat flex min-h-screen w-full bg-[#e4e4e4] text-black">
+    <SidebarProvider className="dark">
+      <div className="font-montserrat flex min-h-screen w-full bg-neutral-950 text-white">
         <AdminSidebar user={session.user} />
-        <SidebarInset className="flex flex-1 flex-col bg-[#FFFFFF]">
-          <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b border-neutral-100 bg-white/80 px-4 backdrop-blur-md">
-            <SidebarTrigger className="text-neutral-700 hover:bg-neutral-100" />
-            <div className="mx-2 h-4 w-[1px] bg-neutral-200" />
-            <span className="text-sm font-medium text-neutral-700">
+        <SidebarInset className="flex flex-1 flex-col bg-neutral-950 text-white">
+          <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b border-neutral-800 bg-neutral-900/80 px-4 backdrop-blur-md">
+            <SidebarTrigger className="text-neutral-200 hover:bg-neutral-800 hover:text-white" />
+            <div className="mx-2 h-4 w-[1px] bg-neutral-800" />
+            <span className="text-sm font-semibold text-white">
               Área Administrativa
             </span>
           </header>
-          <main className="flex-1 p-6 pb-20 md:p-8">{children}</main>
+          <main className="flex-1 bg-neutral-950 p-6 pb-20 text-white md:p-8">
+            {children}
+          </main>
         </SidebarInset>
       </div>
     </SidebarProvider>

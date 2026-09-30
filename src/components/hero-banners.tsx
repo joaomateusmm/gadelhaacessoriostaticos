@@ -12,7 +12,7 @@ const BANNERS = [
   // COLUNA ESQUERDA (1)
   {
     id: "quarto",
-    src: "/images/banners/quarto.jpg",
+    src: "/banners/banner1.jpeg",
     title: "Quartos",
     description: "Melhores móveis para o seu quarto.",
     href: "/categorias/quartos",
@@ -20,7 +20,7 @@ const BANNERS = [
   },
   {
     id: "eletrodomesticos",
-    src: "/images/banners/eletrodomesticos.jpg",
+    src: "/banners/banner2.jpeg",
     title: "Eletrodomésticos",
     description: "Melhores eletros para sua casa.",
     price: "R$ 49,90",
@@ -31,7 +31,7 @@ const BANNERS = [
   // COLUNA CENTRAL (2)
   {
     id: "moveis-usados",
-    src: "/images/banners/moveis-usados.jpg",
+    src: "/banners/banner3.jpeg",
     title: "Móveis Usados",
     description: "Compre móveis usados no melhor preço na Inglaterra.",
     href: "/categorias/moveis-usados",
@@ -39,7 +39,7 @@ const BANNERS = [
   },
   {
     id: "Cozinha",
-    src: "/images/banners/cozinha.jpg",
+    src: "/banners/banner4.jpeg",
     title: "Cozinha",
     description: "Melhores móveis e itens para sua cozinha.",
     href: "/categorias/cozinha",
@@ -47,7 +47,7 @@ const BANNERS = [
   },
   {
     id: "Banheiros",
-    src: "/images/banners/banheiro.jpg",
+    src: "/banners/banner5.jpeg",
     alt: "banheiros",
     title: "Banheiros",
     description: "Melhores itens para o seu banheiro.",
@@ -58,7 +58,7 @@ const BANNERS = [
   // COLUNA DIREITA (3)
   {
     id: "quintal",
-    src: "/images/banners/quintal.jpg",
+    src: "/banners/banner6.jpeg",
     title: "Quintal",
     description: "Melhores objetos para o seu quintal.",
     href: "/categorias/quintal",
@@ -66,7 +66,7 @@ const BANNERS = [
   },
   {
     id: "promocoes",
-    src: "/images/banners/promocoes.jpg",
+    src: "/banners/banner7.jpeg",
     title: "Produtos em Promoção",
     description: "Corre para não perder a promo.",
     href: "/categorias/promocoes",
@@ -169,7 +169,7 @@ export function HeroBanners() {
   const getBanner = (pos: string) => BANNERS.find((b) => b.position === pos);
 
   return (
-    <section className="w-full px-4 pt-42 md:pb-5  md:px-8 md:pt-36">
+    <section className="w-full px-4 pt-42 md:px-8 md:pt-36 md:pb-5">
       <div className="mx-auto max-w-[1440px]">
         <div className="grid h-auto w-full grid-cols-1 gap-4 md:h-[600px] md:grid-cols-4">
           {/* COLUNA 1 (ESQUERDA) */}

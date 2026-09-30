@@ -138,7 +138,6 @@ export const review = pgTable("review", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
-  updatedAt: timestamp("updatedAt").defaultNow(),
 });
 
 export const reviewRelations = relations(review, ({ one }) => ({

@@ -119,132 +119,128 @@ export default async function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-8 p-8">
+    <div className="space-y-8 p-4 md:p-8">
       <div>
-        <h1 className="font-clash-display text-3xl font-medium text-neutral-900">
+        <h1 className="font-clash-display text-3xl font-semibold tracking-tight text-white">
           Dashboard
         </h1>
-        <p className="text-neutral-500">
+        <p className="text-sm font-medium text-neutral-400">
           Visão geral e métricas da sua loja em tempo real.
         </p>
       </div>
+
       {/* --- SEÇÃO 1: CARDS MAIORES (KPIs) --- */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Receita */}
-        <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 p-6 shadow-sm transition-all hover:border-neutral-700">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-neutral-500">
+            <span className="text-sm font-medium text-neutral-400">
               Receita Total
             </span>
-            <div className="rounded-full bg-orange-100 p-2 text-orange-600">
+            <div className="rounded-full bg-orange-500/15 p-2 text-orange-400 border border-orange-500/20">
               <DollarSign className="h-5 w-5" />
             </div>
           </div>
           <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-neutral-900">
+            <span className="text-3xl font-extrabold text-white">
               {formatCurrency(totalRevenue)}
             </span>
-            {/* Opcional: Badge de crescimento */}
-            {/* <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-700">
-              +12%
-            </span> */}
           </div>
         </div>
 
         {/* Vendas */}
-        <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 p-6 shadow-sm transition-all hover:border-neutral-700">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-neutral-500">
+            <span className="text-sm font-medium text-neutral-400">
               Vendas Concluídas
             </span>
-            <div className="rounded-full bg-blue-100 p-2 text-blue-600">
+            <div className="rounded-full bg-blue-500/15 p-2 text-blue-400 border border-blue-500/20">
               <Activity className="h-5 w-5" />
             </div>
           </div>
-          <div className="mt-4 text-3xl font-bold text-neutral-900">
+          <div className="mt-4 text-3xl font-extrabold text-white">
             {totalSales}
           </div>
         </div>
 
         {/* Produtos Ativos */}
-        <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 p-6 shadow-sm transition-all hover:border-neutral-700">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-neutral-500">
+            <span className="text-sm font-medium text-neutral-400">
               Produtos Ativos
             </span>
-            <div className="rounded-full bg-purple-100 p-2 text-purple-600">
+            <div className="rounded-full bg-purple-500/15 p-2 text-purple-400 border border-purple-500/20">
               <Package className="h-5 w-5" />
             </div>
           </div>
-          <div className="mt-4 text-3xl font-bold text-neutral-900">
+          <div className="mt-4 text-3xl font-extrabold text-white">
             {activeProducts}
           </div>
         </div>
 
         {/* Clientes */}
-        <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="relative overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 p-6 shadow-sm transition-all hover:border-neutral-700">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-neutral-500">
+            <span className="text-sm font-medium text-neutral-400">
               Contas Criadas
             </span>
-            <div className="rounded-full bg-pink-100 p-2 text-pink-600">
+            <div className="rounded-full bg-pink-500/15 p-2 text-pink-400 border border-pink-500/20">
               <Users className="h-5 w-5" />
             </div>
           </div>
-          <div className="mt-4 text-3xl font-bold text-neutral-900">
+          <div className="mt-4 text-3xl font-extrabold text-white">
             {totalUsers}
           </div>
         </div>
       </div>
+
       {/* --- SEÇÃO 2: CARDS MENORES (Operacional) --- */}
       <div>
-        <h3 className="mb-4 text-sm font-semibold tracking-wider text-neutral-500 uppercase">
+        <h3 className="mb-4 text-xs font-bold tracking-wider text-neutral-400 uppercase">
           Detalhes Operacionais
         </h3>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
           {/* Avaliação Média */}
-          <div className="flex flex-col justify-center rounded-lg border border-neutral-200 bg-white p-4 transition-colors hover:bg-neutral-50">
-            <div className="mb-2 flex items-center gap-2 text-yellow-500">
+          <div className="flex flex-col justify-center rounded-lg border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:bg-neutral-800/80">
+            <div className="mb-2 flex items-center gap-2 text-yellow-400">
               <Star className="h-4 w-4 fill-current" />
-              <span className="text-xs font-bold text-neutral-600">Média</span>
+              <span className="text-xs font-semibold text-neutral-300">Média</span>
             </div>
-            <span className="text-xl font-bold text-neutral-900">
+            <span className="text-xl font-bold text-white">
               {avgRating}
             </span>
             <span className="text-[10px] text-neutral-400">Geral da loja</span>
           </div>
 
           {/* Categorias */}
-          <div className="flex flex-col justify-center rounded-lg border border-neutral-200 bg-white p-4 transition-colors hover:bg-neutral-50">
+          <div className="flex flex-col justify-center rounded-lg border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:bg-neutral-800/80">
             <div className="mb-2 text-neutral-400">
               <Layers className="h-4 w-4" />
             </div>
-            <span className="text-xl font-bold text-neutral-900">
+            <span className="text-xl font-bold text-white">
               {stats.categories}
             </span>
             <span className="text-[10px] text-neutral-400">Categorias</span>
           </div>
 
           {/* Reviews */}
-          <div className="flex flex-col justify-center rounded-lg border border-neutral-200 bg-white p-4 transition-colors hover:bg-neutral-50">
+          <div className="flex flex-col justify-center rounded-lg border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:bg-neutral-800/80">
             <div className="mb-2 text-neutral-400">
               <MessageSquare className="h-4 w-4" />
             </div>
-            <span className="text-xl font-bold text-neutral-900">
+            <span className="text-xl font-bold text-white">
               {stats.reviews}
             </span>
             <span className="text-[10px] text-neutral-400">Reviews</span>
           </div>
         </div>
       </div>
+
       {/* --- SEÇÃO 3: GRÁFICOS --- */}
-      <div className="w-full rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
-        <h3 className="mb-4 text-lg font-bold text-neutral-900">
+      <div className="w-full rounded-xl border border-neutral-800 bg-neutral-900 p-6 shadow-sm">
+        <h3 className="mb-4 text-lg font-bold text-white">
           Receita Diária
         </h3>
-        {/* O componente RevenueChart deve ser capaz de lidar com o tema claro.
-            Se ele usar Recharts, geralmente o texto se adapta ou precisa de configuração específica de cor.
-        */}
         <RevenueChart data={revenueChartData} />
       </div>
     </div>

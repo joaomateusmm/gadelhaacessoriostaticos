@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react"; // 1. IMPORTAR SUSPENSE
 
+export const dynamic = "force-dynamic";
+
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { db } from "@/db";

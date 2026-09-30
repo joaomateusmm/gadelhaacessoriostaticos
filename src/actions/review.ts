@@ -198,7 +198,6 @@ export async function updateReviewAction(
       .set({
         rating,
         comment,
-        updatedAt: new Date(), // Atualiza a data
       })
       .where(and(eq(review.id, reviewId), eq(review.userId, session.user.id)))
       .returning();
