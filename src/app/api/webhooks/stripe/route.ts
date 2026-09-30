@@ -2,17 +2,13 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 
 import { notifyPaymentSuccess } from "@/actions/service-checkout";
 import { decreaseProductStock } from "@/actions/stock";
 import { db } from "@/db";
 import { order, serviceOrder } from "@/db/schema";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia" as unknown as Stripe.LatestApiVersion,
-  typescript: true,
-});
+import { stripe } from "@/lib/stripe";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;

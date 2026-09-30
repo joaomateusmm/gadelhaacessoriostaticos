@@ -4,17 +4,12 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { Resend } from "resend";
-import Stripe from "stripe";
 import { z } from "zod";
 
 import { db } from "@/db";
 import { serviceOrder, serviceProvider } from "@/db/schema";
 import { auth } from "@/lib/auth";
-
-// Inicializa o cliente do Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia" as unknown as Stripe.LatestApiVersion,
-});
+import { stripe } from "@/lib/stripe";
 
 // Inicializa o Resend
 const resend = new Resend(process.env.RESEND_API_KEY!);

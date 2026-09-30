@@ -1,16 +1,11 @@
 import { eq, inArray } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 
 import { db } from "@/db";
 import { coupon, order, orderItem, product, user } from "@/db/schema";
 import { auth } from "@/lib/auth";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia" as unknown as Stripe.LatestApiVersion,
-  typescript: true,
-});
+import { stripe } from "@/lib/stripe";
 
 // --- FUNÇÃO AUXILIAR SHADOW ACCOUNT ---
 async function getOrCreateGuestUser(email: string, name: string) {

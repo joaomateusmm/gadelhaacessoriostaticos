@@ -3,15 +3,11 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { cookies, headers } from "next/headers";
 import { Resend } from "resend";
-import Stripe from "stripe";
 
 import { db } from "@/db";
 import { coupon, order, orderItem, product } from "@/db/schema";
 import { auth } from "@/lib/auth";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia" as unknown as Stripe.LatestApiVersion,
-});
+import { stripe } from "@/lib/stripe";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@esggroup.com";
