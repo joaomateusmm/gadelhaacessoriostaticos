@@ -85,19 +85,15 @@ export const category = pgTable("category", {
 });
 
 // --- TABELA DE MARCAS (ADICIONADA DO BANCO Y PARA REFERÊNCIA) ---
-
 export const brand = pgTable("brand", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
-  image: text("image"), // Opcional
+  image: text("image"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
-  updatedAt: timestamp("updatedAt")
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow().$onUpdate(() => new Date()),
 });
+
+
 
 // --- TABELA DE PRODUTOS (ATUALIZADA E MESCLADA) ---
 
