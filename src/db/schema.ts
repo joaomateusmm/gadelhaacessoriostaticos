@@ -4,6 +4,7 @@ import {
   date,
   integer,
   json,
+  jsonb, // Adicionado para suportar tamanhos e cores
   numeric,
   pgEnum,
   pgTable,
@@ -83,9 +84,25 @@ export const category = pgTable("category", {
     .$onUpdate(() => new Date()),
 });
 
-// --- TABELA DE PRODUTOS (ATUALIZADA) ---
+// --- TABELA DE MARCAS (ADICIONADA DO BANCO Y PARA REFERÊNCIA) ---
+
+export const brand = pgTable("brand", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  image: text("image"), // Opcional
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+// --- TABELA DE PRODUTOS (ATUALIZADA E MESCLADA) ---
 
 export const product = pgTable("product", {
+  // Campos originais do banco X mantidos integralmente
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -109,13 +126,27 @@ export const product = pgTable("product", {
   sales: integer("sales").notNull().default(0),
   affiliateRate: integer("affiliateRate").default(10),
 
-  // --- NOVOS CAMPOS: INFORMAÇÕES ÚTEIS ---
+  // Informações úteis originais do banco X
   condition: text("condition").default("new"), // 'new', 'used', 'refurbished', etc.
   isAssembled: boolean("isAssembled").default(false), // true = sim, false = não
   hasWarranty: boolean("hasWarranty").default(false),
   warrantyDetails: text("warrantyDetails"), // ex: "12 meses"
-  brand: text("brand"), // Se null, é Genérico
+  brand: text("brand"), // Texto livre mantido por compatibilidade com X
 
+  // --- NOVOS CAMPOS: ADICIONADOS DO BANCO Y ---
+  code: text("code"),
+  downloadUrl: text("downloadUrl"),
+  tamanhos: jsonb("tamanhos").$type<string[]>().default([]).notNull(),
+  cores: jsonb("cores").$type<string[]>().default([]).notNull(),
+  brandId: text("brandId").references(() => brand.id, { onDelete: "set null" }), // Relação com a tabela brand
+  paymentLink: text("paymentLink"), // <-- AGORA OPCIONAL (antes era notNull)
+  deliveryMode: text("deliveryMode").notNull().default("email"),
+  paymentMethods: text("paymentMethods")
+    .array()
+    .notNull()
+    .default(["Pix", "Cartão de Crédito", "Cartão de Débito", "Boleto"]),
+
+  // Timestamps mantidos
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt")
     .notNull()
@@ -447,10 +478,7 @@ export const statusPagamentoEnum = pgEnum("statusPagamento", [
   "Não pago",
 ]);
 
-export const statusPedidoEnum = pgEnum("statusPedido", [
-  "Devendo",
-  "Entregue",
-]);
+export const statusPedidoEnum = pgEnum("statusPedido", ["Devendo", "Entregue"]);
 
 export const statusPacoteEnum = pgEnum("statusPacote", [
   "Criado",
@@ -502,7 +530,9 @@ export const pedidos = pgTable("pedidos", {
     .notNull()
     .default("Não pago"),
   statusPedido: statusPedidoEnum("statusPedido").notNull().default("Devendo"),
-  statusPacote: statusPacoteEnum("statusPacote").notNull().default("Não criado"),
+  statusPacote: statusPacoteEnum("statusPacote")
+    .notNull()
+    .default("Não criado"),
   tipoPagamento: text("tipoPagamento"),
   tipoEntrega: text("tipoEntrega"),
   observacao: text("observacao"),

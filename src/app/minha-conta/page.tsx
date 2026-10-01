@@ -1,11 +1,5 @@
 import { eq } from "drizzle-orm";
-import {
-  ChevronRight,
-  Headphones,
-  Package,
-  Shield,
-  User,
-} from "lucide-react";
+import { ChevronRight, Headphones, Package, Shield, User } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";

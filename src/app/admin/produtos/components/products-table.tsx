@@ -66,6 +66,12 @@ const formatPrice = (amount: number, currency: string = "GBP") => {
   }).format(amount / 100);
 };
 
+const toolbarButton =
+  "flex h-10 cursor-pointer items-center justify-center gap-2 rounded-none border border-neutral-800 bg-neutral-900 px-3 font-mono text-xs font-bold text-neutral-300 uppercase duration-300 hover:border-neutral-600 hover:bg-neutral-800 hover:text-white active:scale-95";
+
+const checkboxClass =
+  "border-neutral-600 bg-neutral-900 data-[state=checked]:border-emerald-600 data-[state=checked]:bg-emerald-600 data-[state=checked]:text-white";
+
 export function ProductsTable({
   data,
   totalProducts,
@@ -138,36 +144,33 @@ export function ProductsTable({
   return (
     <>
       <div className="mb-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-        <div className="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-neutral-200 bg-white px-3 text-sm text-neutral-600 shadow-sm duration-300">
-          <Search className="mr-1 h-4 w-4 text-neutral-500" />
+        <div className="flex h-10 items-center gap-2 rounded-none border border-neutral-800 bg-neutral-900 px-3">
+          <Search className="h-4 w-4 text-neutral-500" />
           <input
             placeholder="Pesquisar Produto..."
             type="text"
             defaultValue={searchParams.get("search")?.toString()}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-auto p-1 duration-300 hover:bg-neutral-50 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none active:scale-95"
+            className="w-auto bg-transparent p-1 font-mono text-xs text-white placeholder:text-neutral-500 focus:outline-none"
           />
         </div>
-        <div className="ml-auto flex items-center justify-center gap-3">
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
           {selectedIds.length > 0 && (
             <button
               onClick={() => setShowDeleteDialog(true)}
-              className="animate-in fade-in zoom-in flex h-10 items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 text-sm text-red-600 duration-300 hover:bg-red-100"
+              className="animate-in fade-in zoom-in flex h-10 cursor-pointer items-center justify-center gap-2 rounded-none border border-red-600 bg-red-950/60 px-3 font-mono text-xs font-bold text-red-400 uppercase duration-300 hover:bg-red-900/60 hover:text-red-300"
             >
               <SquareCheck className="h-4 w-4" />
               Excluir ({selectedIds.length})
             </button>
           )}
-          <button
-            onClick={handleSelectPage}
-            className="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-neutral-200 bg-white px-3 text-sm text-neutral-600 shadow-sm duration-300 hover:bg-neutral-50 active:scale-95"
-          >
+          <button onClick={handleSelectPage} className={toolbarButton}>
             <SquareCheck className="h-4 w-4" />
             Marcar Página
           </button>
           <button
             onClick={() => handleSelectAll(true)}
-            className="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-neutral-200 bg-white px-3 text-sm text-neutral-600 shadow-sm duration-300 hover:bg-neutral-50 active:scale-95"
+            className={toolbarButton}
           >
             <CopyCheck className="h-4 w-4" />
             Marcar Todos
@@ -175,13 +178,13 @@ export function ProductsTable({
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-none border border-neutral-800 bg-neutral-950">
         <Table>
-          <TableHeader className="bg-neutral-50">
-            <TableRow className="border-neutral-200 hover:bg-neutral-100">
+          <TableHeader className="bg-neutral-900">
+            <TableRow className="border-neutral-800 hover:bg-neutral-900">
               <TableHead className="w-[40px] pl-4">
                 <Checkbox
-                  className="border-neutral-400 data-[state=checked]:border-orange-600 data-[state=checked]:bg-orange-600"
+                  className={checkboxClass}
                   checked={
                     data.length > 0 &&
                     selectedIds.length === data.length &&
@@ -190,23 +193,22 @@ export function ProductsTable({
                   onCheckedChange={(checked) => handleSelectAll(!!checked)}
                 />
               </TableHead>
-              {/* NOME: Largura maior */}
-              <TableHead className="w-[300px] font-semibold text-neutral-600">
+              <TableHead className="w-[300px] font-mono text-[11px] font-bold tracking-normal text-neutral-400 uppercase">
                 Nome
               </TableHead>
-              <TableHead className="w-[100px] font-semibold text-neutral-600">
+              <TableHead className="w-[100px] font-mono text-[11px] font-bold tracking-normal text-neutral-400 uppercase">
                 Status
               </TableHead>
-              <TableHead className="hidden font-semibold text-neutral-600 md:table-cell md:w-[200px]">
+              <TableHead className="hidden font-mono text-[11px] font-bold tracking-normal text-neutral-400 uppercase md:table-cell md:w-[200px]">
                 Categoria(s)
               </TableHead>
-              <TableHead className="w-[120px] text-right font-semibold text-neutral-600">
+              <TableHead className="w-[120px] text-right font-mono text-[11px] font-bold tracking-normal text-neutral-400 uppercase">
                 Preço
               </TableHead>
-              <TableHead className="hidden w-[80px] text-right font-semibold text-neutral-600 md:table-cell">
+              <TableHead className="hidden w-[80px] text-right font-mono text-[11px] font-bold tracking-normal text-neutral-400 uppercase md:table-cell">
                 Vendas
               </TableHead>
-              <TableHead className="w-[60px] text-center font-semibold text-neutral-600">
+              <TableHead className="w-[60px] text-center font-mono text-[11px] font-bold tracking-normal text-neutral-400 uppercase">
                 Ver
               </TableHead>
               <TableHead className="w-[60px]"></TableHead>
@@ -214,20 +216,17 @@ export function ProductsTable({
           </TableHeader>
           <TableBody>
             {data.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={8}
-                  className="h-96 text-center text-neutral-500"
-                >
+              <TableRow className="border-neutral-800 hover:bg-transparent">
+                <TableCell colSpan={8} className="h-96 text-center">
                   <div className="flex h-full w-full flex-col items-center justify-center gap-4 py-10">
                     <Image
                       src="/images/illustration.svg"
                       alt="Sem produtos"
                       width={200}
                       height={200}
-                      className="opacity-50 grayscale"
+                      className="opacity-30 grayscale"
                     />
-                    <p className="text-lg font-light text-neutral-400">
+                    <p className="font-mono text-xs text-neutral-500 uppercase">
                       Nenhum produto encontrado.
                     </p>
                   </div>
@@ -241,12 +240,12 @@ export function ProductsTable({
                 return (
                   <TableRow
                     key={item.id}
-                    className="border-neutral-100 transition-colors hover:bg-neutral-50"
+                    className="border-neutral-800 transition-colors hover:bg-neutral-900 data-[state=selected]:bg-neutral-900"
                     data-state={selectedIds.includes(item.id) ? "selected" : ""}
                   >
                     <TableCell className="pl-4">
                       <Checkbox
-                        className="border-neutral-400 data-[state=checked]:border-orange-600 data-[state=checked]:bg-orange-600"
+                        className={checkboxClass}
                         checked={selectedIds.includes(item.id)}
                         onCheckedChange={(checked) =>
                           handleSelectOne(!!checked, item.id)
@@ -254,9 +253,9 @@ export function ProductsTable({
                       />
                     </TableCell>
 
-                    <TableCell className="font-medium text-neutral-900">
+                    <TableCell className="font-mono text-xs font-medium text-white">
                       <div className="flex items-center gap-3">
-                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-neutral-200 bg-neutral-50">
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-none border border-neutral-800 bg-neutral-900">
                           {mainImage ? (
                             <Image
                               src={mainImage}
@@ -266,7 +265,7 @@ export function ProductsTable({
                             />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center">
-                              <ImageIcon className="h-4 w-4 text-neutral-400" />
+                              <ImageIcon className="h-4 w-4 text-neutral-600" />
                             </div>
                           )}
                         </div>
@@ -282,12 +281,12 @@ export function ProductsTable({
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className={`border px-2 py-1 font-medium capitalize ${
+                        className={`rounded-none border px-2 py-1 font-mono text-[10px] font-bold uppercase ${
                           item.status === "active"
-                            ? "border-green-200 bg-green-50 text-green-700"
+                            ? "border-emerald-600 bg-emerald-950/60 text-emerald-400"
                             : item.status === "inactive"
-                              ? "border-red-200 bg-red-50 text-red-700"
-                              : "border-yellow-200 bg-yellow-50 text-yellow-700"
+                              ? "border-red-600 bg-red-950/60 text-red-400"
+                              : "border-yellow-600 bg-yellow-950/60 text-yellow-400"
                         }`}
                       >
                         {item.status === "active"
@@ -305,18 +304,18 @@ export function ProductsTable({
                             <Badge
                               key={catId}
                               variant="secondary"
-                              className="border border-neutral-200 bg-neutral-100 whitespace-nowrap text-neutral-600 hover:bg-neutral-200"
+                              className="rounded-none border border-neutral-700 bg-neutral-800 font-mono text-[10px] whitespace-nowrap text-neutral-300 uppercase hover:bg-neutral-700"
                             >
                               {getCategoryName(catId)}
                             </Badge>
                           ))
                         ) : (
-                          <span className="text-neutral-400">-</span>
+                          <span className="text-neutral-600">-</span>
                         )}
                         {item.categories && item.categories.length > 2 && (
                           <Badge
                             variant="outline"
-                            className="border-neutral-200 text-xs"
+                            className="rounded-none border-neutral-700 font-mono text-[10px] text-neutral-400"
                           >
                             +{item.categories.length - 2}
                           </Badge>
@@ -324,11 +323,11 @@ export function ProductsTable({
                       </div>
                     </TableCell>
 
-                    <TableCell className="text-right font-mono font-medium whitespace-nowrap text-neutral-900">
+                    <TableCell className="text-right font-mono text-xs font-medium whitespace-nowrap text-white">
                       {formatPrice(item.price, item.currency)}
                     </TableCell>
 
-                    <TableCell className="hidden text-right text-neutral-600 md:table-cell">
+                    <TableCell className="hidden text-right font-mono text-xs text-neutral-400 md:table-cell">
                       {item.sales}
                     </TableCell>
 
@@ -336,7 +335,7 @@ export function ProductsTable({
                       <Link
                         href={`/produto/${item.id}`}
                         target="_blank"
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-orange-600"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-none text-neutral-500 duration-300 hover:bg-neutral-800 hover:text-emerald-400"
                         title="Ver página do produto"
                       >
                         <ExternalLink className="h-4 w-4" />
@@ -356,19 +355,21 @@ export function ProductsTable({
 
       {/* --- RODAPÉ --- */}
       <div className="mt-4 flex flex-col items-center justify-between gap-4 md:flex-row">
-        <p className="text-sm text-neutral-500">
+        <p className="font-mono text-xs text-neutral-500">
           Exibindo {data.length} de {totalProducts} produtos.
         </p>
 
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-neutral-500">Visualizar</span>
+            <span className="font-mono text-xs text-neutral-500 uppercase">
+              Visualizar
+            </span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+                  className="h-8 rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 uppercase hover:bg-neutral-800 hover:text-white"
                 >
                   {limitParam === "all" ? "Todos" : limitParam}
                   <ChevronDown className="ml-2 h-3 w-3 opacity-50" />
@@ -376,26 +377,26 @@ export function ProductsTable({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="border-neutral-200 bg-white text-neutral-700 shadow-md"
+                className="rounded border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 shadow-xl"
               >
                 <Link href="?limit=10" scroll={false}>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-neutral-50 focus:bg-neutral-50">
+                  <DropdownMenuItem className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white">
                     10
                   </DropdownMenuItem>
                 </Link>
                 <Link href="?limit=20" scroll={false}>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-neutral-50 focus:bg-neutral-50">
+                  <DropdownMenuItem className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white">
                     20
                   </DropdownMenuItem>
                 </Link>
                 <Link href="?limit=30" scroll={false}>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-neutral-50 focus:bg-neutral-50">
+                  <DropdownMenuItem className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white">
                     30
                   </DropdownMenuItem>
                 </Link>
-                <DropdownMenuSeparator className="bg-neutral-100" />
+                <DropdownMenuSeparator className="bg-neutral-800" />
                 <Link href="?limit=all" scroll={false}>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-neutral-50 focus:bg-neutral-50">
+                  <DropdownMenuItem className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white">
                     Todos
                   </DropdownMenuItem>
                 </Link>
@@ -407,7 +408,7 @@ export function ProductsTable({
             <Button
               variant="outline"
               size="sm"
-              className="border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
+              className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 uppercase hover:bg-neutral-800 hover:text-white disabled:opacity-50"
               disabled
             >
               Anterior
@@ -415,7 +416,7 @@ export function ProductsTable({
             <Button
               variant="outline"
               size="sm"
-              className="border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+              className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 uppercase hover:bg-neutral-800 hover:text-white"
             >
               Próxima
             </Button>
@@ -424,21 +425,24 @@ export function ProductsTable({
       </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="border-neutral-200 bg-white text-neutral-900 shadow-lg sm:max-w-md">
+        <AlertDialogContent className="rounded-none border-neutral-800 bg-neutral-950 text-white shadow-none sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Tem certeza absoluta?</AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-500">
+            <AlertDialogTitle className="font-mono text-sm font-bold tracking-normal text-white uppercase">
+              Tem certeza absoluta?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="font-mono text-xs text-neutral-500">
               Isso excluirá permanentemente{" "}
-              <strong>{selectedIds.length}</strong> produtos selecionados.
+              <strong className="text-white">{selectedIds.length}</strong>{" "}
+              produtos selecionados.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900">
+            <AlertDialogCancel className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs font-bold text-neutral-300 uppercase hover:bg-neutral-800 hover:text-white">
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleBulkDelete}
-              className="bg-red-600 text-white shadow-sm hover:bg-red-700"
+              className="rounded-none border border-red-600 bg-red-950/60 font-mono text-xs font-bold text-red-400 uppercase hover:bg-red-900/60 hover:text-red-300"
               disabled={isPending}
             >
               {isPending ? "Excluindo..." : "Excluir Selecionados"}

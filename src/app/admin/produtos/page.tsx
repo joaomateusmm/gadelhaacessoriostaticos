@@ -1,6 +1,7 @@
 import { count, desc, ilike, or } from "drizzle-orm";
-import { Suspense } from "react"; // 1. IMPORTAR SUSPENSE
+import { Suspense } from "react";
 
+import { ImportProductsButton } from "@/components/import-button";
 import { db } from "@/db";
 import { category, product } from "@/db/schema";
 
@@ -52,24 +53,27 @@ export default async function AdminProductsPage({
     .from(category);
 
   return (
-    <div className="space-y-4 p-2 pt-4 bg-neutral-900 text-white">
+    <div className="space-y-6 p-2 pt-4 text-white">
       {/* --- HEADER DA PÁGINA --- */}
-      <div className="flex flex-row items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="font-clash-display text-3xl font-medium text-white">
             Meus Produtos
           </h1>
-          <p className="text-sm text-neutral-400">
+          <p className="font-mono text-xs text-neutral-500">
             Gerencie o catálogo da sua loja.
           </p>
         </div>
 
-        <AddProductButton />
+        <div className="flex items-center gap-3">
+          <AddProductButton />
+          {/* <ImportProductsButton /> */}
+        </div>
       </div>
 
       <Suspense
         fallback={
-          <div className="flex h-64 items-center justify-center rounded-lg border border-dashed border-neutral-200 bg-neutral-50 text-neutral-400">
+          <div className="flex h-64 items-center justify-center border border-dashed border-neutral-800 bg-neutral-950 font-mono text-xs text-neutral-500 uppercase">
             Carregando tabela...
           </div>
         }

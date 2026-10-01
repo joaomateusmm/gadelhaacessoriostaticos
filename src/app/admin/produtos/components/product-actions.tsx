@@ -48,17 +48,14 @@ export function ProductActions({ id }: ProductActionsProps) {
         const result = await deleteProduct(id);
 
         if (result.success) {
-          // Deu certo de primeira? Ótimo.
           setShowDeleteDialog(false);
           toast.success(result.message);
           router.refresh();
         } else if (result.code === "CONSTRAINT_VIOLATION") {
-          // AQUI ESTÁ A INTELIGÊNCIA:
-          // Se falhou por causa do banco, fechamos o delete e abrimos a sugestão
+          // Falhou por causa do banco: fecha o delete e sugere inativar
           setShowDeleteDialog(false);
           setShowArchiveDialog(true);
         } else {
-          // Erro genérico real
           toast.error(result.message);
         }
       } catch {
@@ -91,7 +88,7 @@ export function ProductActions({ id }: ProductActionsProps) {
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="h-8 w-8 p-0 text-neutral-400 hover:bg-black/5 hover:text-black"
+            className="h-8 w-8 rounded-none p-0 text-neutral-400 hover:bg-neutral-800 hover:text-white"
           >
             <span className="sr-only">Abrir menu</span>
             <MoreHorizontal className="h-4 w-4" />
@@ -99,47 +96,50 @@ export function ProductActions({ id }: ProductActionsProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="border border-black/10 bg-neutral-100 text-neutral-800"
+          className="rounded border border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 shadow-xl"
         >
-          <DropdownMenuLabel>Ações</DropdownMenuLabel>
+          <DropdownMenuLabel className="font-mono text-[11px] tracking-normal text-neutral-500 uppercase">
+            Ações
+          </DropdownMenuLabel>
 
-          {/* --- AÇÃO DE EDITAR --- */}
           <DropdownMenuItem
-            className="cursor-pointer duration-300 hover:bg-black/5"
+            className="cursor-pointer font-mono text-xs uppercase duration-300 focus:bg-neutral-800 focus:text-white"
             onClick={() => router.push(`/admin/produtos/${id}/editar`)}
           >
-            <Edit className="mr-2 h-4 w-4 text-neutral-800" /> Editar
+            <Edit className="mr-2 h-4 w-4 text-neutral-500" /> Editar
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator className="bg-black/5" />
+          <DropdownMenuSeparator className="bg-neutral-800" />
           <DropdownMenuItem
-            className="cursor-pointer text-red-700 duration-300 hover:bg-black/5"
+            className="cursor-pointer font-mono text-xs text-red-400 uppercase duration-300 focus:bg-neutral-800 focus:text-red-300"
             onSelect={(e) => {
               e.preventDefault();
               setShowDeleteDialog(true);
             }}
           >
-            <Trash className="mr-2 h-4 w-4 text-neutral-800" /> Excluir
+            <Trash className="mr-2 h-4 w-4 text-red-400" /> Excluir
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
       {/* --- DIALOG 1: TENTATIVA DE EXCLUSÃO --- */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="border-white/10 bg-[#111] text-white">
+        <AlertDialogContent className="rounded-none border-neutral-800 bg-neutral-950 text-white shadow-none">
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir permanentemente?</AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-400">
+            <AlertDialogTitle className="font-mono text-sm font-bold tracking-normal text-white uppercase">
+              Excluir permanentemente?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="font-mono text-xs text-neutral-500">
               Essa ação tentará remover o produto do banco de dados.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-white/10 bg-transparent text-white hover:bg-white/10 hover:text-white">
+            <AlertDialogCancel className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs font-bold text-neutral-300 uppercase hover:bg-neutral-800 hover:text-white">
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="rounded-none border border-red-600 bg-red-950/60 font-mono text-xs font-bold text-red-400 uppercase hover:bg-red-900/60 hover:text-red-300"
               disabled={isPending}
             >
               {isPending ? "Processando..." : "Excluir"}
@@ -150,28 +150,28 @@ export function ProductActions({ id }: ProductActionsProps) {
 
       {/* --- DIALOG 2: SUGESTÃO INTELIGENTE (ARQUIVAR) --- */}
       <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
-        <AlertDialogContent className="border-white/10 bg-[#111] text-white">
+        <AlertDialogContent className="rounded-none border-neutral-800 bg-neutral-950 text-white shadow-none">
           <AlertDialogHeader>
             <div className="mb-2 flex items-center gap-2 text-yellow-500">
               <Archive className="h-5 w-5" />
-              <AlertDialogTitle className="text-white">
+              <AlertDialogTitle className="font-mono text-sm font-bold tracking-normal text-white uppercase">
                 Não foi possível excluir
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-neutral-300">
+            <AlertDialogDescription className="font-mono text-xs text-neutral-400">
               Algum usuário tem esse produto no carrinho, favoritos ou histórico
               de compras. Para não perder esses dados, sugerimos deixá-lo como{" "}
-              <strong>Inativo</strong>. Ele não aparecerá mais na loja, mas o
-              histórico será mantido.
+              <strong className="text-white">Inativo</strong>. Ele não aparecerá
+              mais na loja, mas o histórico será mantido.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-white/10 bg-transparent text-white hover:bg-white/10 hover:text-white">
+            <AlertDialogCancel className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs font-bold text-neutral-300 uppercase hover:bg-neutral-800 hover:text-white">
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleArchive}
-              className="bg-yellow-600 text-white hover:bg-yellow-700"
+              className="rounded-none border border-yellow-600 bg-yellow-950/60 font-mono text-xs font-bold text-yellow-400 uppercase hover:bg-yellow-900/60 hover:text-yellow-300"
               disabled={isPending}
             >
               {isPending ? "Salvando..." : "Deixar Inativo"}

@@ -196,7 +196,7 @@ export default async function TrabalheConoscoPage() {
                   <ProviderForm categories={categoriesWithStatus} />
 
                   {/* NOVO: ALERTA SOBRE A COMISSÃO GERAL */}
-                  <Alert className="my-8 border-neutral-200 bg-white shadow-sm text-neutral-800">
+                  <Alert className="my-8 border-neutral-200 bg-white text-neutral-800 shadow-sm">
                     <Info className="h-5 w-5 text-neutral-600" />
                     <AlertTitle className="mb-2 font-bold text-neutral-900">
                       Sobre os valores de comissão:
