@@ -118,7 +118,21 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* Serviços */}
+          {/* Marcas */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname.startsWith("/admin/marcas")}
+              className="h-10 font-medium text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-white data-[active=true]:border data-[active=true]:border-orange-500/30 data-[active=true]:bg-orange-500/15 data-[active=true]:font-semibold data-[active=true]:text-orange-400 data-[active=true]:shadow-sm"
+            >
+              <Link href="/admin/marcas">
+                <Blocks className="mr-2 h-5 w-5" />
+                <span>Marcas</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          {/* Serviços
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
@@ -130,10 +144,10 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 <span>Serviços</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
 
           {/* Prestadores */}
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={pathname.startsWith("/admin/prestadores")}
@@ -144,10 +158,10 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 <span>Prestadores</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
 
           {/* Solicitações de Serviços */}
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={pathname.startsWith("/admin/solicitacoes")}
@@ -158,10 +172,10 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 <span>Solicitações de Serviços</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
 
           {/* Afiliados */}
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={pathname.startsWith("/admin/afiliados")}
@@ -172,10 +186,10 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 <span>Afiliados</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
 
           {/* Avaliações */}
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={pathname === "/admin/avaliacoes"}
@@ -186,10 +200,10 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 <span>Avaliações</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
 
           {/* Cupons */}
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={pathname.startsWith("/admin/cupons")}
@@ -200,7 +214,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 <span>Cupons</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
 
           {/* Separador */}
           <div className="my-4 h-[1px] bg-neutral-800" />
