@@ -31,7 +31,7 @@ interface WishlistItem {
 // 1. Badge do Ícone
 function WishlistIconBadge({ count }: { count: number }) {
   return (
-    <button className="group relative flex cursor-pointer items-center text-neutral-700 duration-300 outline-none hover:scale-105 hover:text-black active:scale-95">
+    <button className="flex cursor-pointer items-center py-2 text-white duration-300 hover:scale-105 hover:text-orange-500 active:scale-95">
       <div className="relative">
         <Heart className="h-5.5 w-5.5" strokeWidth={2} />
         {count > 0 && (
@@ -169,6 +169,8 @@ export function WishlistSheet() {
           <WishlistIconBadge count={items.length} />
         </div>
       </SheetTrigger>
+
+      {/* className="flex items-center py-2 text-white duration-300 hover:text-orange-500 active:scale-95" */}
 
       <SheetContent className="flex h-full w-full flex-col bg-white p-0 text-neutral-900 sm:max-w-[400px]">
         {/* HEADER */}

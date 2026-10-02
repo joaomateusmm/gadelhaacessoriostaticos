@@ -106,7 +106,7 @@ export const product = pgTable("product", {
   description: text("description"),
   price: integer("price").notNull(), // Em centavos
   discountPrice: integer("discountPrice"), // Em centavos
-  currency: text("currency").notNull().default("GBP"),
+  currency: text("currency").notNull().default("BRL"),
   images: text("images").array(),
   categories: text("categories").array(),
   weight: real("weight").default(0),

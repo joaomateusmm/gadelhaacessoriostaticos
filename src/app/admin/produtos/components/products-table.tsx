@@ -11,7 +11,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import {
@@ -141,6 +141,37 @@ export function ProductsTable({
     return cat ? cat.name : "Desconhecido";
   };
 
+  const sections = (() => {
+    const map = new Map<string, typeof data>();
+    const uncategorizedKey = " Sem Categoria";
+
+    data.forEach((product) => {
+      if (product.categories && product.categories.length > 0) {
+        product.categories.forEach((catId: string) => {
+          const catName = getCategoryName(catId);
+          if (!map.has(catName)) {
+            map.set(catName, []);
+          }
+          map.get(catName)!.push(product);
+        });
+      } else {
+        if (!map.has(uncategorizedKey)) {
+          map.set(uncategorizedKey, []);
+        }
+        map.get(uncategorizedKey)!.push(product);
+      }
+    });
+
+    const sortedCategories = Array.from(map.keys()).sort((a, b) =>
+      a.localeCompare(b, "pt-BR", { sensitivity: "base" })
+    );
+
+    return sortedCategories.map((catName) => ({
+      categoryName: catName === uncategorizedKey ? "Sem Categoria" : catName,
+      products: map.get(catName)!,
+    }));
+  })();
+
   return (
     <>
       <div className="mb-4 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
@@ -233,121 +264,139 @@ export function ProductsTable({
                 </TableCell>
               </TableRow>
             ) : (
-              data.map((item) => {
-                const mainImage =
-                  item.images && item.images.length > 0 ? item.images[0] : null;
-
-                return (
-                  <TableRow
-                    key={item.id}
-                    className="border-neutral-800 transition-colors hover:bg-neutral-900 data-[state=selected]:bg-neutral-900"
-                    data-state={selectedIds.includes(item.id) ? "selected" : ""}
-                  >
-                    <TableCell className="pl-4">
-                      <Checkbox
-                        className={checkboxClass}
-                        checked={selectedIds.includes(item.id)}
-                        onCheckedChange={(checked) =>
-                          handleSelectOne(!!checked, item.id)
-                        }
-                      />
-                    </TableCell>
-
-                    <TableCell className="font-mono text-xs font-medium text-white">
-                      <div className="flex items-center gap-3">
-                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-none border border-neutral-800 bg-neutral-900">
-                          {mainImage ? (
-                            <Image
-                              src={mainImage}
-                              alt={item.name}
-                              fill
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center">
-                              <ImageIcon className="h-4 w-4 text-neutral-600" />
-                            </div>
-                          )}
-                        </div>
-                        <span
-                          className="max-w-[200px] truncate"
-                          title={item.name}
-                        >
-                          {item.name}
-                        </span>
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`rounded-none border px-2 py-1 font-mono text-[10px] font-bold uppercase ${
-                          item.status === "active"
-                            ? "border-emerald-600 bg-emerald-950/60 text-emerald-400"
-                            : item.status === "inactive"
-                              ? "border-red-600 bg-red-950/60 text-red-400"
-                              : "border-yellow-600 bg-yellow-950/60 text-yellow-400"
-                        }`}
-                      >
-                        {item.status === "active"
-                          ? "Ativo"
-                          : item.status === "inactive"
-                            ? "Inativo"
-                            : "Rascunho"}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex flex-wrap gap-1">
-                        {item.categories && item.categories.length > 0 ? (
-                          item.categories.slice(0, 2).map((catId: string) => (
-                            <Badge
-                              key={catId}
-                              variant="secondary"
-                              className="rounded-none border border-neutral-700 bg-neutral-800 font-mono text-[10px] whitespace-nowrap text-neutral-300 uppercase hover:bg-neutral-700"
-                            >
-                              {getCategoryName(catId)}
-                            </Badge>
-                          ))
-                        ) : (
-                          <span className="text-neutral-600">-</span>
-                        )}
-                        {item.categories && item.categories.length > 2 && (
-                          <Badge
-                            variant="outline"
-                            className="rounded-none border-neutral-700 font-mono text-[10px] text-neutral-400"
-                          >
-                            +{item.categories.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="text-right font-mono text-xs font-medium whitespace-nowrap text-white">
-                      {formatPrice(item.price, item.currency)}
-                    </TableCell>
-
-                    <TableCell className="hidden text-right font-mono text-xs text-neutral-400 md:table-cell">
-                      {item.sales}
-                    </TableCell>
-
-                    <TableCell className="text-center">
-                      <Link
-                        href={`/produto/${item.id}`}
-                        target="_blank"
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-none text-neutral-500 duration-300 hover:bg-neutral-800 hover:text-emerald-400"
-                        title="Ver página do produto"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Link>
-                    </TableCell>
-
-                    <TableCell>
-                      <ProductActions id={item.id} />
+              sections.map((section) => (
+                <React.Fragment key={section.categoryName}>
+                  <TableRow className="border-neutral-800 bg-neutral-900/80 hover:bg-neutral-900/80">
+                    <TableCell
+                      colSpan={8}
+                      className="py-2 pl-4 font-mono text-xs font-bold tracking-wider text-emerald-400 uppercase"
+                    >
+                      {section.categoryName} ({section.products.length})
                     </TableCell>
                   </TableRow>
-                );
-              })
+                  {section.products.map((item) => {
+                    const mainImage =
+                      item.images && item.images.length > 0
+                        ? item.images[0]
+                        : null;
+
+                    return (
+                      <TableRow
+                        key={`${section.categoryName}-${item.id}`}
+                        className="border-neutral-800 transition-colors hover:bg-neutral-900 data-[state=selected]:bg-neutral-900"
+                        data-state={
+                          selectedIds.includes(item.id) ? "selected" : ""
+                        }
+                      >
+                        <TableCell className="pl-4">
+                          <Checkbox
+                            className={checkboxClass}
+                            checked={selectedIds.includes(item.id)}
+                            onCheckedChange={(checked) =>
+                              handleSelectOne(!!checked, item.id)
+                            }
+                          />
+                        </TableCell>
+
+                        <TableCell className="font-mono text-xs font-medium text-white">
+                          <div className="flex items-center gap-3">
+                            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-none border border-neutral-800 bg-neutral-900">
+                              {mainImage ? (
+                                <Image
+                                  src={mainImage}
+                                  alt={item.name}
+                                  fill
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center">
+                                  <ImageIcon className="h-4 w-4 text-neutral-600" />
+                                </div>
+                              )}
+                            </div>
+                            <span
+                              className="max-w-[200px] truncate"
+                              title={item.name}
+                            >
+                              {item.name}
+                            </span>
+                          </div>
+                        </TableCell>
+
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={`rounded-none border px-2 py-1 font-mono text-[10px] font-bold uppercase ${
+                              item.status === "active"
+                                ? "border-emerald-600 bg-emerald-950/60 text-emerald-400"
+                                : item.status === "inactive"
+                                  ? "border-red-600 bg-red-950/60 text-red-400"
+                                  : "border-yellow-600 bg-yellow-950/60 text-yellow-400"
+                            }`}
+                          >
+                            {item.status === "active"
+                              ? "Ativo"
+                              : item.status === "inactive"
+                                ? "Inativo"
+                                : "Rascunho"}
+                          </Badge>
+                        </TableCell>
+
+                        <TableCell className="hidden md:table-cell">
+                          <div className="flex flex-wrap gap-1">
+                            {item.categories && item.categories.length > 0 ? (
+                              item.categories
+                                .slice(0, 2)
+                                .map((catId: string) => (
+                                  <Badge
+                                    key={catId}
+                                    variant="secondary"
+                                    className="rounded-none border border-neutral-700 bg-neutral-800 font-mono text-[10px] whitespace-nowrap text-neutral-300 uppercase hover:bg-neutral-700"
+                                  >
+                                    {getCategoryName(catId)}
+                                  </Badge>
+                                ))
+                            ) : (
+                              <span className="text-neutral-600">-</span>
+                            )}
+                            {item.categories && item.categories.length > 2 && (
+                              <Badge
+                                variant="outline"
+                                className="rounded-none border-neutral-700 font-mono text-[10px] text-neutral-400"
+                              >
+                                +{item.categories.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+
+                        <TableCell className="text-right font-mono text-xs font-medium whitespace-nowrap text-white">
+                          {formatPrice(item.price, item.currency)}
+                        </TableCell>
+
+                        <TableCell className="hidden text-right font-mono text-xs text-neutral-400 md:table-cell">
+                          {item.sales}
+                        </TableCell>
+
+                        <TableCell className="text-center">
+                          <Link
+                            href={`/produto/${item.id}`}
+                            target="_blank"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-none text-neutral-500 duration-300 hover:bg-neutral-800 hover:text-emerald-400"
+                            title="Ver página do produto"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Link>
+                        </TableCell>
+
+                        <TableCell>
+                          <ProductActions id={item.id} />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </React.Fragment>
+              ))
             )}
           </TableBody>
         </Table>

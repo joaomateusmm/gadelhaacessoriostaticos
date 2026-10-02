@@ -47,8 +47,8 @@ export default async function ProductCatalog() {
             {categoriesWithProducts.map((catSection) => (
               <div key={catSection.id}>
                 {/* Título da Categoria */}
-                <div className="mb-6 flex items-center gap-4 border-b border-neutral-100 pb-2">
-                  <h3 className="font-clash-display text-3xl font-medium text-neutral-900">
+                <div className="mb-6 flex items-center gap-4 border-b border-neutral-800 pb-2">
+                  <h3 className="font-clash-display text-3xl font-medium text-white">
                     {catSection.name}
                   </h3>
                 </div>

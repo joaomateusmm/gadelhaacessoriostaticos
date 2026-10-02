@@ -131,13 +131,13 @@ export function ProductCard({ data, categoryName }: ProductCardProps) {
         </div>
       )}
 
-      <div className="relative aspect-square w-full overflow-hidden bg-neutral-50 p-4">
+      <div className="relative aspect-square w-full overflow-hidden bg-neutral-50 p-3">
         <Image
           src={productImage}
           alt={data.name}
           fill
           className={cn(
-            "object-contain transition-transform duration-500 group-hover:scale-105",
+            "object-contain object-center transition-transform duration-500 group-hover:scale-105",
             isPending && "scale-100 blur-[2px]",
           )}
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"

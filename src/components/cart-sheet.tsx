@@ -21,7 +21,7 @@ import { useCartStore } from "@/store/cart-store";
 // 1. Badge do Ícone do Carrinho
 function CartIconBadge({ count }: { count: number }) {
   return (
-    <div className="group relative hidden cursor-pointer items-center text-neutral-700 duration-300 hover:scale-105 hover:text-black active:scale-95 md:flex">
+    <div className="flex cursor-pointer items-center py-2 duration-300 hover:scale-105 hover:text-orange-500 active:scale-95">
       <div className="relative">
         <ShoppingCart className="h-5.5 w-5.5" strokeWidth={2} />
         {count > 0 && (

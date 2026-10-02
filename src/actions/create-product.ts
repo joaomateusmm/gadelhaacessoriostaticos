@@ -33,7 +33,7 @@ const productSchema = z.object({
   length: z.number().int().min(0).default(0),
 
   // --- NOVOS CAMPOS ---
-  condition: z.enum(["new", "used", "refurbished"]).default("new").optional(),
+  condition: z.enum(["new", "used", "refurbished"]).default("new").optional().nullable(),
   isAssembled: z.boolean().default(false).optional(),
   hasWarranty: z.boolean().default(false).optional(),
   warrantyDetails: z.string().optional().nullable(),

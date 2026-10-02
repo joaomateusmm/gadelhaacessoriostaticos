@@ -125,7 +125,7 @@ const formSchema = z.object({
   price: z.number().min(0, "O preço não pode ser negativo"),
   discountPrice: z.number().optional(),
 
-  currency: z.enum(["GBP", "USD", "EUR", "BRL"]),
+  currency: z.literal("BRL").default("BRL"),
 
   categories: z.array(z.string()),
 
@@ -295,8 +295,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
       description: initialData.description || "",
       status:
         (initialData.status as "active" | "inactive" | "draft") || "draft",
-      currency:
-        (initialData.currency as "GBP" | "USD" | "EUR" | "BRL") || "GBP",
+      currency: "BRL",
       price: initialData.price / 100,
       discountPrice: initialData.discountPrice
         ? initialData.discountPrice / 100
@@ -550,168 +549,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
               </CardContent>
             </Card>
 
-            {/* --- CARD: ESPECIFICAÇÕES E DETALHES (OPCIONAL) --- */}
-            <Card className="rounded-none border-neutral-800 bg-neutral-950 shadow-none">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 font-mono text-sm font-bold tracking-normal text-white uppercase">
-                  <Info className="h-5 w-5 text-neutral-500" /> Especificações e
-                  Detalhes (Opcional)
-                </CardTitle>
-                <CardDescription className="font-mono text-xs text-neutral-500">
-                  Opcional. Informações úteis para o cliente na página do
-                  produto.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {/* Marca */}
-                  <FormField
-                    control={form.control}
-                    name="brand"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                          <Tag className="h-4 w-4 text-neutral-500" /> Marca /
-                          Fabricante
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ex: Samsung, IKEA, Genérico..."
-                            className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-xs"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Condição */}
-                  <FormField
-                    control={form.control}
-                    name="condition"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                          Condição do Item
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white focus:border-neutral-600 focus:ring-0">
-                              <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="rounded border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 shadow-xl">
-                            <SelectItem
-                              value="new"
-                              className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white"
-                            >
-                              Novo
-                            </SelectItem>
-                            <SelectItem
-                              value="used"
-                              className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white"
-                            >
-                              Usado
-                            </SelectItem>
-                            <SelectItem
-                              value="refurbished"
-                              className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white"
-                            >
-                              Recondicionado
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {/* Montagem */}
-                  <FormField
-                    control={form.control}
-                    name="isAssembled"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-lg border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-neutral-700">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="border-neutral-600 bg-neutral-900 data-[state=checked]:border-emerald-600 data-[state=checked]:bg-emerald-600 data-[state=checked]:text-white"
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel className="flex items-center gap-2 font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                            <Hammer className="h-4 w-4 text-neutral-500" />
-                            Produto vem montado?
-                          </FormLabel>
-                          <FormDescription className="font-mono text-[11px] text-neutral-500">
-                            Marque se o produto já vem pronto para uso.
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Garantia Checkbox */}
-                  <FormField
-                    control={form.control}
-                    name="hasWarranty"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-lg border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-neutral-700">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="border-neutral-600 bg-neutral-900 data-[state=checked]:border-emerald-600 data-[state=checked]:bg-emerald-600 data-[state=checked]:text-white"
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel className="flex items-center gap-2 font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                            <ShieldCheck className="h-4 w-4 text-neutral-500" />
-                            Possui Garantia?
-                          </FormLabel>
-                          <FormDescription className="font-mono text-[11px] text-neutral-500">
-                            Marque se oferecer garantia para este item.
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Detalhes da Garantia (Condicional) */}
-                {watchHasWarranty && (
-                  <FormField
-                    control={form.control}
-                    name="warrantyDetails"
-                    render={({ field }) => (
-                      <FormItem className="animate-in fade-in slide-in-from-top-2">
-                        <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                          Detalhes da Garantia
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ex: 12 meses pelo fabricante, 3 meses pela loja..."
-                            className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-xs"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </CardContent>
-            </Card>
-
             {/* --- CARD: TAMANHOS E CORES --- */}
             <Card className="rounded-none border-neutral-800 bg-neutral-950 shadow-none">
               <CardHeader>
@@ -952,140 +789,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
               </CardContent>
             </Card>
 
-            {/* Configuração de Frete */}
-            <Card className="rounded-none border-neutral-800 bg-neutral-950 shadow-none">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 font-mono text-sm font-bold tracking-normal text-white uppercase">
-                  <Truck className="h-5 w-5 text-neutral-500" /> Configuração de
-                  Frete
-                </CardTitle>
-                <CardDescription className="font-mono text-xs text-neutral-500">
-                  Defina como o Frete será cobrado.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="shippingType"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                        Tipo de Cobrança
-                      </FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="flex flex-col space-y-1"
-                        >
-                          <FormItem
-                            className={cn(
-                              "flex items-center space-y-0 rounded-lg border p-4 transition-colors",
-                              field.value === "free"
-                                ? "border-emerald-500/60 bg-emerald-950/30"
-                                : "border-neutral-800 bg-neutral-900 hover:border-neutral-700",
-                            )}
-                          >
-                            <FormControl>
-                              <RadioGroupItem
-                                value="free"
-                                className="border-neutral-600 text-emerald-400"
-                              />
-                            </FormControl>
-                            <FormLabel className="ml-3 w-full cursor-pointer font-mono text-[11px] font-normal tracking-normal text-neutral-400 uppercase">
-                              <span className="block font-mono text-xs font-bold text-white uppercase">
-                                Frete Grátis
-                              </span>
-                              <span className="block font-mono text-[11px] text-neutral-500">
-                                O cliente não pagará nada pelo envio.
-                              </span>
-                            </FormLabel>
-                          </FormItem>
-
-                          <FormItem
-                            className={cn(
-                              "flex items-center space-y-0 rounded-lg border p-4 transition-colors",
-                              field.value === "fixed"
-                                ? "border-emerald-500/60 bg-emerald-950/30"
-                                : "border-neutral-800 bg-neutral-900 hover:border-neutral-700",
-                            )}
-                          >
-                            <FormControl>
-                              <RadioGroupItem
-                                value="fixed"
-                                className="border-neutral-600 text-emerald-400"
-                              />
-                            </FormControl>
-                            <FormLabel className="ml-3 w-full cursor-pointer font-mono text-[11px] font-normal tracking-normal text-neutral-400 uppercase">
-                              <span className="block font-mono text-xs font-bold text-white uppercase">
-                                Valor Fixo
-                              </span>
-                              <span className="block font-mono text-[11px] text-neutral-500">
-                                Valor único de entrega para qualquer região.
-                              </span>
-                            </FormLabel>
-                          </FormItem>
-
-                          <FormItem
-                            className={cn(
-                              "flex items-center space-y-0 rounded-lg border p-4 transition-colors",
-                              field.value === "calculated"
-                                ? "border-emerald-500/60 bg-emerald-950/30"
-                                : "border-neutral-800 bg-neutral-900 hover:border-neutral-700",
-                            )}
-                          >
-                            <FormControl>
-                              <RadioGroupItem
-                                value="calculated"
-                                className="border-neutral-600 text-emerald-400"
-                              />
-                            </FormControl>
-                            <FormLabel className="ml-3 w-full cursor-pointer font-mono text-[11px] font-normal tracking-normal text-neutral-400 uppercase">
-                              <span className="block font-mono text-xs font-bold text-white uppercase">
-                                Calculado (Peso e Medidas)
-                              </span>
-                              <span className="block font-mono text-[11px] text-neutral-500">
-                                Calculado automaticamente baseado nas dimensões.
-                              </span>
-                            </FormLabel>
-                          </FormItem>
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {watchShippingType === "fixed" && (
-                  <FormField
-                    control={form.control}
-                    name="fixedShippingPrice"
-                    render={({ field }) => (
-                      <FormItem className="animate-in fade-in slide-in-from-top-2">
-                        <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                          Valor do Frete ({CURRENCY_SYMBOLS[watchCurrency]})
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={`${CURRENCY_SYMBOLS[watchCurrency]} 0,00`}
-                            className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-lg text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-lg"
-                            value={formatCurrency(
-                              field.value || 0,
-                              watchCurrency,
-                            )}
-                            onChange={(e) =>
-                              handlePriceChange(e, field.onChange)
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </CardContent>
-            </Card>
-
             {/* Informações Logísticas (OPCIONAL) */}
             {watchShippingType === "calculated" && (
               <Card className="animate-in fade-in slide-in-from-top-4 rounded-none border-neutral-800 bg-neutral-950 shadow-none">
@@ -1253,58 +956,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
               <CardContent className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="deliveryMode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                        Modo de Entrega
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-12 rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white focus:border-neutral-600 focus:ring-0 [&_.delivery-desc]:hidden">
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="rounded border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 shadow-xl">
-                          <SelectItem
-                            value="email"
-                            className="cursor-pointer py-3 focus:bg-neutral-800 focus:text-white"
-                          >
-                            <div className="flex flex-col gap-1 text-left">
-                              <span className="font-medium">
-                                Entrega por Email
-                              </span>
-                              <span className="delivery-desc font-mono text-[11px] text-neutral-500">
-                                Receba o seu pacote por Email imediatamente após
-                                o pagamento.
-                              </span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem
-                            value="none"
-                            className="cursor-pointer py-3 focus:bg-neutral-800 focus:text-white"
-                          >
-                            <div className="flex flex-col gap-1 text-left">
-                              <span className="font-medium">Não informar</span>
-                              <span className="delivery-desc font-mono text-[11px] text-neutral-500">
-                                Não exibe informações de entrega.
-                              </span>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {watchDeliveryMode === "email" && (
-                  <FormField
-                    control={form.control}
-                    name="downloadUrl"
+                  name="downloadUrl"
                     render={({ field }) => (
                       <FormItem className="animate-in fade-in slide-in-from-top-2">
                         <FormLabel className="flex items-center gap-2 font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
@@ -1326,7 +978,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                       </FormItem>
                     )}
                   />
-                )}
 
                 <Separator className="bg-neutral-800" />
 
@@ -1441,21 +1092,21 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                       const isCover = index === 0;
 
                       return (
-                        <div
-                          key={url}
-                          className={cn(
-                            "group relative aspect-square overflow-hidden rounded-lg border bg-neutral-900 transition-all",
-                            isCover
-                              ? "border-emerald-500/60 ring-2 ring-emerald-500/40"
-                              : "border-neutral-800 hover:border-neutral-600",
-                          )}
-                        >
-                          <Image
-                            src={url}
-                            alt={`Preview ${index}`}
-                            fill
-                            className="object-cover"
-                          />
+                          <div
+                            key={url}
+                            className={cn(
+                              "group relative aspect-square overflow-hidden rounded-lg border bg-neutral-900 p-2 transition-all",
+                              isCover
+                                ? "border-emerald-500/60 ring-2 ring-emerald-500/40"
+                                : "border-neutral-800 hover:border-neutral-600",
+                            )}
+                          >
+                            <Image
+                              src={url}
+                              alt={`Imagem do produto ${index + 1}`}
+                              fill
+                              className="object-contain object-center"
+                            />
 
                           {/* Badge de CAPA */}
                           {isCover && (
@@ -1825,32 +1476,14 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                             <SelectValue placeholder="Selecione a moeda" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="rounded border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 shadow-xl">
-                          <SelectItem
-                            value="GBP"
-                            className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white"
-                          >
-                            Libra Esterlina (£)
-                          </SelectItem>
-                          <SelectItem
-                            value="USD"
-                            className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white"
-                          >
-                            Dólar Americano ($)
-                          </SelectItem>
-                          <SelectItem
-                            value="EUR"
-                            className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white"
-                          >
-                            Euro (€)
-                          </SelectItem>
-                          <SelectItem
-                            value="BRL"
-                            className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white"
-                          >
-                            Real Brasileiro (R$)
-                          </SelectItem>
-                        </SelectContent>
+                            <SelectContent className="rounded border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 shadow-xl">
+                              <SelectItem
+                                value="BRL"
+                                className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white"
+                              >
+                                Real Brasileiro (R$)
+                              </SelectItem>
+                            </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
