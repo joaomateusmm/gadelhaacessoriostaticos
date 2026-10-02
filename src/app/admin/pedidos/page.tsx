@@ -1,14 +1,15 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { obterPedidosSistemaAction } from "@/actions/pedidos-sistema";
 import { Button } from "@/components/ui/button";
 
-export const dynamic = "force-dynamic";
-
 import { ExportJsonPedidosButton } from "./components/export-json-button";
 import { ImportJsonPedidosButton } from "./components/import-json-button";
 import { TabelaPedidosSistema } from "./components/pedidos-table";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminPedidosPage() {
   const pedidosList = await obterPedidosSistemaAction();
@@ -36,7 +37,9 @@ export default async function AdminPedidosPage() {
         </div>
       </div>
 
-      <TabelaPedidosSistema initialPedidos={pedidosList} />
+      <Suspense fallback={<div className="text-white">Carregando pedidos...</div>}>
+        <TabelaPedidosSistema initialPedidos={pedidosList} />
+      </Suspense>
     </div>
   );
 }

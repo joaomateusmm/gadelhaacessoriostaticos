@@ -274,6 +274,27 @@ export async function alternarStatusPacoteAction(
   }
 }
 
+export async function alternarStatusPagamentoAction(
+  pedidoId: string,
+  novoStatus: StatusPagamento,
+) {
+  try {
+    await db
+      .update(pedidos)
+      .set({
+        statusPagamento: novoStatus,
+        updatedAt: new Date(),
+      })
+      .where(eq(pedidos.id, pedidoId));
+
+    revalidatePath("/admin/pedidos");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao alternar status de pagamento:", error);
+    return { success: false };
+  }
+}
+
 export async function alternarItemSeparadoAction(
   itemId: string,
   novoValor: boolean,

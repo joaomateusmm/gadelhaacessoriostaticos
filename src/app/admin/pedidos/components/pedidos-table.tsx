@@ -12,17 +12,20 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import {
   alternarItemSeparadoAction,
   alternarStatusPacoteAction,
+  alternarStatusPagamentoAction,
   concluirPedidoSistemaAction,
   excluirPedidoSistemaAction,
   PedidoSistema,
   reverterPedidoSistemaAction,
   StatusPacote,
+  StatusPagamento,
 } from "@/actions/pedidos-sistema";
 import {
   DropdownMenu,
@@ -40,6 +43,11 @@ export function TabelaPedidosSistema({
 }: {
   initialPedidos: PedidoSistema[];
 }) {
+  const searchParams = useSearchParams();
+  const paramProduto = searchParams.get("produto");
+  const paramTamanho = searchParams.get("tamanho");
+  const paramCor = searchParams.get("cor");
+
   const [pedidos, setPedidos] = useState<PedidoSistema[]>(initialPedidos);
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState<
@@ -48,9 +56,13 @@ export function TabelaPedidosSistema({
   const [filtroPagamento, setFiltroPagamento] = useState<
     "todos" | "Pago" | "Não pago"
   >("Pago");
-  const [filtroProduto, setFiltroProduto] = useState<string>("todos");
-  const [filtroTamanho, setFiltroTamanho] = useState<string>("todos");
-  const [filtroCor, setFiltroCor] = useState<string>("todos");
+  const [filtroProduto, setFiltroProduto] = useState<string>(
+    paramProduto || "todos",
+  );
+  const [filtroTamanho, setFiltroTamanho] = useState<string>(
+    paramTamanho || "todos",
+  );
+  const [filtroCor, setFiltroCor] = useState<string>(paramCor || "todos");
   const [searchProdutoFilter, setSearchProdutoFilter] = useState("");
   const [ordemData, setOrdemData] = useState<"recentes" | "antigos">(
     "recentes",
@@ -64,6 +76,9 @@ export function TabelaPedidosSistema({
   const [openPacoteDropdown, setOpenPacoteDropdown] = useState<string | null>(
     null,
   );
+  const [openPagamentoDropdown, setOpenPagamentoDropdown] = useState<
+    string | null
+  >(null);
 
   // Lista única de nomes de produtos extraída dos pedidos
   const produtosUnicos = Array.from(
@@ -134,6 +149,24 @@ export function TabelaPedidosSistema({
     const res = await alternarStatusPacoteAction(pedidoId, novoStatus);
     if (!res.success) {
       toast.error("Erro ao atualizar status do pacote.");
+    }
+  };
+
+  const handleAlterarStatusPagamento = async (
+    pedidoId: string,
+    novoStatus: StatusPagamento,
+  ) => {
+    setPedidos((prev) =>
+      prev.map((p) => {
+        if (p.id !== pedidoId) return p;
+        return { ...p, statusPagamento: novoStatus };
+      }),
+    );
+    setOpenPagamentoDropdown(null);
+
+    const res = await alternarStatusPagamentoAction(pedidoId, novoStatus);
+    if (!res.success) {
+      toast.error("Erro ao atualizar status do pagamento.");
     }
   };
 
@@ -820,15 +853,53 @@ export function TabelaPedidosSistema({
                                   </div>
                                 )}
                               </div>
-                              <span
-                                className={`px-2 py-0.5 text-[10px] font-bold uppercase ${
-                                  pedido.statusPagamento === "Pago"
-                                    ? "border border-emerald-500/40 bg-emerald-600/20 text-emerald-400"
-                                    : "border border-amber-500/40 bg-amber-500/20 text-amber-400"
-                                }`}
-                              >
-                                {pedido.statusPagamento || "Não Pago"}
-                              </span>
+                              {/* Dropdown Status de Pagamento */}
+                              <div className="relative">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setOpenPagamentoDropdown(
+                                      openPagamentoDropdown === pedido.id
+                                        ? null
+                                        : pedido.id,
+                                    )
+                                  }
+                                  className={`flex cursor-pointer items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase transition-all hover:opacity-80 ${
+                                    pedido.statusPagamento === "Pago"
+                                      ? "border border-emerald-500/40 bg-emerald-600/20 text-emerald-400"
+                                      : "border border-amber-500/40 bg-amber-500/20 text-amber-400"
+                                  }`}
+                                >
+                                  {pedido.statusPagamento || "Não pago"}
+                                  <ChevronDown className="h-2.5 w-2.5" />
+                                </button>
+
+                                {openPagamentoDropdown === pedido.id && (
+                                  <div className="absolute top-full left-0 z-50 mt-1 min-w-[110px] overflow-hidden rounded border border-neutral-700 bg-neutral-950 shadow-xl">
+                                    {(["Pago", "Não pago"] as StatusPagamento[]).map(
+                                      (opcao) => (
+                                        <button
+                                          key={opcao}
+                                          type="button"
+                                          onClick={() =>
+                                            handleAlterarStatusPagamento(
+                                              pedido.id,
+                                              opcao,
+                                            )
+                                          }
+                                          className={`w-full px-3 py-1.5 text-left font-mono text-[10px] font-bold uppercase transition-colors hover:bg-neutral-800 ${
+                                            pedido.statusPagamento === opcao
+                                              ? "text-white"
+                                              : "text-neutral-400"
+                                          }`}
+                                        >
+                                          {opcao}
+                                        </button>
+                                      ),
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                               <span
                                 className={`px-2 py-0.5 text-[10px] font-bold uppercase ${
                                   pedido.statusPedido === "Entregue"

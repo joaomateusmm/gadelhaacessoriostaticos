@@ -9,6 +9,7 @@ import {
   Star,
   Users,
 } from "lucide-react";
+import Link from "next/link";
 import { Fragment } from "react";
 
 import { obterPedidosSistemaAction } from "@/actions/pedidos-sistema";
@@ -476,13 +477,22 @@ export default async function AdminDashboard() {
                         const prevCor =
                           i > 0 ? prod.variacoes[i - 1].cor : v.cor;
                         const mudouCor = i > 0 && v.cor !== prevCor;
+
+                        const params = new URLSearchParams();
+                        if (prod.nome) params.set("produto", prod.nome);
+                        if (v.tamanho) params.set("tamanho", v.tamanho);
+                        if (v.cor) params.set("cor", v.cor);
+
                         return (
                           <Fragment key={v.rotulo}>
                             {mudouCor && (
                               <div className="my-1.5 border-t border-white/[0.06]" />
                             )}
-                            <div className="flex items-center justify-between py-2 font-mono text-xs">
-                              <span className="flex items-center gap-1.5 text-neutral-300">
+                            <Link
+                              href={`/admin/pedidos?${params.toString()}`}
+                              className="group flex cursor-pointer items-center justify-between rounded px-1.5 py-2 font-mono text-xs transition-colors hover:bg-neutral-900/90"
+                            >
+                              <span className="flex items-center gap-1.5 text-neutral-300 group-hover:text-emerald-400">
                                 {v.cor &&
                                   (() => {
                                     const cssColor = corParaCss(v.cor);
@@ -497,7 +507,7 @@ export default async function AdminDashboard() {
                               </span>
                               <div className="flex items-center gap-2">
                                 {v.pendente > 0 ? (
-                                  <span className="rounded border border-neutral-500/20 bg-neutral-500/10 px-2 py-0.5 text-xs font-medium text-neutral-300">
+                                  <span className="rounded border border-neutral-500/20 bg-neutral-500/10 px-2 py-0.5 text-xs font-medium text-neutral-300 group-hover:border-emerald-500/40 group-hover:bg-emerald-500/10 group-hover:text-emerald-400">
                                     {v.pendente} a separar
                                   </span>
                                 ) : (
@@ -506,7 +516,7 @@ export default async function AdminDashboard() {
                                   </span>
                                 )}
                               </div>
-                            </div>
+                            </Link>
                           </Fragment>
                         );
                       })}
