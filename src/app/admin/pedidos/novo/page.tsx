@@ -85,6 +85,7 @@ export default function RegistrarPedidoPage() {
 
   // Itens
   const [itens, setItens] = useState<ItemPedidoItem[]>([]);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [produtoId, setProdutoId] = useState("");
   const [tamanho, setTamanho] = useState("M");
   const [cor, setCor] = useState("Preto");
@@ -168,24 +169,60 @@ export default function RegistrarPedidoPage() {
 
   const adicionarItem = () => {
     if (!produtoSelecionado) return;
-    setItens((prev) => [
-      ...prev,
-      {
-        id: `item-${Date.now()}`,
-        produtoId: produtoSelecionado.id,
-        nome: produtoSelecionado.nome,
-        tamanho,
-        cor,
-        quantidade,
-        precoUnitario: produtoSelecionado.preco,
-        separado: false,
-      },
-    ]);
+
+    if (editingItemId) {
+      setItens((prev) =>
+        prev.map((i) =>
+          i.id === editingItemId
+            ? {
+                ...i,
+                produtoId: produtoSelecionado.id,
+                nome: produtoSelecionado.nome,
+                tamanho,
+                cor,
+                quantidade,
+                precoUnitario: produtoSelecionado.preco,
+              }
+            : i,
+        ),
+      );
+      setEditingItemId(null);
+    } else {
+      setItens((prev) => [
+        ...prev,
+        {
+          id: `item-${Date.now()}`,
+          produtoId: produtoSelecionado.id,
+          nome: produtoSelecionado.nome,
+          tamanho,
+          cor,
+          quantidade,
+          precoUnitario: produtoSelecionado.preco,
+          separado: false,
+        },
+      ]);
+    }
+    setQuantidade(1);
+  };
+
+  const editarItem = (item: ItemPedidoItem) => {
+    setEditingItemId(item.id || null);
+    setProdutoId(item.produtoId || "");
+    setTamanho(item.tamanho || "M");
+    setCor(item.cor || "Preto");
+    setQuantidade(item.quantidade);
+  };
+
+  const cancelarEdicaoItem = () => {
+    setEditingItemId(null);
     setQuantidade(1);
   };
 
   const removerItem = (id?: string) => {
     if (!id) return;
+    if (editingItemId === id) {
+      setEditingItemId(null);
+    }
     setItens((prev) => prev.filter((i) => i.id !== id));
   };
 
@@ -458,13 +495,25 @@ export default function RegistrarPedidoPage() {
                     className="mt-1 border-white/10 bg-white/5 text-white"
                   />
                 </div>
-                <Button
-                  type="button"
-                  onClick={adicionarItem}
-                  className="bg-white text-black hover:bg-neutral-200"
-                >
-                  Adicionar ao Pedido
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    onClick={adicionarItem}
+                    className="bg-white text-black hover:bg-neutral-200"
+                  >
+                    {editingItemId ? "Atualizar Item" : "Adicionar ao Pedido"}
+                  </Button>
+                  {editingItemId && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={cancelarEdicaoItem}
+                      className="border-white/10 text-white hover:bg-white/10"
+                    >
+                      Cancelar
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {/* LISTA DE ITENS */}
@@ -478,7 +527,11 @@ export default function RegistrarPedidoPage() {
                     {itens.map((it) => (
                       <div
                         key={it.id}
-                        className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3 text-xs"
+                        className={`flex items-center justify-between rounded-lg border p-3 text-xs ${
+                          editingItemId === it.id
+                            ? "border-orange-500 bg-orange-500/10"
+                            : "border-white/10 bg-white/5"
+                        }`}
                       >
                         <span className="text-white">
                           {it.quantidade}x {it.nome} — {it.tamanho} ({it.cor})
@@ -487,6 +540,13 @@ export default function RegistrarPedidoPage() {
                           <span className="font-mono font-bold text-[#D00000]">
                             {formatBrl(it.precoUnitario * it.quantidade)}
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => editarItem(it)}
+                            className="text-neutral-400 hover:text-white"
+                          >
+                            Editar
+                          </button>
                           <button
                             type="button"
                             onClick={() => removerItem(it.id)}

@@ -38,6 +38,13 @@ const productSchema = z.object({
   hasWarranty: z.boolean().default(false).optional(),
   warrantyDetails: z.string().optional().nullable(),
   brand: z.string().optional().nullable(),
+
+  tamanhos: z.array(z.string()).optional().default([]),
+  cores: z.array(z.string()).optional().default([]),
+  paymentLink: z.string().optional().nullable(),
+  downloadUrl: z.string().optional().nullable(),
+  deliveryMode: z.string().optional().nullable(),
+  paymentMethods: z.array(z.string()).optional().default([]),
 });
 
 export type ProductServerPayload = z.infer<typeof productSchema>;
@@ -97,12 +104,12 @@ export async function createProduct(rawData: ProductServerPayload) {
   const finalCategories = await applyPromoLogic(data);
 
   try {
-    await db.insert(product).values({
-      id: data.id, // Se undefined, o banco gera UUID
+    const insertValues = {
+      ...(data.id ? { id: data.id } : {}),
       name: data.name,
       description: data.description,
       price: data.price,
-      discountPrice: data.discountPrice, // Pode ser null
+      discountPrice: data.discountPrice,
       currency: data.currency,
       images: data.images || [],
       categories: finalCategories,
@@ -117,13 +124,22 @@ export async function createProduct(rawData: ProductServerPayload) {
       height: data.height,
       length: data.length,
 
-      // --- SALVANDO NOVOS CAMPOS ---
       condition: data.condition,
       isAssembled: data.isAssembled,
       hasWarranty: data.hasWarranty,
       warrantyDetails: data.warrantyDetails,
       brand: data.brand,
-    });
+
+      tamanhos: data.tamanhos || [],
+      cores: data.cores || [],
+      paymentLink: data.paymentLink || null,
+      downloadUrl: data.downloadUrl || null,
+      deliveryMode: data.deliveryMode || undefined,
+      paymentMethods: data.paymentMethods || [],
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await db.insert(product).values(insertValues as any);
 
     revalidatePath("/admin/produtos");
     revalidatePath("/");
@@ -181,6 +197,13 @@ export async function updateProduct(id: string, rawData: ProductServerPayload) {
         hasWarranty: data.hasWarranty,
         warrantyDetails: data.warrantyDetails,
         brand: data.brand,
+
+        tamanhos: data.tamanhos || [],
+        cores: data.cores || [],
+        paymentLink: data.paymentLink || null,
+        downloadUrl: data.downloadUrl || null,
+        deliveryMode: data.deliveryMode || undefined,
+        paymentMethods: data.paymentMethods || [],
 
         updatedAt: new Date(),
       })

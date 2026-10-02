@@ -62,12 +62,6 @@ interface Product {
 // Se mudar a altura da barra, ajuste também a classe "-translate-y-10" abaixo.
 const SCROLL_THRESHOLD = 10;
 
-const LANGUAGES = [
-  { code: "pt", label: "Português", flag: "https://flagcdn.com/w40/br.png" },
-  { code: "en", label: "English", flag: "https://flagcdn.com/w40/us.png" },
-  { code: "es", label: "Español", flag: "https://flagcdn.com/w40/es.png" },
-] as const;
-
 // --- COMPONENTE DE ÍCONE ---
 function HeaderIconButton({
   icon: Icon,

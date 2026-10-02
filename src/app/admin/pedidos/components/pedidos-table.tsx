@@ -24,6 +24,15 @@ import {
   reverterPedidoSistemaAction,
   StatusPacote,
 } from "@/actions/pedidos-sistema";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { brl } from "@/lib/format";
 
 export function TabelaPedidosSistema({
@@ -36,8 +45,13 @@ export function TabelaPedidosSistema({
   const [filtroStatus, setFiltroStatus] = useState<
     "todos" | "Devendo" | "Entregue"
   >("Devendo");
+  const [filtroPagamento, setFiltroPagamento] = useState<
+    "todos" | "Pago" | "Não pago"
+  >("Pago");
   const [filtroProduto, setFiltroProduto] = useState<string>("todos");
-  const [openDropdownProduto, setOpenDropdownProduto] = useState(false);
+  const [filtroTamanho, setFiltroTamanho] = useState<string>("todos");
+  const [filtroCor, setFiltroCor] = useState<string>("todos");
+  const [searchProdutoFilter, setSearchProdutoFilter] = useState("");
   const [ordemData, setOrdemData] = useState<"recentes" | "antigos">(
     "recentes",
   );
@@ -56,6 +70,44 @@ export function TabelaPedidosSistema({
     new Set(
       pedidos
         .flatMap((p) => p.itens.map((item) => item.nome.trim()))
+        .filter(Boolean),
+    ),
+  ).sort();
+
+  // Lista de tamanhos únicos disponíveis baseados no produto selecionado (ou em todos os produtos se "todos")
+  const tamanhosDisponiveis = Array.from(
+    new Set(
+      pedidos
+        .flatMap((p) =>
+          p.itens
+            .filter(
+              (item) =>
+                filtroProduto === "todos" ||
+                item.nome.trim().toLowerCase() === filtroProduto.toLowerCase(),
+            )
+            .map((item) => item.tamanho.trim()),
+        )
+        .filter(Boolean),
+    ),
+  ).sort();
+
+  // Lista de cores únicas disponíveis baseadas no produto e tamanho selecionados
+  const coresDisponiveis = Array.from(
+    new Set(
+      pedidos
+        .flatMap((p) =>
+          p.itens
+            .filter(
+              (item) =>
+                (filtroProduto === "todos" ||
+                  item.nome.trim().toLowerCase() ===
+                    filtroProduto.toLowerCase()) &&
+                (filtroTamanho === "todos" ||
+                  item.tamanho.trim().toLowerCase() ===
+                    filtroTamanho.toLowerCase()),
+            )
+            .map((item) => (item.cor || "").trim()),
+        )
         .filter(Boolean),
     ),
   ).sort();
@@ -184,7 +236,35 @@ export function TabelaPedidosSistema({
         (item) =>
           item.nome.trim().toLowerCase() === filtroProduto.toLowerCase(),
       );
-    return matchBusca && matchStatus && matchProduto;
+    const matchTamanho =
+      filtroTamanho === "todos" ||
+      p.itens.some(
+        (item) =>
+          (filtroProduto === "todos" ||
+            item.nome.trim().toLowerCase() === filtroProduto.toLowerCase()) &&
+          item.tamanho.trim().toLowerCase() === filtroTamanho.toLowerCase(),
+      );
+    const matchCor =
+      filtroCor === "todos" ||
+      p.itens.some(
+        (item) =>
+          (filtroProduto === "todos" ||
+            item.nome.trim().toLowerCase() === filtroProduto.toLowerCase()) &&
+          (filtroTamanho === "todos" ||
+            item.tamanho.trim().toLowerCase() ===
+              filtroTamanho.toLowerCase()) &&
+          (item.cor || "").trim().toLowerCase() === filtroCor.toLowerCase(),
+      );
+    const matchPagamento =
+      filtroPagamento === "todos" || p.statusPagamento === filtroPagamento;
+    return (
+      matchBusca &&
+      matchStatus &&
+      matchPagamento &&
+      matchProduto &&
+      matchTamanho &&
+      matchCor
+    );
   });
 
   const todosSelecionados =
@@ -298,67 +378,250 @@ export function TabelaPedidosSistema({
         </div>
 
         <div className="flex items-center justify-center gap-2">
-          {/* Filtro por Produto (Dropdown Customizado com Largura Dinâmica) */}
-          <div className="relative inline-block font-mono text-xs">
+          {/* Filtro por Produto (Dropdown Shadcn com Busca) */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className={`flex cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-xs uppercase transition-all focus:outline-none ${
+                  filtroProduto !== "todos"
+                    ? "border-emerald-600 bg-emerald-950/60 font-bold text-emerald-400"
+                    : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-600 hover:text-white"
+                }`}
+              >
+                <span className="max-w-[200px] truncate">
+                  {filtroProduto === "todos"
+                    ? "TODOS OS PRODUTOS"
+                    : filtroProduto.toUpperCase()}
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-88 max-h-80 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+              onWheel={(e) => e.stopPropagation()}
+            >
+              <div className="mb-2 flex items-center gap-2 border border-neutral-800 bg-neutral-900 px-2 py-1">
+                <Search className="h-3.5 w-3.5 text-neutral-500" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar produto..."
+                  value={searchProdutoFilter}
+                  onChange={(e) => setSearchProdutoFilter(e.target.value)}
+                  className="w-full bg-transparent font-mono text-xs text-white placeholder:text-neutral-500 focus:outline-none"
+                />
+              </div>
+
+              <div
+                className="max-h-60 space-y-1 overflow-y-auto"
+                onWheel={(e) => e.stopPropagation()}
+              >
+                <DropdownMenuItem
+                  onClick={() => {
+                    setFiltroProduto("todos");
+                    setFiltroTamanho("todos");
+                    setFiltroCor("todos");
+                  }}
+                  className={`mb-2 cursor-pointer font-mono text-xs uppercase ${
+                    filtroProduto === "todos"
+                      ? "bg-neutral-800 font-bold text-emerald-400"
+                      : "focus:bg-neutral-900 focus:text-white"
+                  }`}
+                >
+                  TODOS OS PRODUTOS
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="bg-neutral-800" />
+
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="px-2 py-1 font-mono text-[10px] font-bold text-neutral-500 uppercase">
+                    Produtos ({produtosUnicos.length})
+                  </DropdownMenuLabel>
+                  {produtosUnicos
+                    .filter((prod) =>
+                      prod
+                        .toLowerCase()
+                        .includes(searchProdutoFilter.toLowerCase()),
+                    )
+                    .map((prod) => (
+                      <DropdownMenuItem
+                        key={prod}
+                        onClick={() => {
+                          setFiltroProduto(prod);
+                          setFiltroTamanho("todos");
+                          setFiltroCor("todos");
+                        }}
+                        className={`cursor-pointer font-mono text-xs uppercase ${
+                          filtroProduto === prod
+                            ? "bg-neutral-800 font-bold text-emerald-400"
+                            : "focus:bg-neutral-900 focus:text-white"
+                        }`}
+                      >
+                        {prod}
+                      </DropdownMenuItem>
+                    ))}
+                </DropdownMenuGroup>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Filtro por Tamanho */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className={`flex cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-xs uppercase transition-all focus:outline-none ${
+                  filtroTamanho !== "todos"
+                    ? "border-emerald-600 bg-emerald-950/60 font-bold text-emerald-400"
+                    : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-600 hover:text-white"
+                }`}
+              >
+                <span className="whitespace-nowrap">
+                  {filtroTamanho === "todos"
+                    ? "TAMANHO: TODOS"
+                    : `TAM: ${filtroTamanho.toUpperCase()}`}
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-48 max-h-60 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+              onWheel={(e) => e.stopPropagation()}
+            >
+              <DropdownMenuItem
+                onClick={() => {
+                  setFiltroTamanho("todos");
+                  setFiltroCor("todos");
+                }}
+                className={`cursor-pointer font-mono text-xs uppercase ${
+                  filtroTamanho === "todos"
+                    ? "bg-neutral-800 font-bold text-emerald-400"
+                    : "focus:bg-neutral-900 focus:text-white"
+                }`}
+              >
+                TODOS OS TAMANHOS
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator className="bg-neutral-800" />
+
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="px-2 py-1 font-mono text-[10px] font-bold text-neutral-500 uppercase">
+                  Tamanhos Disponíveis ({tamanhosDisponiveis.length})
+                </DropdownMenuLabel>
+                {tamanhosDisponiveis.map((tam) => (
+                  <DropdownMenuItem
+                    key={tam}
+                    onClick={() => {
+                      setFiltroTamanho(tam);
+                      setFiltroCor("todos");
+                    }}
+                    className={`cursor-pointer font-mono text-xs uppercase ${
+                      filtroTamanho === tam
+                        ? "bg-neutral-800 font-bold text-emerald-400"
+                        : "focus:bg-neutral-900 focus:text-white"
+                    }`}
+                  >
+                    {tam}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Filtro por Cor */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className={`flex cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-xs uppercase transition-all focus:outline-none ${
+                  filtroCor !== "todos"
+                    ? "border-emerald-600 bg-emerald-950/60 font-bold text-emerald-400"
+                    : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-600 hover:text-white"
+                }`}
+              >
+                <span className="whitespace-nowrap">
+                  {filtroCor === "todos"
+                    ? "COR: TODAS"
+                    : `COR: ${filtroCor.toUpperCase()}`}
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-48 max-h-60 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+              onWheel={(e) => e.stopPropagation()}
+            >
+              <DropdownMenuItem
+                onClick={() => setFiltroCor("todos")}
+                className={`cursor-pointer font-mono text-xs uppercase ${
+                  filtroCor === "todos"
+                    ? "bg-neutral-800 font-bold text-emerald-400"
+                    : "focus:bg-neutral-900 focus:text-white"
+                }`}
+              >
+                TODAS AS CORES
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator className="bg-neutral-800" />
+
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="px-2 py-1 font-mono text-[10px] font-bold text-neutral-500 uppercase">
+                  Cores Disponíveis ({coresDisponiveis.length})
+                </DropdownMenuLabel>
+                {coresDisponiveis.map((c) => (
+                  <DropdownMenuItem
+                    key={c}
+                    onClick={() => setFiltroCor(c)}
+                    className={`cursor-pointer font-mono text-xs uppercase ${
+                      filtroCor === c
+                        ? "bg-neutral-800 font-bold text-emerald-400"
+                        : "focus:bg-neutral-900 focus:text-white"
+                    }`}
+                  >
+                    {c}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <span className="text-neutral-500">|</span>
+
+          {/* Filtros por Pagamento */}
+          <div className="flex items-center space-x-2 font-mono text-xs">
             <button
-              type="button"
-              onClick={() => setOpenDropdownProduto((prev) => !prev)}
-              className={`flex cursor-pointer items-center gap-2 border px-3 py-1.5 text-xs whitespace-nowrap uppercase transition-all focus:outline-none ${
-                filtroProduto !== "todos"
+              onClick={() => setFiltroPagamento("Pago")}
+              className={`border px-3 py-1.5 uppercase transition-all ${
+                filtroPagamento === "Pago"
                   ? "border-emerald-600 bg-emerald-950/60 font-bold text-emerald-400"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-600 hover:text-white"
               }`}
             >
-              <span>
-                {filtroProduto === "todos"
-                  ? "TODOS OS PRODUTOS"
-                  : filtroProduto.toUpperCase()}
-              </span>
-              <ChevronDown className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+              PAGO
             </button>
-
-            {openDropdownProduto && (
-              <>
-                {/* Backdrop para fechar ao clicar fora */}
-                <div
-                  className="fixed inset-0 z-20"
-                  onClick={() => setOpenDropdownProduto(false)}
-                />
-                <div className="absolute top-full left-0 z-30 mt-1 max-h-60 min-w-full overflow-y-auto rounded border border-neutral-800 bg-neutral-900 font-mono text-xs whitespace-nowrap shadow-xl">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFiltroProduto("todos");
-                      setOpenDropdownProduto(false);
-                    }}
-                    className={`block w-full px-3 py-2 text-left uppercase transition-colors hover:bg-neutral-800 ${
-                      filtroProduto === "todos"
-                        ? "bg-neutral-800 font-bold text-emerald-400"
-                        : "text-neutral-300"
-                    }`}
-                  >
-                    TODOS OS PRODUTOS
-                  </button>
-                  {produtosUnicos.map((prod) => (
-                    <button
-                      key={prod}
-                      type="button"
-                      onClick={() => {
-                        setFiltroProduto(prod);
-                        setOpenDropdownProduto(false);
-                      }}
-                      className={`block w-full px-3 py-2 text-left uppercase transition-colors hover:bg-neutral-800 ${
-                        filtroProduto === prod
-                          ? "bg-neutral-800 font-bold text-emerald-400"
-                          : "text-neutral-300"
-                      }`}
-                    >
-                      {prod.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
+            <button
+              onClick={() => setFiltroPagamento("Não pago")}
+              className={`border px-3 py-1.5 uppercase transition-all ${
+                filtroPagamento === "Não pago"
+                  ? "border-red-600 bg-red-950/60 font-bold text-red-400"
+                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-600 hover:text-white"
+              }`}
+            >
+              NÃO PAGO
+            </button>
+            <button
+              onClick={() => setFiltroPagamento("todos")}
+              className={`border px-3 py-1.5 uppercase transition-all ${
+                filtroPagamento === "todos"
+                  ? "border-neutral-600 bg-neutral-700 font-bold text-white"
+                  : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-600 hover:text-white"
+              }`}
+            >
+              TODOS
+            </button>
           </div>
 
           <span className="text-neutral-500">|</span>
