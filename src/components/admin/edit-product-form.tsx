@@ -125,7 +125,7 @@ const formSchema = z.object({
   price: z.number().min(0, "O preço não pode ser negativo"),
   discountPrice: z.number().optional(),
 
-  currency: z.literal("BRL").default("BRL"),
+  currency: z.literal("BRL"),
 
   categories: z.array(z.string()),
 
