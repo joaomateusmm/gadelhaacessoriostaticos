@@ -44,7 +44,7 @@ const faqData = [
 
 const FaqSection = () => {
   return (
-    <section className="relative mb-15 bg-white py-16">
+    <section className="relative mb-15 bg-neutral-950 py-16">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -53,10 +53,10 @@ const FaqSection = () => {
           viewport={{ once: true }}
           className="mx-auto mb-12 flex max-w-[700px] flex-col items-center text-center"
         >
-          <h2 className="font-montserrat text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl md:text-5xl">
+          <h2 className="font-montserrat text-3xl font-bold tracking-tight text-neutral-50 sm:text-4xl md:text-5xl">
             Perguntas Frequentes
           </h2>
-          <p className="mt-4 text-lg text-neutral-500">
+          <p className="mt-4 text-lg text-neutral-300">
             Tire suas dúvidas sobre nossos produtos, entregas e serviços.
           </p>
           <div className="mt-4 h-1 w-20 rounded-full bg-orange-600" />
@@ -69,17 +69,21 @@ const FaqSection = () => {
           viewport={{ once: true }}
           className="mx-auto max-w-3xl"
         >
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full cursor-pointer"
+          >
             {faqData.map((item) => (
               <AccordionItem
                 key={item.value}
                 value={item.value}
-                className="border-b border-neutral-200"
+                className="cursor-pointer border-b border-neutral-600"
               >
-                <AccordionTrigger className="text-left text-lg font-medium text-neutral-900 transition-all hover:text-orange-600 hover:no-underline data-[state=open]:text-orange-600">
+                <AccordionTrigger className="text-left text-lg font-medium text-neutral-50 transition-all hover:text-orange-600 hover:no-underline data-[state=open]:text-orange-600">
                   {item.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-base leading-relaxed text-neutral-600">
+                <AccordionContent className="text-base leading-relaxed text-neutral-100">
                   {item.answer}
                 </AccordionContent>
               </AccordionItem>

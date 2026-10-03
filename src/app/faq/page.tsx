@@ -50,7 +50,7 @@ const faqData = [
 export default function FaqPage() {
   return (
     // Fundo claro
-    <main className="min-h-screen bg-neutral-50 text-neutral-900">
+    <main className="min-h-screen bg-neutral-950 text-neutral-100">
       <Suspense fallback={<div className="h-20 w-full bg-white" />}>
         <Header />
       </Suspense>

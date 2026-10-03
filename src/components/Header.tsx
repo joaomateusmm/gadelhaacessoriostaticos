@@ -249,7 +249,7 @@ export function HeaderContent() {
       <TopBar />
 
       {/* --- BARRA PRINCIPAL --- */}
-      <div className="relative w-full border-b border-neutral-900 bg-black px-4 md:px-8">
+      <div className="relative w-full bg-black px-4 md:px-8">
         <div className="relative mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-4">
           {/* 1. ESQUERDA: Menu mobile + Logo */}
           <div className="flex items-center gap-3 sm:gap-4">
@@ -477,10 +477,10 @@ export function HeaderContent() {
         {isSearchOpen && (
           <div
             ref={searchRef}
-            className="animate-in fade-in slide-in-from-top-2 absolute inset-x-0 top-full z-40 border-t border-neutral-800 bg-neutral-950 px-4 py-4 shadow-xl duration-200 md:px-8"
+            className="animate-in fade-in slide-in-from-top-2 absolute inset-x-0 top-full z-40 bg-black px-4 py-4 shadow-xl duration-200 md:px-8"
           >
             <div className="relative mx-auto max-w-3xl">
-              <div className="flex h-12 w-full items-center rounded-full border border-neutral-700 bg-neutral-900 pr-2 pl-5 transition-all focus-within:border-orange-600">
+              <div className="flex h-12 w-full items-center rounded-full border border-neutral-700 bg-neutral-950 pr-2 pl-5 transition-all focus-within:border-orange-600">
                 <input
                   ref={searchInputRef}
                   type="text"
