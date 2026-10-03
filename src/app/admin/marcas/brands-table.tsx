@@ -153,7 +153,7 @@ export function BrandsTable({ data }: BrandsTableProps) {
                       : "-"}
                   </TableCell>
                   <TableCell>
-                    <BrandActions id={brand.id} />
+                    <BrandActions id={brand.id} name={brand.name} />
                   </TableCell>
                 </TableRow>
               ))

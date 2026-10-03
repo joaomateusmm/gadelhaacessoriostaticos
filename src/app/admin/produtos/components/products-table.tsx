@@ -163,7 +163,7 @@ export function ProductsTable({
     });
 
     const sortedCategories = Array.from(map.keys()).sort((a, b) =>
-      a.localeCompare(b, "pt-BR", { sensitivity: "base" })
+      a.localeCompare(b, "pt-BR", { sensitivity: "base" }),
     );
 
     return sortedCategories.map((catName) => ({

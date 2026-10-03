@@ -9,7 +9,7 @@ export default async function AdminBrandsPage() {
   const brands = await db.select().from(brand).orderBy(desc(brand.createdAt));
 
   return (
-    <div className="flex flex-col space-y-8 p-2 pt-6">
+    <div className="space-y-4 pt-4 text-white">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-clash-display text-3xl font-medium tracking-tight text-white">

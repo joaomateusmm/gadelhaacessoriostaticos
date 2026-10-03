@@ -59,12 +59,12 @@ export function CategoriesTable({ data }: CategoriesTableProps) {
   return (
     <div className="space-y-4">
       {/* Filtros e Ações */}
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-between gap-4">
         {selectedIds.length > 0 && (
           <Button
             onClick={handleBulkDelete}
             disabled={isPending}
-            className="bg-red-600 text-white shadow-sm hover:bg-red-700"
+            className="animate-in fade-in zoom-in bg-red-600 hover:bg-red-700"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Excluir ({selectedIds.length})
@@ -73,26 +73,26 @@ export function CategoriesTable({ data }: CategoriesTableProps) {
       </div>
 
       {/* Tabela */}
-      <div className="rounded-md border border-neutral-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-md border border-white/10 bg-[#0A0A0A]">
         <Table>
-          <TableHeader className="bg-neutral-50">
-            <TableRow className="border-neutral-200 hover:bg-neutral-100">
+          <TableHeader className="bg-white/5">
+            <TableRow className="border-white/10 hover:bg-white/5">
               <TableHead className="w-[40px]">
                 <Checkbox
-                  className="border-neutral-400 data-[state=checked]:border-orange-600 data-[state=checked]:bg-orange-600"
+                  className="border-white/50 data-[state=checked]:border-[#D00000] data-[state=checked]:bg-[#D00000]"
                   checked={
                     data.length > 0 && selectedIds.length === data.length
                   }
                   onCheckedChange={(c) => handleSelectAll(!!c)}
                 />
               </TableHead>
-              <TableHead className="font-semibold text-neutral-600">
+              <TableHead className="font-semibold text-neutral-400">
                 Nome
               </TableHead>
-              <TableHead className="font-semibold text-neutral-600">
+              <TableHead className="font-semibold text-neutral-400">
                 Descrição
               </TableHead>
-              <TableHead className="text-right font-semibold text-neutral-600">
+              <TableHead className="text-right font-semibold text-neutral-400">
                 Criado em
               </TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -123,19 +123,19 @@ export function CategoriesTable({ data }: CategoriesTableProps) {
               data.map((item) => (
                 <TableRow
                   key={item.id}
-                  className="border-neutral-100 transition-colors hover:bg-neutral-50"
+                  className="border-white/10 transition-colors hover:bg-white/5"
                 >
                   <TableCell>
                     <Checkbox
-                      className="border-neutral-400 data-[state=checked]:border-orange-600 data-[state=checked]:bg-orange-600"
+                      className="border-white/50 data-[state=checked]:border-[#D00000] data-[state=checked]:bg-[#D00000]"
                       checked={selectedIds.includes(item.id)}
                       onCheckedChange={(c) => handleSelectOne(!!c, item.id)}
                     />
                   </TableCell>
-                  <TableCell className="font-medium text-neutral-900">
+                  <TableCell className="font-medium text-white">
                     {item.name}
                   </TableCell>
-                  <TableCell className="text-neutral-500">
+                  <TableCell className="text-right text-neutral-400">
                     {item.description || "-"}
                   </TableCell>
                   <TableCell className="text-right text-neutral-500">

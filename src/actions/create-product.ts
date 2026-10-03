@@ -41,6 +41,7 @@ const productSchema = z.object({
 
   tamanhos: z.array(z.string()).optional().default([]),
   cores: z.array(z.string()).optional().default([]),
+  brandId: z.string().optional().nullable(),
   paymentLink: z.string().optional().nullable(),
   downloadUrl: z.string().optional().nullable(),
   deliveryMode: z.string().optional().nullable(),
@@ -132,6 +133,7 @@ export async function createProduct(rawData: ProductServerPayload) {
 
       tamanhos: data.tamanhos || [],
       cores: data.cores || [],
+      brandId: data.brandId || null,
       paymentLink: data.paymentLink || null,
       downloadUrl: data.downloadUrl || null,
       deliveryMode: data.deliveryMode || undefined,
@@ -200,6 +202,7 @@ export async function updateProduct(id: string, rawData: ProductServerPayload) {
 
         tamanhos: data.tamanhos || [],
         cores: data.cores || [],
+        brandId: data.brandId || null,
         paymentLink: data.paymentLink || null,
         downloadUrl: data.downloadUrl || null,
         deliveryMode: data.deliveryMode || undefined,

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -59,9 +60,9 @@ export function AddBrandButton() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="bg-white text-black hover:bg-neutral-200">
-          Nova Marca
-        </button>
+        <Button className="flex items-center gap-2 border border-white/10 bg-white/5 text-white hover:bg-white/10">
+          <Plus className="h-4 w-4" /> Nova Marca
+        </Button>
       </DialogTrigger>
       <DialogContent className="border-white/10 bg-[#111] text-white sm:max-w-[425px]">
         <DialogHeader>

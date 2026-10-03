@@ -1,6 +1,7 @@
 "use client";
 
-import { MoreHorizontal, Trash } from "lucide-react";
+import { ExternalLink, MoreHorizontal, Trash } from "lucide-react";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -26,9 +27,10 @@ import {
 
 interface BrandActionsProps {
   id: string;
+  name: string;
 }
 
-export function BrandActions({ id }: BrandActionsProps) {
+export function BrandActions({ id, name }: BrandActionsProps) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -64,7 +66,13 @@ export function BrandActions({ id }: BrandActionsProps) {
           align="end"
           className="border-white/10 bg-[#111] text-white"
         >
-          <DropdownMenuLabel>Ações</DropdownMenuLabel>
+          <DropdownMenuLabel>{name}</DropdownMenuLabel>
+          <Link href={`/marca/${id}`} target="_blank">
+            <DropdownMenuItem className="cursor-pointer focus:bg-white/10">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Ver página da marca
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem
             onClick={() => setOpen(true)}
             className="cursor-pointer text-red-500 focus:bg-red-500/10 focus:text-red-500"

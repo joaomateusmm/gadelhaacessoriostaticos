@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -58,8 +59,8 @@ export function AddCategoryButton() {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button className="gap-2 bg-neutral-900 text-white shadow-md transition-all hover:bg-neutral-800 hover:shadow-lg">
-          Nova Categoria
+        <Button className="flex items-center gap-2 border border-white/10 bg-white/5 text-white hover:bg-white/10">
+          <Plus className="h-4 w-4" /> Nova Categoria
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="border-neutral-200 bg-white text-neutral-900 shadow-lg sm:max-w-[425px]">

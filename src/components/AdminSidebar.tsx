@@ -1,17 +1,12 @@
 "use client";
 
 import {
-  Bell,
+  Bird,
   Blocks,
-  Hammer,
   Home,
   LayoutDashboard,
   Package,
-  Star,
-  TicketPercent,
   Truck,
-  UserRoundCog,
-  Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -44,7 +39,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   return (
     <Sidebar className="border-r border-neutral-800 bg-neutral-900 text-white">
       {/* --- HEADER (Logo) --- */}
-      <SidebarHeader className="flex h-20 justify-center border-b border-neutral-800 bg-neutral-900 px-6">
+      <SidebarHeader className="flex h-16 justify-center border-b border-neutral-800 bg-neutral-900 px-6">
         <div className="flex items-center justify-center gap-2 py-6">
           <Image
             src="/icons/logo.png"
@@ -126,7 +121,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               className="h-10 font-medium text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-white data-[active=true]:border data-[active=true]:border-orange-500/30 data-[active=true]:bg-orange-500/15 data-[active=true]:font-semibold data-[active=true]:text-orange-400 data-[active=true]:shadow-sm"
             >
               <Link href="/admin/marcas">
-                <Blocks className="mr-2 h-5 w-5" />
+                <Bird className="mr-2 h-5 w-5" />
                 <span>Marcas</span>
               </Link>
             </SidebarMenuButton>

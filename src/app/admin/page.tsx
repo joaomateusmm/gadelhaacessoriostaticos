@@ -13,8 +13,9 @@ import Link from "next/link";
 import { Fragment } from "react";
 
 import { obterPedidosSistemaAction } from "@/actions/pedidos-sistema";
+import { CopyCardButton } from "@/components/admin/copy-card-button";
+import { FilterPagamento } from "@/components/admin/filter-pagamento";
 import { RevenueChart } from "@/components/admin/revenue-chart";
-// IMPORTANTE: Importe o novo gráfico de vendas
 import { db } from "@/db";
 import { brand, category, order, product, review, user } from "@/db/schema";
 
@@ -94,7 +95,16 @@ function corParaCss(cor: string): string | null {
   return mapa[cor.toLowerCase()] ?? null;
 }
 
-export default async function AdminDashboard() {
+interface AdminDashboardProps {
+  searchParams: Promise<{ pagamento?: string }>;
+}
+
+export default async function AdminDashboard({
+  searchParams,
+}: AdminDashboardProps) {
+  const { pagamento } = await searchParams;
+  const filtroPagamento = pagamento || "Pago";
+
   const [
     totalRevenueRes,
     totalSalesRes,
@@ -154,7 +164,18 @@ export default async function AdminDashboard() {
   };
 
   // --- LÓGICA DE DETALHAMENTO DE PRODUTOS A SEPARAR DA PÁGINA DE EXEMPLO ---
-  const devendo = pedidosSistema.filter((p) => p.statusPedido === "Devendo");
+  const devendo = pedidosSistema.filter((p) => {
+    const isDevendo = p.statusPedido === "Devendo";
+    if (!isDevendo) return false;
+
+    if (filtroPagamento === "Pago") {
+      return p.statusPagamento === "Pago";
+    }
+    if (filtroPagamento === "Não pago") {
+      return p.statusPagamento === "Não pago";
+    }
+    return true;
+  });
 
   const mapaProdutos = new Map<
     string,
@@ -300,7 +321,7 @@ export default async function AdminDashboard() {
       {/* --- SEÇÃO 1: CARDS MAIORES (KPIs) --- */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Receita */}
-        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0A0A0A] p-6 shadow-lg transition-all hover:border-[#D00000]/30">
+        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0A0A0A] p-6 transition-all hover:border-[#D00000]/30">
           <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-[#D00000]/5 blur-2xl" />
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-neutral-400">
@@ -322,7 +343,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Vendas */}
-        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0A0A0A] p-6 shadow-lg transition-all hover:border-[#D00000]/30">
+        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0A0A0A] p-6 transition-all hover:border-[#D00000]/30">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-neutral-400">
               Vendas Concluídas
@@ -335,7 +356,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Produtos Ativos */}
-        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0A0A0A] p-6 shadow-lg transition-all hover:border-[#D00000]/30">
+        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0A0A0A] p-6 transition-all hover:border-[#D00000]/30">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-neutral-400">
               Produtos Ativos
@@ -350,7 +371,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Clientes */}
-        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0A0A0A] p-6 shadow-lg transition-all hover:border-[#D00000]/30">
+        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0A0A0A] p-6 transition-all hover:border-[#D00000]/30">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-neutral-400">
               Contas Criadas
@@ -418,22 +439,95 @@ export default async function AdminDashboard() {
 
       {/* --- SEÇÃO 4: DETALHAMENTO DE ITENS A SEPARAR (POR TAMANHO / COR) --- */}
       <div className="space-y-4 border-t border-white/10 pt-12">
-        <div>
-          <h2 className="font-clash-display text-3xl font-medium text-white">
-            Itens a Separar
-          </h2>
-          <p className="text-neutral-400">
-            Organizado do maior tamanho para o menor tamanho, baseado nos
-            pedidos com status &quot;A Entregar&quot;.
-          </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-clash-display text-3xl font-medium text-white">
+              Itens a Separar
+            </h2>
+            <p className="text-neutral-400">
+              Organizado do maior tamanho para o menor tamanho, baseado nos
+              pedidos com status &quot;A Entregar&quot;.
+            </p>
+          </div>
+
+          {/* Filtros de Pagamento para os Itens a Separar */}
+          <FilterPagamento filtroPagamento={filtroPagamento} />
         </div>
+
+        {/* Barra de Progresso Geral */}
+        {resumoProdutos.length > 0 &&
+          (() => {
+            const totalGeralItens = resumoProdutos.reduce(
+              (acc, p) => acc + p.totalDoProduto,
+              0,
+            );
+            const totalGeralPendentes = resumoProdutos.reduce(
+              (acc, p) => acc + p.pendentesDoProduto,
+              0,
+            );
+            const totalGeralSeparados = totalGeralItens - totalGeralPendentes;
+            const pctGeral = totalGeralItens
+              ? Math.round((totalGeralSeparados / totalGeralItens) * 100)
+              : 100;
+
+            return (
+              <div className="rounded-xl border border-white/10 bg-[#0A0A0A] p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`rounded-full p-2 ${
+                        pctGeral === 100
+                          ? "bg-emerald-500/10 text-emerald-400"
+                          : "bg-amber-500/10 text-amber-400"
+                      }`}
+                    >
+                      <Package className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-white">
+                        Progresso Geral de Separação
+                      </h3>
+                      <p className="font-mono text-xs text-neutral-500">
+                        {totalGeralSeparados} de {totalGeralItens} itens
+                        separados &bull; {totalGeralPendentes} pendente
+                        {totalGeralPendentes !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className={`font-mono text-2xl font-bold ${
+                      pctGeral === 100
+                        ? "text-emerald-400"
+                        : pctGeral >= 50
+                          ? "text-amber-400"
+                          : "text-red-400"
+                    }`}
+                  >
+                    {pctGeral}%
+                  </span>
+                </div>
+                <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-neutral-800">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ${
+                      pctGeral === 100
+                        ? "bg-emerald-500"
+                        : pctGeral >= 50
+                          ? "bg-gradient-to-r from-neutral-500 via-neutral-500 to-neutral-300"
+                          : "bg-gradient-to-r from-neutral-500 via-neutral-500 to-neutral-300"
+                    }`}
+                    style={{ width: `${pctGeral}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })()}
 
         {resumoProdutos.length === 0 ? (
           <div className="rounded-xl border border-white/10 bg-[#0A0A0A] p-8 text-center font-mono text-sm text-neutral-500">
             Nenhum item pendente de separação no momento.
           </div>
         ) : (
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {resumoProdutos.map((prod) => {
               const pctSeparado = prod.totalDoProduto
                 ? Math.round(
@@ -446,16 +540,22 @@ export default async function AdminDashboard() {
               return (
                 <div
                   key={prod.nome}
-                  className="flex flex-col justify-between rounded-xl border border-white/10 bg-[#0A0A0A] p-5 shadow-lg transition-all"
+                  className="flex flex-col justify-between rounded-xl border border-white/10 bg-[#0A0A0A] p-5 transition-all"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 border-b border-white/5 pb-2">
                       <h3 className="text-sm font-semibold text-white">
                         {prod.nome}
                       </h3>
-                      <span className="shrink-0 rounded-md border border-neutral-800 bg-neutral-900 px-2 py-0.5 font-mono text-[10px] text-neutral-400">
-                        {prod.pendentesDoProduto} pendentes
-                      </span>
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <CopyCardButton
+                          nomeProduto={prod.nome}
+                          variacoes={prod.variacoes}
+                        />
+                        <span className="flex h-8 items-center justify-center rounded-md border border-neutral-800 bg-neutral-900 px-3 font-mono text-[11px] text-neutral-400">
+                          {prod.pendentesDoProduto} pendentes
+                        </span>
+                      </div>
                     </div>
 
                     {/* Barra de Progresso do Produto */}

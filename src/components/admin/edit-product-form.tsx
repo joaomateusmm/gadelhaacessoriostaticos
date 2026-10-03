@@ -450,19 +450,33 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 pb-20">
-      <div className="flex items-center gap-4">
-        <Link href="/admin/produtos">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 rounded-none border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <h1 className="font-clash-display text-3xl font-medium text-white">
-          Editar Produto: {initialData.name}
-        </h1>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/produtos">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 rounded-none border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <h1 className="font-clash-display text-3xl font-medium text-white">
+            Editar Produto: {initialData.name}
+          </h1>
+        </div>
+
+        <Button
+          type="submit"
+          className="h-12 w-auto cursor-pointer rounded-none border border-emerald-600 bg-emerald-950/60 px-12 font-mono text-xs font-bold text-emerald-400 uppercase duration-300 hover:bg-emerald-900/60 hover:text-emerald-300 disabled:opacity-50"
+          disabled={form.formState.isSubmitting || isUploading}
+        >
+          {form.formState.isSubmitting
+            ? "Atualizando..."
+            : isUploading
+              ? "Enviando imagens..."
+              : "Salvar Alterações"}
+        </Button>
       </div>
 
       <Form {...form}>
@@ -957,27 +971,27 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                 <FormField
                   control={form.control}
                   name="downloadUrl"
-                    render={({ field }) => (
-                      <FormItem className="animate-in fade-in slide-in-from-top-2">
-                        <FormLabel className="flex items-center gap-2 font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                          <LinkIcon className="h-4 w-4 text-neutral-500" /> Link
-                          do Arquivo (Download) (Opcional)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ex: https://drive.google.com/..."
-                            className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-xs"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                        <FormDescription className="font-mono text-[11px] text-neutral-500">
-                          Enviado automaticamente após a compra, se informado.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  render={({ field }) => (
+                    <FormItem className="animate-in fade-in slide-in-from-top-2">
+                      <FormLabel className="flex items-center gap-2 font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
+                        <LinkIcon className="h-4 w-4 text-neutral-500" /> Link
+                        do Arquivo (Download) (Opcional)
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: https://drive.google.com/..."
+                          className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-xs"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormDescription className="font-mono text-[11px] text-neutral-500">
+                        Enviado automaticamente após a compra, se informado.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <Separator className="bg-neutral-800" />
 
@@ -1092,21 +1106,21 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                       const isCover = index === 0;
 
                       return (
-                          <div
-                            key={url}
-                            className={cn(
-                              "group relative aspect-square overflow-hidden rounded-lg border bg-neutral-900 p-2 transition-all",
-                              isCover
-                                ? "border-emerald-500/60 ring-2 ring-emerald-500/40"
-                                : "border-neutral-800 hover:border-neutral-600",
-                            )}
-                          >
-                            <Image
-                              src={url}
-                              alt={`Imagem do produto ${index + 1}`}
-                              fill
-                              className="object-contain object-center"
-                            />
+                        <div
+                          key={url}
+                          className={cn(
+                            "group relative aspect-square overflow-hidden rounded-lg border bg-neutral-900 p-2 transition-all",
+                            isCover
+                              ? "border-emerald-500/60 ring-2 ring-emerald-500/40"
+                              : "border-neutral-800 hover:border-neutral-600",
+                          )}
+                        >
+                          <Image
+                            src={url}
+                            alt={`Imagem do produto ${index + 1}`}
+                            fill
+                            className="object-contain object-center"
+                          />
 
                           {/* Badge de CAPA */}
                           {isCover && (
@@ -1147,7 +1161,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
           </div>
 
           <div className="space-y-8">
-            {/* Organização */}
             <Card className="rounded-none border-neutral-800 bg-neutral-950 shadow-none">
               <CardHeader>
                 <CardTitle className="font-mono text-sm font-bold tracking-normal text-white uppercase">
@@ -1204,9 +1217,20 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                   name="categories"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                        Categorias
-                      </FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
+                          Categorias
+                        </FormLabel>
+                        {field.value && field.value.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => form.setValue("categories", [])}
+                            className="font-mono text-[10px] text-neutral-500 uppercase transition-colors hover:text-red-400"
+                          >
+                            Limpar tudo
+                          </button>
+                        )}
+                      </div>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -1476,14 +1500,14 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                             <SelectValue placeholder="Selecione a moeda" />
                           </SelectTrigger>
                         </FormControl>
-                            <SelectContent className="rounded border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 shadow-xl">
-                              <SelectItem
-                                value="BRL"
-                                className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white"
-                              >
-                                Real Brasileiro (R$)
-                              </SelectItem>
-                            </SelectContent>
+                        <SelectContent className="rounded border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 shadow-xl">
+                          <SelectItem
+                            value="BRL"
+                            className="cursor-pointer font-mono text-xs uppercase focus:bg-neutral-800 focus:text-white"
+                          >
+                            Real Brasileiro (R$)
+                          </SelectItem>
+                        </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
@@ -1550,20 +1574,19 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                 />
               </CardContent>
             </Card>
-
-            <Button
-              type="submit"
-              className="h-12 w-full cursor-pointer rounded-none border border-emerald-600 bg-emerald-950/60 font-mono text-xs font-bold text-emerald-400 uppercase duration-300 hover:bg-emerald-900/60 hover:text-emerald-300 disabled:opacity-50"
-              disabled={form.formState.isSubmitting || isUploading}
-            >
-              {form.formState.isSubmitting
-                ? "Atualizando..."
-                : isUploading
-                  ? "Enviando imagens..."
-                  : "Salvar Alterações"}
-            </Button>
           </div>
         </form>
+        <Button
+          type="submit"
+          className="h-12 w-full cursor-pointer rounded-none border border-emerald-600 bg-emerald-950/60 font-mono text-xs font-bold text-emerald-400 uppercase duration-300 hover:bg-emerald-900/60 hover:text-emerald-300 disabled:opacity-50"
+          disabled={form.formState.isSubmitting || isUploading}
+        >
+          {form.formState.isSubmitting
+            ? "Atualizando..."
+            : isUploading
+              ? "Enviando imagens..."
+              : "Salvar Alterações"}
+        </Button>
       </Form>
     </div>
   );

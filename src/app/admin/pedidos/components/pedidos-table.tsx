@@ -38,6 +38,48 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { brl } from "@/lib/format";
 
+const COR_MAP: Record<string, string> = {
+  preto: "#000000",
+  black: "#000000",
+  branco: "#ffffff",
+  white: "#ffffff",
+  vermelho: "#ef4444",
+  red: "#ef4444",
+  azul: "#3b82f6",
+  blue: "#3b82f6",
+  "azul marinho": "#1e3a8a",
+  navy: "#1e3a8a",
+  verde: "#22c55e",
+  green: "#22c55e",
+  amarelo: "#eab308",
+  yellow: "#eab308",
+  cinza: "#6b7280",
+  gray: "#6b7280",
+  grey: "#6b7280",
+  "cinza mescla": "#9ca3af",
+  rosa: "#ec4899",
+  pink: "#ec4899",
+  roxo: "#a855f7",
+  purple: "#a855f7",
+  vinho: "#881337",
+  bordo: "#881337",
+  bordô: "#881337",
+  marrom: "#78350f",
+  brown: "#78350f",
+  caqui: "#c2b280",
+  khaki: "#c2b280",
+  bege: "#fef3c7",
+  beige: "#fef3c7",
+  laranja: "#f97316",
+  orange: "#f97316",
+};
+
+function getCorHex(cor?: string) {
+  if (!cor) return null;
+  const c = cor.trim().toLowerCase();
+  return COR_MAP[c] || (cor.startsWith("#") ? cor : null);
+}
+
 export function TabelaPedidosSistema({
   initialPedidos,
 }: {
@@ -432,7 +474,7 @@ export function TabelaPedidosSistema({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="w-88 max-h-80 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+              className="max-h-80 w-88 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
               onWheel={(e) => e.stopPropagation()}
             >
               <div className="mb-2 flex items-center gap-2 border border-neutral-800 bg-neutral-900 px-2 py-1">
@@ -520,7 +562,7 @@ export function TabelaPedidosSistema({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="w-48 max-h-60 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+              className="max-h-60 w-48 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
               onWheel={(e) => e.stopPropagation()}
             >
               <DropdownMenuItem
@@ -584,7 +626,7 @@ export function TabelaPedidosSistema({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="w-48 max-h-60 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+              className="max-h-60 w-48 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
               onWheel={(e) => e.stopPropagation()}
             >
               <DropdownMenuItem
@@ -614,7 +656,12 @@ export function TabelaPedidosSistema({
                         : "focus:bg-neutral-900 focus:text-white"
                     }`}
                   >
-                    {c}
+                    <span className="flex items-center gap-2">
+                      {c}
+                      {getCorHex(c) && (
+                        <span style={{ backgroundColor: getCorHex(c)! }} />
+                      )}
+                    </span>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
@@ -876,27 +923,27 @@ export function TabelaPedidosSistema({
 
                                 {openPagamentoDropdown === pedido.id && (
                                   <div className="absolute top-full left-0 z-50 mt-1 min-w-[110px] overflow-hidden rounded border border-neutral-700 bg-neutral-950 shadow-xl">
-                                    {(["Pago", "Não pago"] as StatusPagamento[]).map(
-                                      (opcao) => (
-                                        <button
-                                          key={opcao}
-                                          type="button"
-                                          onClick={() =>
-                                            handleAlterarStatusPagamento(
-                                              pedido.id,
-                                              opcao,
-                                            )
-                                          }
-                                          className={`w-full px-3 py-1.5 text-left font-mono text-[10px] font-bold uppercase transition-colors hover:bg-neutral-800 ${
-                                            pedido.statusPagamento === opcao
-                                              ? "text-white"
-                                              : "text-neutral-400"
-                                          }`}
-                                        >
-                                          {opcao}
-                                        </button>
-                                      ),
-                                    )}
+                                    {(
+                                      ["Pago", "Não pago"] as StatusPagamento[]
+                                    ).map((opcao) => (
+                                      <button
+                                        key={opcao}
+                                        type="button"
+                                        onClick={() =>
+                                          handleAlterarStatusPagamento(
+                                            pedido.id,
+                                            opcao,
+                                          )
+                                        }
+                                        className={`w-full px-3 py-1.5 text-left font-mono text-[10px] font-bold uppercase transition-colors hover:bg-neutral-800 ${
+                                          pedido.statusPagamento === opcao
+                                            ? "text-white"
+                                            : "text-neutral-400"
+                                        }`}
+                                      >
+                                        {opcao}
+                                      </button>
+                                    ))}
                                   </div>
                                 )}
                               </div>
@@ -1015,11 +1062,24 @@ export function TabelaPedidosSistema({
                                         type="checkbox"
                                         checked={!!item.separado}
                                         onChange={() => {}}
-                                        className="h-4 w-4 cursor-pointer rounded border-neutral-700 bg-neutral-950 text-white focus:ring-0"
+                                        className="h-4 w-4 cursor-pointer rounded border-2 border-neutral-700 bg-neutral-950 text-white"
                                       />
-                                      <span>
-                                        {item.quantidade}x {item.nome} —{" "}
-                                        {item.tamanho} ({item.cor})
+                                      <span className="inline-flex items-center gap-3">
+                                        <span>
+                                          {item.quantidade}x {item.nome} —{" "}
+                                          {item.tamanho} ({item.cor})
+                                        </span>
+                                        {getCorHex(item.cor) && (
+                                          <span
+                                            className="inline-block h-4 w-4 shrink-0 rounded-full border border-neutral-700 shadow-sm"
+                                            style={{
+                                              backgroundColor: getCorHex(
+                                                item.cor,
+                                              )!,
+                                            }}
+                                            title={item.cor}
+                                          />
+                                        )}
                                       </span>
                                     </div>
                                     <span className="font-bold tabular-nums">

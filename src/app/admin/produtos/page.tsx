@@ -53,7 +53,7 @@ export default async function AdminProductsPage({
     .from(category);
 
   return (
-    <div className="space-y-6 p-2 pt-4 text-white">
+    <div className="space-y-4 pt-4 text-white">
       {/* --- HEADER DA PÁGINA --- */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>

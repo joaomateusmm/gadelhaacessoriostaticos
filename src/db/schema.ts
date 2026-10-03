@@ -93,8 +93,6 @@ export const brand = pgTable("brand", {
   updatedAt: timestamp("updatedAt").notNull().defaultNow().$onUpdate(() => new Date()),
 });
 
-
-
 // --- TABELA DE PRODUTOS (ATUALIZADA E MESCLADA) ---
 
 export const product = pgTable("product", {
@@ -176,6 +174,19 @@ export const reviewRelations = relations(review, ({ one }) => ({
     fields: [review.userId],
     references: [user.id],
   }),
+}));
+
+// --- RELAÇÕES DE MARCA ---
+export const brandRelations = relations(brand, ({ many }) => ({
+  products: many(product),
+}));
+
+export const productRelations = relations(product, ({ one, many }) => ({
+  brandRef: one(brand, {
+    fields: [product.brandId],
+    references: [brand.id],
+  }),
+  reviews: many(review),
 }));
 
 // --- TABELA DE PEDIDOS (MANTIDA) ---
