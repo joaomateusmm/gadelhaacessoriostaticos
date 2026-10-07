@@ -466,17 +466,18 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
           </h1>
         </div>
 
-        <Button
-          type="submit"
-          className="h-12 w-auto cursor-pointer rounded-none border border-emerald-600 bg-emerald-950/60 px-12 font-mono text-xs font-bold text-emerald-400 uppercase duration-300 hover:bg-emerald-900/60 hover:text-emerald-300 disabled:opacity-50"
-          disabled={form.formState.isSubmitting || isUploading}
-        >
-          {form.formState.isSubmitting
-            ? "Atualizando..."
-            : isUploading
-              ? "Enviando imagens..."
-              : "Salvar Alterações"}
-        </Button>
+<Button
+            type="button"
+            onClick={form.handleSubmit(onSubmit)}
+            className="h-12 w-auto cursor-pointer rounded-none border border-emerald-600 bg-emerald-950/60 px-12 font-mono text-xs font-bold text-emerald-400 uppercase duration-300 hover:bg-emerald-900/60 hover:text-emerald-300 disabled:opacity-50"
+            disabled={form.formState.isSubmitting || isUploading}
+          >
+            {form.formState.isSubmitting
+              ? "Atualizando..."
+              : isUploading
+                ? "Enviando imagens..."
+                : "Salvar Alterações"}
+          </Button>
       </div>
 
       <Form {...form}>

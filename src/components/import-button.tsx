@@ -52,7 +52,7 @@ export function ImportProductsButton() {
       {/* Rótulo que age como o botão estilizado */}
       <label
         htmlFor="json-upload"
-        className={`flex cursor-pointer items-center gap-2 rounded-md bg-orange-600 px-4 py-2 font-medium text-white shadow-sm transition-colors hover:bg-orange-700 ${
+        className={`flex h-10 w-[250px] cursor-pointer items-center justify-center gap-2 rounded-none border border-white/10 bg-white/5 font-mono text-xs text-white uppercase hover:bg-white/10 ${
           isLoading ? "pointer-events-none opacity-70" : ""
         }`}
       >

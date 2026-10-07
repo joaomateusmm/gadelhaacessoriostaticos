@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { category, product } from "@/db/schema";
 
 import { AddProductButton } from "./components/add-button";
+import { ExportJsonProductsButton } from "./components/export-json-button";
 import { ProductsTable } from "./components/products-table";
 
 export default async function AdminProductsPage({
@@ -67,7 +68,8 @@ export default async function AdminProductsPage({
 
         <div className="flex items-center gap-3">
           <AddProductButton />
-          {/* <ImportProductsButton /> */}
+          <ImportProductsButton />
+          <ExportJsonProductsButton products={productsData} />
         </div>
       </div>
 
