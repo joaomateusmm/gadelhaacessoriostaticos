@@ -232,15 +232,14 @@ export default function RegistrarPedidoPage() {
   );
 
   const handleSalvar = async () => {
-    if (!nome.trim()) {
-      toast.error("Preencha o nome do agente/cliente.");
-      return;
-    }
-    if (itens.length === 0) {
-      toast.error("Adicione pelo menos 1 item ao pedido.");
-      return;
-    }
+if (!nome.trim()) {
+        toast.error("Preencha o nome do agente/cliente.");
+        return;
+      }
+      // Allow saving without items
 
+    
+    
     try {
       setSalvando(true);
       if (modoEdicao && pedidoIdEdicao) {
@@ -732,7 +731,7 @@ export default function RegistrarPedidoPage() {
 
               <Button
                 onClick={handleSalvar}
-                disabled={salvando || !nome || itens.length === 0}
+                disabled={salvando || !nome}
                 className="mt-4 h-12 w-full bg-[#D00000] font-bold text-white hover:bg-[#a00000]"
               >
                 {salvando ? "Salvando..." : "Salvar Pedido"}
