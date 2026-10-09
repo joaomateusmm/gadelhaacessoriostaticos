@@ -487,7 +487,7 @@ export function TabelaPedidosSistema({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="max-h-80 w-120 rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+              className="max-h-80 w-120 overflow-x-hidden rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
               onWheel={(e) => e.stopPropagation()}
             >
               <div className="mb-2 flex items-center gap-2 border border-neutral-800 bg-neutral-900 px-2 py-1">
@@ -502,7 +502,7 @@ export function TabelaPedidosSistema({
               </div>
 
               <div
-                className="max-h-60 space-y-1 overflow-y-auto"
+                className="max-h-60 space-y-1 overflow-x-hidden overflow-y-auto custom-scrollbar"
                 onWheel={(e) => e.stopPropagation()}
               >
                 <DropdownMenuItem
@@ -546,7 +546,7 @@ export function TabelaPedidosSistema({
                             : "focus:bg-neutral-900 focus:text-white"
                         }`}
                       >
-                        {prod}
+                        <span className="truncate">{prod}</span>
                       </DropdownMenuItem>
                     ))}
                 </DropdownMenuGroup>
@@ -575,7 +575,7 @@ export function TabelaPedidosSistema({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="max-h-60 w-48 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+              className="max-h-60 w-48 overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl custom-scrollbar"
               onWheel={(e) => e.stopPropagation()}
             >
               <DropdownMenuItem
@@ -639,7 +639,7 @@ export function TabelaPedidosSistema({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="max-h-60 w-48 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+              className="max-h-60 w-48 overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl custom-scrollbar"
               onWheel={(e) => e.stopPropagation()}
             >
               <DropdownMenuItem
@@ -675,6 +675,66 @@ export function TabelaPedidosSistema({
                         <span style={{ backgroundColor: getCorHex(c)! }} />
                       )}
                     </span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Filtro por Status do Pacote */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className={`flex cursor-pointer items-center gap-2 border px-3 py-1.5 font-mono text-xs uppercase transition-all focus:outline-none ${
+                  filtroPacote !== "todos"
+                    ? "border-emerald-600 bg-emerald-950/60 font-bold text-emerald-400"
+                    : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:border-neutral-600 hover:text-white"
+                }`}
+              >
+                <span className="whitespace-nowrap">
+                  {filtroPacote === "todos"
+                    ? "PACOTE: TODOS"
+                    : `PACOTE: ${filtroPacote.toUpperCase()}`}
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="max-h-60 w-48 overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl custom-scrollbar"
+              onWheel={(e) => e.stopPropagation()}
+            >
+              <DropdownMenuItem
+                onClick={() => setFiltroPacote("todos")}
+                className={`cursor-pointer font-mono text-xs uppercase ${
+                  filtroPacote === "todos"
+                    ? "bg-neutral-800 font-bold text-emerald-400"
+                    : "focus:bg-neutral-900 focus:text-white"
+                }`}
+              >
+                TODOS OS PACOTES
+              </DropdownMenuItem>
+
+              <DropdownMenuSeparator className="bg-neutral-800" />
+
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="px-2 py-1 font-mono text-[10px] font-bold text-neutral-500 uppercase">
+                  Status do Pacote
+                </DropdownMenuLabel>
+                {(
+                  ["Não criado", "Criado", "Lacrado"] as StatusPacote[]
+                ).map((status) => (
+                  <DropdownMenuItem
+                    key={status}
+                    onClick={() => setFiltroPacote(status)}
+                    className={`cursor-pointer font-mono text-xs uppercase ${
+                      filtroPacote === status
+                        ? "bg-neutral-800 font-bold text-emerald-400"
+                        : "focus:bg-neutral-900 focus:text-white"
+                    }`}
+                  >
+                    {status}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>

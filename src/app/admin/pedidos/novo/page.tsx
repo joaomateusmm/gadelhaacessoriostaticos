@@ -526,7 +526,7 @@ export default function RegistrarPedidoPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="start"
-                        className="max-h-80 w-[var(--radix-dropdown-menu-trigger-width)] min-w-[280px] overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+                        className="custom-scrollbar max-h-[30rem] w-[var(--radix-dropdown-menu-trigger-width)] min-w-[280px] overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
                         onWheel={(e) => e.stopPropagation()}
                       >
                         <div className="mb-2 flex items-center gap-2 border border-neutral-800 bg-neutral-900 px-2 py-1.5">
@@ -541,7 +541,7 @@ export default function RegistrarPedidoPage() {
                         </div>
 
                         <div
-                          className="max-h-60 space-y-2 overflow-y-auto"
+                          className="custom-scrollbar max-h-[25rem] p-4 space-y-2 overflow-x-hidden overflow-y-auto"
                           onWheel={(e) => e.stopPropagation()}
                         >
                           {produtosPorCategoria.length === 0 ? (
@@ -603,7 +603,7 @@ export default function RegistrarPedidoPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="start"
-                        className="max-h-60 w-[var(--radix-dropdown-menu-trigger-width)] min-w-[180px] overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+                        className="custom-scrollbar max-h-60 w-[var(--radix-dropdown-menu-trigger-width)] min-w-[180px] overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
                         onWheel={(e) => e.stopPropagation()}
                       >
                         <DropdownMenuGroup>
@@ -656,7 +656,7 @@ export default function RegistrarPedidoPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="start"
-                        className="max-h-64 w-[var(--radix-dropdown-menu-trigger-width)] min-w-[200px] overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+                        className="custom-scrollbar max-h-64 w-[var(--radix-dropdown-menu-trigger-width)] min-w-[200px] overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
                         onWheel={(e) => e.stopPropagation()}
                       >
                         {(produtoSelecionado?.cores || []).length > 5 && (
@@ -673,7 +673,7 @@ export default function RegistrarPedidoPage() {
                         )}
 
                         <div
-                          className="max-h-48 space-y-1 overflow-y-auto"
+                          className="custom-scrollbar max-h-48 space-y-1 overflow-x-hidden overflow-y-auto"
                           onWheel={(e) => e.stopPropagation()}
                         >
                           <DropdownMenuGroup>
