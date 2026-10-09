@@ -4,7 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
-import { clientes, itensPedido, pedidos, product } from "@/db/schema";
+import { category, clientes, itensPedido, pedidos, product } from "@/db/schema";
 
 export type Corporacao = "Polícia Militar" | "Polícia Penal";
 export type StatusPagamento = "Pago" | "Não pago";
@@ -142,17 +142,31 @@ function formatarDataBR(data?: string | null): string {
 
 export async function obterProdutosParaPedidoAction() {
   try {
-    const list = await db
-      .select()
-      .from(product)
-      .where(eq(product.status, "active"));
-    return list.map((p) => ({
-      id: p.id,
-      nome: p.name,
-      preco: p.price / 100, // Converte de centavos para R$ reais
-      tamanhos: p.tamanhos || ["M"],
-      cores: p.cores || ["Preto"],
-    }));
+    const [list, categorias] = await Promise.all([
+      db.select().from(product).where(eq(product.status, "active")),
+      db.select().from(category),
+    ]);
+
+    const catMap = new Map<string, string>();
+    categorias.forEach((c) => {
+      catMap.set(c.id, c.name);
+    });
+
+    return list.map((p) => {
+      let categoriaNome = "Outros";
+      if (p.categories && p.categories.length > 0) {
+        categoriaNome = catMap.get(p.categories[0]) || p.categories[0] || "Outros";
+      }
+
+      return {
+        id: p.id,
+        nome: p.name,
+        preco: p.price / 100, // Converte de centavos para R$ reais
+        tamanhos: p.tamanhos || ["M"],
+        cores: p.cores || ["Preto"],
+        categoria: categoriaNome,
+      };
+    });
   } catch (error) {
     console.error("Erro ao buscar produtos para pedido:", error);
     return [];

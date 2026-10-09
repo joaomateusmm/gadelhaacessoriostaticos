@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
+import { ChevronDown, ChevronLeft, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -21,6 +21,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 
 const SALDO_VOLUS_PP = 1003.39;
@@ -30,6 +39,48 @@ const formatBrl = (val: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
     val,
   );
+
+const COR_MAP: Record<string, string> = {
+  preto: "#000000",
+  black: "#000000",
+  branco: "#ffffff",
+  white: "#ffffff",
+  vermelho: "#ef4444",
+  red: "#ef4444",
+  azul: "#3b82f6",
+  blue: "#3b82f6",
+  "azul marinho": "#1e3a8a",
+  navy: "#1e3a8a",
+  verde: "#22c55e",
+  green: "#22c55e",
+  amarelo: "#eab308",
+  yellow: "#eab308",
+  cinza: "#6b7280",
+  gray: "#6b7280",
+  grey: "#6b7280",
+  "cinza mescla": "#9ca3af",
+  rosa: "#ec4899",
+  pink: "#ec4899",
+  roxo: "#a855f7",
+  purple: "#a855f7",
+  vinho: "#881337",
+  bordo: "#881337",
+  bordô: "#881337",
+  marrom: "#78350f",
+  brown: "#78350f",
+  caqui: "#c2b280",
+  khaki: "#c2b280",
+  bege: "#fef3c7",
+  beige: "#fef3c7",
+  laranja: "#f97316",
+  orange: "#f97316",
+};
+
+function getCorHex(cor?: string) {
+  if (!cor) return null;
+  const c = cor.trim().toLowerCase();
+  return COR_MAP[c] || (cor.startsWith("#") ? cor : null);
+}
 
 // Data e hora de agora (horário local do navegador): "DD/MM/AAAA" e "HH:mm"
 function agoraFormatado() {
@@ -55,6 +106,7 @@ export default function RegistrarPedidoPage() {
       preco: number;
       tamanhos: string[];
       cores: string[];
+      categoria?: string;
     }[]
   >([]);
   const [carregandoProdutos, setCarregandoProdutos] = useState(true);
@@ -90,6 +142,8 @@ export default function RegistrarPedidoPage() {
   const [tamanho, setTamanho] = useState("M");
   const [cor, setCor] = useState("Preto");
   const [quantidade, setQuantidade] = useState(1);
+  const [searchProduto, setSearchProduto] = useState("");
+  const [searchCor, setSearchCor] = useState("");
 
   const [salvando, setSalvando] = useState(false);
 
@@ -157,6 +211,22 @@ export default function RegistrarPedidoPage() {
 
   const produtoSelecionado =
     produtos.find((p) => p.id === produtoId) || produtos[0];
+
+  // Produtos filtrados pela busca e agrupados por categoria em ordem alfabética
+  const produtosFiltrados = produtos.filter((p) =>
+    p.nome.toLowerCase().includes(searchProduto.toLowerCase()),
+  );
+
+  const categoriasMapeadas = Array.from(
+    new Set(produtosFiltrados.map((p) => p.categoria || "Outros")),
+  ).sort((a, b) => a.localeCompare(b, "pt-BR"));
+
+  const produtosPorCategoria = categoriasMapeadas.map((cat) => ({
+    categoria: cat,
+    itens: produtosFiltrados
+      .filter((p) => (p.categoria || "Outros") === cat)
+      .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")),
+  }));
 
   const trocarProduto = (id: string) => {
     const p = produtos.find((x) => x.id === id);
@@ -232,14 +302,12 @@ export default function RegistrarPedidoPage() {
   );
 
   const handleSalvar = async () => {
-if (!nome.trim()) {
-        toast.error("Preencha o nome do agente/cliente.");
-        return;
-      }
-      // Allow saving without items
+    if (!nome.trim()) {
+      toast.error("Preencha o nome do agente/cliente.");
+      return;
+    }
+    // Allow saving without items
 
-    
-    
     try {
       setSalvando(true);
       if (modoEdicao && pedidoIdEdicao) {
@@ -436,48 +504,215 @@ if (!nome.trim()) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="text-xs text-neutral-400">Produto</label>
-                  <select
-                    value={produtoId}
-                    onChange={(e) => trocarProduto(e.target.value)}
-                    className="mt-1 h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"
-                  >
-                    {produtos.map((p) => (
-                      <option key={p.id} value={p.id} className="bg-[#111]">
-                        {p.nome} — {formatBrl(p.preco)}
-                      </option>
-                    ))}
-                  </select>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="col-span-1 sm:col-span-2">
+                  <label className="font-mono text-xs text-neutral-400 uppercase">
+                    Produto
+                  </label>
+                  <div className="mt-1">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          className="flex h-10 w-full cursor-pointer items-center justify-between rounded-md border border-white/10 bg-white/5 px-3 font-mono text-xs text-white uppercase transition-all hover:border-neutral-600 focus:outline-none"
+                        >
+                          <span className="truncate">
+                            {produtoSelecionado
+                              ? `${produtoSelecionado.nome} — ${formatBrl(produtoSelecionado.preco)}`
+                              : "Selecione um produto..."}
+                          </span>
+                          <ChevronDown className="h-4 w-4 shrink-0 text-neutral-400" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="start"
+                        className="max-h-80 w-[var(--radix-dropdown-menu-trigger-width)] min-w-[280px] overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+                        onWheel={(e) => e.stopPropagation()}
+                      >
+                        <div className="mb-2 flex items-center gap-2 border border-neutral-800 bg-neutral-900 px-2 py-1.5">
+                          <Search className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+                          <input
+                            type="text"
+                            placeholder="Pesquisar produto..."
+                            value={searchProduto}
+                            onChange={(e) => setSearchProduto(e.target.value)}
+                            className="w-full bg-transparent font-mono text-xs text-white placeholder:text-neutral-500 focus:outline-none"
+                          />
+                        </div>
+
+                        <div
+                          className="max-h-60 space-y-2 overflow-y-auto"
+                          onWheel={(e) => e.stopPropagation()}
+                        >
+                          {produtosPorCategoria.length === 0 ? (
+                            <div className="p-3 text-center font-mono text-xs text-neutral-500">
+                              Nenhum produto encontrado.
+                            </div>
+                          ) : (
+                            produtosPorCategoria.map((grupo, idx) => (
+                              <DropdownMenuGroup key={grupo.categoria}>
+                                {idx > 0 && (
+                                  <DropdownMenuSeparator className="my-1.5 bg-neutral-800" />
+                                )}
+                                <DropdownMenuLabel className="px-2 py-1 font-mono text-[10px] font-bold tracking-wider text-neutral-400 uppercase">
+                                  {grupo.categoria} ({grupo.itens.length})
+                                </DropdownMenuLabel>
+                                {grupo.itens.map((p) => (
+                                  <DropdownMenuItem
+                                    key={p.id}
+                                    onClick={() => trocarProduto(p.id)}
+                                    className={`my-0.5 flex cursor-pointer items-center justify-between font-mono text-xs uppercase ${
+                                      produtoId === p.id
+                                        ? "bg-neutral-800 font-bold text-emerald-400"
+                                        : "focus:bg-neutral-900 focus:text-white"
+                                    }`}
+                                  >
+                                    <span className="truncate">{p.nome}</span>
+                                    <span className="ml-2 shrink-0 font-bold text-neutral-400">
+                                      {formatBrl(p.preco)}
+                                    </span>
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuGroup>
+                            ))
+                          )}
+                        </div>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
+
                 <div>
-                  <label className="text-xs text-neutral-400">Tamanho</label>
-                  <select
-                    value={tamanho}
-                    onChange={(e) => setTamanho(e.target.value)}
-                    className="mt-1 h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"
-                  >
-                    {(produtoSelecionado?.tamanhos || ["M"]).map((t) => (
-                      <option key={t} value={t} className="bg-[#111]">
-                        {t}
-                      </option>
-                    ))}
-                  </select>
+                  <label className="font-mono text-xs text-neutral-400 uppercase">
+                    Tamanho
+                  </label>
+                  <div className="mt-1">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          className="flex h-10 w-full cursor-pointer items-center justify-between rounded-md border border-white/10 bg-white/5 px-3 font-mono text-xs text-white uppercase transition-all hover:border-neutral-600 focus:outline-none"
+                        >
+                          <span className="truncate">
+                            {tamanho
+                              ? `TAM: ${tamanho.toUpperCase()}`
+                              : "Selecione o tamanho"}
+                          </span>
+                          <ChevronDown className="h-4 w-4 shrink-0 text-neutral-400" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="start"
+                        className="max-h-60 w-[var(--radix-dropdown-menu-trigger-width)] min-w-[180px] overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+                        onWheel={(e) => e.stopPropagation()}
+                      >
+                        <DropdownMenuGroup>
+                          <DropdownMenuLabel className="px-2 py-1 font-mono text-[10px] font-bold text-neutral-500 uppercase">
+                            Tamanhos Disponíveis
+                          </DropdownMenuLabel>
+                          {(produtoSelecionado?.tamanhos || ["M"]).map((t) => (
+                            <DropdownMenuItem
+                              key={t}
+                              onClick={() => setTamanho(t)}
+                              className={`cursor-pointer font-mono text-xs uppercase ${
+                                tamanho === t
+                                  ? "bg-neutral-800 font-bold text-emerald-400"
+                                  : "focus:bg-neutral-900 focus:text-white"
+                              }`}
+                            >
+                              {t}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
+
                 <div>
-                  <label className="text-xs text-neutral-400">Cor</label>
-                  <select
-                    value={cor}
-                    onChange={(e) => setCor(e.target.value)}
-                    className="mt-1 h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"
-                  >
-                    {(produtoSelecionado?.cores || ["Preto"]).map((c) => (
-                      <option key={c} value={c} className="bg-[#111]">
-                        {c}
-                      </option>
-                    ))}
-                  </select>
+                  <label className="font-mono text-xs text-neutral-400 uppercase">
+                    Cor
+                  </label>
+                  <div className="mt-1">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          className="flex h-10 w-full cursor-pointer items-center justify-between rounded-md border border-white/10 bg-white/5 px-3 font-mono text-xs text-white uppercase transition-all hover:border-neutral-600 focus:outline-none"
+                        >
+                          <span className="flex items-center gap-2 truncate">
+                            {getCorHex(cor) && (
+                              <span
+                                className="h-2.5 w-2.5 rounded-full border border-neutral-600"
+                                style={{ backgroundColor: getCorHex(cor)! }}
+                              />
+                            )}
+                            {cor
+                              ? `COR: ${cor.toUpperCase()}`
+                              : "Selecione a cor"}
+                          </span>
+                          <ChevronDown className="h-4 w-4 shrink-0 text-neutral-400" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="start"
+                        className="max-h-64 w-[var(--radix-dropdown-menu-trigger-width)] min-w-[200px] overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+                        onWheel={(e) => e.stopPropagation()}
+                      >
+                        {(produtoSelecionado?.cores || []).length > 5 && (
+                          <div className="mb-2 flex items-center gap-2 border border-neutral-800 bg-neutral-900 px-2 py-1.5">
+                            <Search className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+                            <input
+                              type="text"
+                              placeholder="Pesquisar cor..."
+                              value={searchCor}
+                              onChange={(e) => setSearchCor(e.target.value)}
+                              className="w-full bg-transparent font-mono text-xs text-white placeholder:text-neutral-500 focus:outline-none"
+                            />
+                          </div>
+                        )}
+
+                        <div
+                          className="max-h-48 space-y-1 overflow-y-auto"
+                          onWheel={(e) => e.stopPropagation()}
+                        >
+                          <DropdownMenuGroup>
+                            <DropdownMenuLabel className="px-2 py-1 font-mono text-[10px] font-bold text-neutral-500 uppercase">
+                              Cores Disponíveis
+                            </DropdownMenuLabel>
+                            {(produtoSelecionado?.cores || ["Preto"])
+                              .filter((c) =>
+                                c
+                                  .toLowerCase()
+                                  .includes(searchCor.toLowerCase()),
+                              )
+                              .map((c) => (
+                                <DropdownMenuItem
+                                  key={c}
+                                  onClick={() => setCor(c)}
+                                  className={`cursor-pointer font-mono text-xs uppercase ${
+                                    cor === c
+                                      ? "bg-neutral-800 font-bold text-emerald-400"
+                                      : "focus:bg-neutral-900 focus:text-white"
+                                  }`}
+                                >
+                                  <span className="flex items-center gap-2">
+                                    <span
+                                      className="h-2.5 w-2.5 rounded-full border border-neutral-600"
+                                      style={{
+                                        backgroundColor:
+                                          getCorHex(c) || "#888888",
+                                      }}
+                                    />
+                                    {c}
+                                  </span>
+                                </DropdownMenuItem>
+                              ))}
+                          </DropdownMenuGroup>
+                        </div>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </div>
 

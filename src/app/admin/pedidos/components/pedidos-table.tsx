@@ -95,6 +95,9 @@ export function TabelaPedidosSistema({
   const [filtroStatus, setFiltroStatus] = useState<
     "todos" | "Devendo" | "Entregue"
   >("Devendo");
+  const [filtroPacote, setFiltroPacote] = useState<"todos" | StatusPacote>(
+    "todos",
+  );
   const [filtroPagamento, setFiltroPagamento] = useState<
     "todos" | "Pago" | "Não pago"
   >("Pago");
@@ -299,12 +302,22 @@ export function TabelaPedidosSistema({
   };
 
   const pedidosFiltrados = pedidos.filter((p) => {
+    const termoBusca = busca.toLowerCase();
+    const termoApenasDigitos = busca.replace(/\D/g, "");
+    const contatoApenasDigitos = (p.contato || "").replace(/\D/g, "");
+
     const matchBusca =
-      p.cliente.toLowerCase().includes(busca.toLowerCase()) ||
-      p.codigo.toLowerCase().includes(busca.toLowerCase()) ||
-      p.unidade.toLowerCase().includes(busca.toLowerCase());
+      p.cliente.toLowerCase().includes(termoBusca) ||
+      p.codigo.toLowerCase().includes(termoBusca) ||
+      p.unidade.toLowerCase().includes(termoBusca) ||
+      (p.contato && p.contato.toLowerCase().includes(termoBusca)) ||
+      (termoApenasDigitos.length > 0 &&
+        contatoApenasDigitos.includes(termoApenasDigitos));
     const matchStatus =
       filtroStatus === "todos" || p.statusPedido === filtroStatus;
+    const matchPacote =
+      filtroPacote === "todos" ||
+      (p.statusPacote || "Não criado") === filtroPacote;
     const matchProduto =
       filtroProduto === "todos" ||
       p.itens.some(
@@ -335,6 +348,7 @@ export function TabelaPedidosSistema({
     return (
       matchBusca &&
       matchStatus &&
+      matchPacote &&
       matchPagamento &&
       matchProduto &&
       matchTamanho &&
@@ -422,36 +436,35 @@ export function TabelaPedidosSistema({
 
   return (
     <div className="mx-auto pt-5 pb-10">
+      {/* Busca e Seleção Geral */}
+      <div className="flex w-full items-center gap-3 md:w-auto">
+        <label className="mb-6 flex cursor-pointer items-center gap-2 font-mono text-xs text-neutral-400 select-none hover:text-white">
+          <input
+            type="checkbox"
+            checked={todosSelecionados}
+            onChange={handleSelectAll}
+            className="h-5 w-5 cursor-pointer rounded border-neutral-700 bg-neutral-900 focus:ring-0"
+          />
+          <span className="text-sm text-white">Selecionar todos</span>
+        </label>
+
+        {selecionados.length > 0 && (
+          <button
+            onClick={handleExcluirSelecionados}
+            disabled={excluindoEmMassa}
+            className="flex cursor-pointer items-center space-x-1 border border-red-800 bg-red-900/40 px-3 py-2 font-mono text-xs font-bold text-red-400 uppercase transition-colors hover:bg-red-900/70 hover:text-white disabled:opacity-50"
+          >
+            <Trash2 className="mr-1 h-3.5 w-3.5" />
+            <span>
+              {excluindoEmMassa
+                ? "Excluindo..."
+                : `Excluir (${selecionados.length})`}
+            </span>
+          </button>
+        )}
+      </div>
       {/* Header da Página */}
       <div className="flex w-full flex-wrap items-center justify-between gap-4">
-        {/* Busca e Seleção Geral */}
-        <div className="flex w-full items-center gap-3 md:w-auto">
-          <label className="flex cursor-pointer items-center gap-2 font-mono text-xs text-neutral-400 select-none hover:text-white">
-            <input
-              type="checkbox"
-              checked={todosSelecionados}
-              onChange={handleSelectAll}
-              className="h-5 w-5 cursor-pointer rounded border-neutral-700 bg-neutral-900 focus:ring-0"
-            />
-            <span className="text-sm text-white">Selecionar todos</span>
-          </label>
-
-          {selecionados.length > 0 && (
-            <button
-              onClick={handleExcluirSelecionados}
-              disabled={excluindoEmMassa}
-              className="flex cursor-pointer items-center space-x-1 border border-red-800 bg-red-900/40 px-3 py-2 font-mono text-xs font-bold text-red-400 uppercase transition-colors hover:bg-red-900/70 hover:text-white disabled:opacity-50"
-            >
-              <Trash2 className="mr-1 h-3.5 w-3.5" />
-              <span>
-                {excluindoEmMassa
-                  ? "Excluindo..."
-                  : `Excluir (${selecionados.length})`}
-              </span>
-            </button>
-          )}
-        </div>
-
         <div className="flex items-center justify-center gap-2">
           {/* Filtro por Produto (Dropdown Shadcn com Busca) */}
           <DropdownMenu>
@@ -474,7 +487,7 @@ export function TabelaPedidosSistema({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="max-h-80 w-88 overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
+              className="max-h-80 w-120 rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
               onWheel={(e) => e.stopPropagation()}
             >
               <div className="mb-2 flex items-center gap-2 border border-neutral-800 bg-neutral-900 px-2 py-1">
@@ -760,7 +773,7 @@ export function TabelaPedidosSistema({
           type="text"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
-          placeholder="Buscar por cliente, código ou unidade..."
+          placeholder="Buscar por cliente, telefone, código ou unidade..."
           className="w-full border border-neutral-800 bg-neutral-900 px-3.5 py-3 pl-9 font-mono text-xs text-white focus:outline-none"
         />
         <Search className="absolute top-3 left-3 h-4 w-4 text-neutral-500" />
