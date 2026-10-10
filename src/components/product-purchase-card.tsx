@@ -9,7 +9,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { AddToWishlistButton } from "@/components/AddToWishlistButton";
@@ -39,6 +39,18 @@ const formatPrice = (value: number, currencyCode: string = "BRL") => {
   }).format(value / 100);
 };
 
+export interface ProductVariantData {
+  id: string;
+  sku?: string | null;
+  name?: string | null;
+  price?: number | null;
+  discountPrice?: number | null;
+  stock: number;
+  isStockUnlimited: boolean;
+  image?: string | null;
+  attributes: Record<string, string>;
+}
+
 interface ProductPurchaseCardProps {
   product: {
     id: string;
@@ -50,29 +62,121 @@ interface ProductPurchaseCardProps {
     isStockUnlimited: boolean | null;
     stock: number | null;
     paymentMethods: string[] | null;
-    currency?: string; // 1. Recebemos a moeda aqui
+    currency?: string;
+    cores?: string[] | null;
+    tamanhos?: string[] | null;
+    variants?: ProductVariantData[] | null;
   };
   categoryNames: string[];
+  /** Callback chamado quando a variante selecionada muda. Recebe a imagem da variante (ou null). */
+  onVariantChange?: (variantImage: string | null | undefined) => void;
+}
+
+function corParaCss(cor: string): string {
+  const mapa: Record<string, string> = {
+    preto: "#171717",
+    branco: "#f8fafc",
+    cinza: "#9ca3af",
+    caqui: "#c8a97e",
+    bege: "#e8d9b5",
+    areia: "#d4b896",
+    marrom: "#92400e",
+    vermelho: "#ef4444",
+    vinho: "#7f1d1d",
+    bordo: "#881337",
+    rosa: "#f472b6",
+    roxo: "#a855f7",
+    lilas: "#c084fc",
+    azul: "#3b82f6",
+    "azul marinho": "#1e3a5f",
+    "azul royal": "#1d4ed8",
+    verde: "#22c55e",
+    "verde militar": "#4b5320",
+    "verde musgo": "#556b2f",
+    laranja: "#f97316",
+    amarelo: "#facc15",
+    dourado: "#d4a017",
+    prata: "#cbd5e1",
+  };
+  return mapa[cor.toLowerCase().trim()] || "#d1d5db";
 }
 
 export function ProductPurchaseCard({
   product,
   categoryNames,
+  onVariantChange,
 }: ProductPurchaseCardProps) {
-  const initialPrice = product.discountPrice || product.price;
-  const productCurrency = product.currency || "GBP";
+  const variants = product.variants || [];
+  const hasVariants = variants.length > 0;
 
-  const [finalPrice] = useState(initialPrice);
+  // Extrair opções de Cores e Tamanhos únicas
+  const coresDisponiveis = hasVariants
+    ? Array.from(
+        new Set(
+          variants
+            .map((v) => v.attributes?.["Cor"] || v.attributes?.["cor"])
+            .filter(Boolean),
+        ),
+      )
+    : product.cores || [];
+
+  const tamanhosDisponiveis = hasVariants
+    ? Array.from(
+        new Set(
+          variants
+            .map((v) => v.attributes?.["Tamanho"] || v.attributes?.["tamanho"])
+            .filter(Boolean),
+        ),
+      )
+    : product.tamanhos || [];
+
+  const [selectedCor, setSelectedCor] = useState<string | null>(
+    coresDisponiveis[0] || null,
+  );
+  const [selectedTamanho, setSelectedTamanho] = useState<string | null>(
+    tamanhosDisponiveis[0] || null,
+  );
+
+  // Encontrar variante selecionada
+  const selectedVariant = hasVariants
+    ? variants.find((v) => {
+        const vCor = v.attributes?.["Cor"] || v.attributes?.["cor"];
+        const vTam = v.attributes?.["Tamanho"] || v.attributes?.["tamanho"];
+        const matchCor = selectedCor ? vCor === selectedCor : true;
+        const matchTam = selectedTamanho ? vTam === selectedTamanho : true;
+        return matchCor && matchTam;
+      }) || variants[0]
+    : null;
+
+  // Notifica a galeria toda vez que a variante selecionada muda
+  useEffect(() => {
+    if (onVariantChange) {
+      onVariantChange(selectedVariant?.image);
+    }
+  }, [selectedVariant, onVariantChange]);
+
+  // Preço e estoque da variante ou produto pai
+  const activePrice = selectedVariant?.price ?? product.price;
+  const activeDiscountPrice =
+    selectedVariant?.discountPrice ?? product.discountPrice;
+  const activeStock = selectedVariant
+    ? selectedVariant.stock
+    : (product.stock ?? 0);
+  const isStockUnlimitedSafe = selectedVariant
+    ? selectedVariant.isStockUnlimited
+    : (product.isStockUnlimited ?? false);
+
+  const productCurrency = product.currency || "GBP";
+  const currentDisplayPrice = activeDiscountPrice || activePrice;
+
   const [appliedCoupon] = useState<{
     code: string;
     discount: number;
   } | null>(null);
 
   const originalDiscountPercentage =
-    product.discountPrice && product.price
-      ? Math.round(
-          ((product.price - product.discountPrice) / product.price) * 100,
-        )
+    activeDiscountPrice && activePrice
+      ? Math.round(((activePrice - activeDiscountPrice) / activePrice) * 100)
       : 0;
 
   // Função auxiliar para conversão
@@ -82,8 +186,7 @@ export function ProductPurchaseCard({
     return formatPrice(converted, targetCurrency);
   };
 
-  const productImage = product.images?.[0] || "";
-  const isStockUnlimitedSafe = product.isStockUnlimited ?? false;
+  const selectedVariantImage = selectedVariant?.image || product.images?.[0] || "";
 
   return (
     <>
@@ -113,9 +216,9 @@ export function ProductPurchaseCard({
           {/* Preços */}
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              {(product.discountPrice || appliedCoupon) && (
+              {(activeDiscountPrice || appliedCoupon) && (
                 <span className="text-sm text-neutral-400 line-through decoration-neutral-300">
-                  {formatPrice(product.price, productCurrency)}
+                  {formatPrice(activePrice, productCurrency)}
                 </span>
               )}
 
@@ -133,14 +236,14 @@ export function ProductPurchaseCard({
 
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-bold text-neutral-900">
-                {finalPrice === 0
+                {currentDisplayPrice === 0
                   ? "Gratuito"
-                  : formatPrice(finalPrice, productCurrency)}
+                  : formatPrice(currentDisplayPrice, productCurrency)}
               </span>
             </div>
 
             {/* 2. ACCORDION DE MOEDAS (NOVO) */}
-            {finalPrice > 0 && (
+            {currentDisplayPrice > 0 && (
               <div className="mt-2">
                 <Accordion
                   type="single"
@@ -162,7 +265,7 @@ export function ProductPurchaseCard({
                                 {target}
                               </span>
                               <span className="font-mono text-neutral-900">
-                                {getConvertedPrice(finalPrice, target)}
+                                {getConvertedPrice(currentDisplayPrice, target)}
                               </span>
                             </div>
                           ))}
@@ -178,6 +281,71 @@ export function ProductPurchaseCard({
             )}
           </div>
 
+          {/* --- SELETOR DE CORES --- */}
+          {coresDisponiveis.length > 0 && (
+            <div className="space-y-2 border-t border-neutral-100 pt-4">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-neutral-800">
+                  Cor: <span className="font-normal text-neutral-600">{selectedCor || "Selecione"}</span>
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {coresDisponiveis.map((c) => {
+                  const isSelected = selectedCor === c;
+                  const hex = corParaCss(c);
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setSelectedCor(c)}
+                      className={`group relative flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                        isSelected
+                          ? "border-neutral-900 bg-neutral-900 text-white shadow-sm ring-2 ring-neutral-900/20"
+                          : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50"
+                      }`}
+                    >
+                      <span
+                        className="h-3 w-3 rounded-full border border-black/10 shrink-0"
+                        style={{ backgroundColor: hex }}
+                      />
+                      <span>{c}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* --- SELETOR DE TAMANHOS --- */}
+          {tamanhosDisponiveis.length > 0 && (
+            <div className="space-y-2 border-t border-neutral-100 pt-4">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-neutral-800">
+                  Tamanho: <span className="font-normal text-neutral-600">{selectedTamanho || "Selecione"}</span>
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {tamanhosDisponiveis.map((tam) => {
+                  const isSelected = selectedTamanho === tam;
+                  return (
+                    <button
+                      key={tam}
+                      type="button"
+                      onClick={() => setSelectedTamanho(tam)}
+                      className={`min-w-10 rounded-md border px-3 py-1.5 text-xs font-semibold uppercase transition-all ${
+                        isSelected
+                          ? "border-orange-600 bg-orange-600 text-white shadow-sm"
+                          : "border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50"
+                      }`}
+                    >
+                      {tam}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Entrega */}
           {product.deliveryMode === "email" && (
             <div className="flex items-center gap-2 rounded-md border border-orange-200 bg-orange-50 p-3 text-sm text-orange-700">
@@ -192,11 +360,18 @@ export function ProductPurchaseCard({
               product={{
                 id: product.id,
                 name: product.name,
-                price: initialPrice,
-                image: productImage,
-                stock: product.stock,
+                price: currentDisplayPrice,
+                image: selectedVariantImage,
+                stock: activeStock,
                 isStockUnlimited: isStockUnlimitedSafe,
               }}
+              variantId={selectedVariant?.id || null}
+              selectedAttributes={{
+                ...(selectedCor ? { Cor: selectedCor } : {}),
+                ...(selectedTamanho ? { Tamanho: selectedTamanho } : {}),
+              }}
+              selectedImage={selectedVariantImage}
+              customPrice={currentDisplayPrice}
               couponCode={appliedCoupon?.code}
             />
 
@@ -205,12 +380,19 @@ export function ProductPurchaseCard({
                 product={{
                   id: product.id,
                   name: product.name,
-                  price: product.price,
-                  discountPrice: product.discountPrice,
+                  price: activePrice,
+                  discountPrice: activeDiscountPrice,
                   images: product.images,
-                  stock: product.stock,
+                  stock: activeStock,
                   isStockUnlimited: isStockUnlimitedSafe,
                 }}
+                variantId={selectedVariant?.id || null}
+                selectedAttributes={{
+                  ...(selectedCor ? { Cor: selectedCor } : {}),
+                  ...(selectedTamanho ? { Tamanho: selectedTamanho } : {}),
+                }}
+                selectedImage={selectedVariantImage}
+                customPrice={currentDisplayPrice}
                 variant="outline"
                 size="lg"
                 className="text-md h-14 flex-1 border-neutral-300 bg-white font-bold text-neutral-700 shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:bg-neutral-50 hover:text-neutral-900"
@@ -220,8 +402,8 @@ export function ProductPurchaseCard({
                 product={{
                   id: product.id,
                   name: product.name,
-                  price: finalPrice,
-                  image: productImage,
+                  price: currentDisplayPrice,
+                  image: selectedVariantImage,
                   category: categoryNames[0] || "Geral",
                 }}
               />
@@ -240,13 +422,13 @@ export function ProductPurchaseCard({
                   <Check className="h-5 w-5 text-green-600" />
                   <span className="text-green-700">Estoque Ilimitado</span>
                 </>
-              ) : (product.stock || 0) > 0 ? (
+              ) : activeStock > 0 ? (
                 <>
                   <Lock className="h-5 w-5 text-neutral-400" />
                   <span>
                     Restam{" "}
                     <span className="font-bold text-neutral-700">
-                      {product.stock}
+                      {activeStock}
                     </span>{" "}
                     unidade(s).
                   </span>
@@ -255,7 +437,7 @@ export function ProductPurchaseCard({
                 <>
                   <XCircle className="h-5 w-5 text-red-600" />
                   <span className="font-bold text-red-700">
-                    Produto Esgotado
+                    {hasVariants ? "Variação Esgotada" : "Produto Esgotado"}
                   </span>
                 </>
               )}

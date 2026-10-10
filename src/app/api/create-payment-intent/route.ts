@@ -218,7 +218,9 @@ export async function POST(req: Request) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           items.map((item: any) => ({
             orderId: newOrder.id,
-            productId: item.id,
+            productId: item.productId || item.id,
+            variantId: item.variantId || null,
+            selectedAttributes: item.selectedAttributes || null,
             productName: item.name,
             price: item.price,
             quantity: item.quantity,

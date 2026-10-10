@@ -23,6 +23,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { VariantItem,VariantMatrix } from "@/components/admin/variant-matrix";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -210,6 +211,7 @@ export default function NewProductPage() {
 
   const [sizeCustom, setSizeCustom] = useState("");
   const [corCustom, setCorCustom] = useState("");
+  const [variantsList, setVariantsList] = useState<VariantItem[]>([]);
 
   useEffect(() => {
     async function loadData() {
@@ -359,6 +361,7 @@ export default function NewProductPage() {
         paymentLink: data.paymentLink === "" ? null : data.paymentLink,
         downloadUrl: data.downloadUrl === "" ? null : data.downloadUrl,
         paymentMethods: data.paymentMethods ?? [],
+        variants: variantsList,
 
         images: uploadedImages,
       } as unknown as ProductServerPayload;
@@ -745,6 +748,16 @@ export default function NewProductPage() {
                   />
                 </CardContent>
               </Card>
+
+              {/* MATRIZ DE VARIANTES E ESTOQUE INDEPENDENTE (NOVO) */}
+              <VariantMatrix
+                cores={form.watch("cores") || []}
+                tamanhos={form.watch("tamanhos") || []}
+                basePrice={form.watch("price") ? Math.round(form.watch("price") * 100) : 0}
+                baseStock={form.watch("stock") || 0}
+                variants={variantsList}
+                onChange={setVariantsList}
+              />
 
               {/* DIMENSÕES (OPCIONAL) */}
               {watchShippingType === "calculated" && (

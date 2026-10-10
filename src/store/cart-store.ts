@@ -3,7 +3,10 @@ import { persist } from "zustand/middleware";
 
 // Tipo do Produto no Carrinho
 export interface CartItem {
-  id: string;
+  id: string; // ID único do item no carrinho (se tiver variante, pode ser `${productId}-${variantId}`)
+  productId?: string; // ID real do produto no banco
+  variantId?: string; // ID da variante se selecionada
+  selectedAttributes?: Record<string, string>; // ex: { "Cor": "Preto", "Tamanho": "M" }
   name: string;
   price: number;
   image?: string;

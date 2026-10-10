@@ -44,6 +44,7 @@ interface OrderItem {
   quantity: number;
   price: number;
   description?: string | null;
+  selectedAttributes?: Record<string, string> | null;
   dimensions: {
     weight?: number | null;
     width?: number | null;
@@ -326,7 +327,15 @@ export function OrderCard({ order }: { order: OrderProps }) {
                     {item.description || "Descrição indisponível."}
                   </p>
                   <div className="mt-2 flex w-fit items-center gap-3 rounded bg-neutral-50 p-2 text-xs text-neutral-500">
-                    <span>Variação: Padrão</span>
+                    <span>
+                      Variação:{" "}
+                      {item.selectedAttributes &&
+                      Object.keys(item.selectedAttributes).length > 0
+                        ? Object.entries(item.selectedAttributes)
+                            .map(([k, v]) => `${k}: ${v}`)
+                            .join(" | ")
+                        : "Padrão"}
+                    </span>
                     <span className="h-3 w-px bg-neutral-300"></span>
                     <span>x{item.quantity}</span>
                     {item.dimensions.weight && item.dimensions.weight > 0 && (

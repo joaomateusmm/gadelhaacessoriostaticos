@@ -6,9 +6,21 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { db } from "@/db";
-import { category, product } from "@/db/schema";
+import { category, product, productVariant } from "@/db/schema";
 
-// --- SCHEMA ATUALIZADO COM OS NOVOS CAMPOS ---
+const variantSchema = z.object({
+  id: z.string().optional(),
+  sku: z.string().optional().nullable(),
+  name: z.string().optional().nullable(),
+  price: z.number().optional().nullable(),
+  discountPrice: z.number().optional().nullable(),
+  stock: z.number().default(0),
+  isStockUnlimited: z.boolean().default(false),
+  image: z.string().optional().nullable(),
+  attributes: z.record(z.string(), z.string()).default({}),
+});
+
+// --- SCHEMA ATUALIZADO COM OS NOVOS CAMPOS E VARIANTES ---
 const productSchema = z.object({
   id: z.string().max(50).optional(),
   name: z.string().min(2, "Nome muito curto"),
@@ -46,6 +58,9 @@ const productSchema = z.object({
   downloadUrl: z.string().optional().nullable(),
   deliveryMode: z.string().optional().nullable(),
   paymentMethods: z.array(z.string()).optional().default([]),
+
+  // --- VARIANTES DE PRODUTO (NOVO) ---
+  variants: z.array(variantSchema).optional().default([]),
 });
 
 export type ProductServerPayload = z.infer<typeof productSchema>;
@@ -140,8 +155,28 @@ export async function createProduct(rawData: ProductServerPayload) {
       paymentMethods: data.paymentMethods || [],
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await db.insert(product).values(insertValues as any);
+    const [insertedProduct] = await db
+      .insert(product)
+      .values(insertValues as typeof product.$inferInsert)
+      .returning({ id: product.id });
+
+    const createdProductId = insertedProduct?.id || data.id;
+
+    if (createdProductId && data.variants && data.variants.length > 0) {
+      await db.insert(productVariant).values(
+        data.variants.map((v) => ({
+          productId: createdProductId,
+          sku: v.sku || null,
+          name: v.name || null,
+          price: v.price != null ? Math.round(v.price) : null,
+          discountPrice: v.discountPrice != null ? Math.round(v.discountPrice) : null,
+          stock: v.stock ?? 0,
+          isStockUnlimited: v.isStockUnlimited ?? false,
+          image: v.image || null,
+          attributes: v.attributes || {},
+        })),
+      );
+    }
 
     revalidatePath("/admin/produtos");
     revalidatePath("/");
@@ -211,6 +246,27 @@ export async function updateProduct(id: string, rawData: ProductServerPayload) {
         updatedAt: new Date(),
       })
       .where(eq(product.id, id));
+
+    if (data.variants !== undefined) {
+      // Deleta variantes antigas e reinsere as atuais
+      await db.delete(productVariant).where(eq(productVariant.productId, id));
+
+      if (data.variants.length > 0) {
+        await db.insert(productVariant).values(
+          data.variants.map((v) => ({
+            productId: id,
+            sku: v.sku || null,
+            name: v.name || null,
+            price: v.price != null ? Math.round(v.price) : null,
+            discountPrice: v.discountPrice != null ? Math.round(v.discountPrice) : null,
+            stock: v.stock ?? 0,
+            isStockUnlimited: v.isStockUnlimited ?? false,
+            image: v.image || null,
+            attributes: v.attributes || {},
+          })),
+        );
+      }
+    }
 
     revalidatePath("/admin/produtos");
     revalidatePath("/");

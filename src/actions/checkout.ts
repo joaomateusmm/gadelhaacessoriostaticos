@@ -5,7 +5,7 @@ import { cookies, headers } from "next/headers";
 import { Resend } from "resend";
 
 import { db } from "@/db";
-import { coupon, order, orderItem, product } from "@/db/schema";
+import { coupon, order, orderItem, product, productVariant } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
 
@@ -25,6 +25,9 @@ export type ShippingAddressInput = {
 
 type CartItemInput = {
   id: string;
+  productId?: string;
+  variantId?: string;
+  selectedAttributes?: Record<string, string>;
   name: string;
   price: number;
   quantity: number;
@@ -357,7 +360,9 @@ export async function createCheckoutSession(
     await db.insert(orderItem).values(
       items.map((item) => ({
         orderId: newOrder.id,
-        productId: item.id,
+        productId: item.productId || item.id,
+        variantId: item.variantId || null,
+        selectedAttributes: item.selectedAttributes || null,
         productName: item.name,
         price: item.price,
         quantity: item.quantity,
@@ -477,7 +482,9 @@ export async function createOrderCOD(
   await db.insert(orderItem).values(
     items.map((item) => ({
       orderId: newOrder.id,
-      productId: item.id,
+      productId: item.productId || item.id,
+      variantId: item.variantId || null,
+      selectedAttributes: item.selectedAttributes || null,
       productName: item.name,
       price: item.price,
       quantity: item.quantity,
@@ -486,14 +493,29 @@ export async function createOrderCOD(
   );
 
   for (const item of items) {
+    const realProdId = item.productId || item.id;
+    if (item.variantId) {
+      await db
+        .update(productVariant)
+        .set({
+          stock: sql`GREATEST(0, ${productVariant.stock} - ${item.quantity})`,
+        })
+        .where(
+          and(
+            eq(productVariant.id, item.variantId),
+            eq(productVariant.isStockUnlimited, false),
+          ),
+        );
+    }
+
     await db
       .update(product)
       .set({ sales: sql`${product.sales} + ${item.quantity}` })
-      .where(eq(product.id, item.id));
+      .where(eq(product.id, realProdId));
     await db
       .update(product)
-      .set({ stock: sql`${product.stock} - ${item.quantity}` })
-      .where(and(eq(product.id, item.id), eq(product.isStockUnlimited, false)));
+      .set({ stock: sql`GREATEST(0, ${product.stock} - ${item.quantity})` })
+      .where(and(eq(product.id, realProdId), eq(product.isStockUnlimited, false)));
   }
 
   if (activeCouponId) {
@@ -698,7 +720,9 @@ export async function createFreeOrder(
   await db.insert(orderItem).values(
     items.map((item) => ({
       orderId: newOrder.id,
-      productId: item.id,
+      productId: item.productId || item.id,
+      variantId: item.variantId || null,
+      selectedAttributes: item.selectedAttributes || null,
       productName: item.name,
       price: 0,
       quantity: item.quantity,
@@ -707,14 +731,29 @@ export async function createFreeOrder(
   );
 
   for (const item of items) {
+    const realProdId = item.productId || item.id;
+    if (item.variantId) {
+      await db
+        .update(productVariant)
+        .set({
+          stock: sql`GREATEST(0, ${productVariant.stock} - ${item.quantity})`,
+        })
+        .where(
+          and(
+            eq(productVariant.id, item.variantId),
+            eq(productVariant.isStockUnlimited, false),
+          ),
+        );
+    }
+
     await db
       .update(product)
       .set({ sales: sql`${product.sales} + ${item.quantity}` })
-      .where(eq(product.id, item.id));
+      .where(eq(product.id, realProdId));
     await db
       .update(product)
-      .set({ stock: sql`${product.stock} - ${item.quantity}` })
-      .where(and(eq(product.id, item.id), eq(product.isStockUnlimited, false)));
+      .set({ stock: sql`GREATEST(0, ${product.stock} - ${item.quantity})` })
+      .where(and(eq(product.id, realProdId), eq(product.isStockUnlimited, false)));
   }
 
   if (activeCouponId) {

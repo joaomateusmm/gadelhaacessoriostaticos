@@ -19,6 +19,10 @@ interface BuyNowButtonProps {
     stock: number | null;
     isStockUnlimited: boolean;
   };
+  variantId?: string | null;
+  selectedAttributes?: Record<string, string>;
+  selectedImage?: string | null;
+  customPrice?: number | null;
   user?: {
     name: string | null;
     email: string | null;
@@ -28,6 +32,10 @@ interface BuyNowButtonProps {
 
 export function BuyNowButton({
   product,
+  variantId,
+  selectedAttributes,
+  selectedImage,
+  customPrice,
   user: initialUser,
   couponCode,
 }: BuyNowButtonProps) {
@@ -45,8 +53,18 @@ export function BuyNowButton({
     coupon: storeCoupon,
   } = useCartStore();
 
-  const isFree = product.price === 0;
+  const finalPrice = customPrice ?? product.price;
+  const isFree = finalPrice === 0;
   const isOutOfStock = !product.isStockUnlimited && (product.stock ?? 0) <= 0;
+
+  const attributeSuffix = selectedAttributes
+    ? Object.values(selectedAttributes).filter(Boolean).join(" / ")
+    : "";
+  const displayName = attributeSuffix
+    ? `${product.name} (${attributeSuffix})`
+    : product.name;
+  const cartItemId = variantId ? `${product.id}-${variantId}` : product.id;
+  const chosenImage = selectedImage || product.image;
 
   const handleBuyNow = async () => {
     if (isOutOfStock) return;
@@ -62,11 +80,14 @@ export function BuyNowButton({
         // 2. Limpa e adiciona
         clearCart();
         addItem({
-          id: product.id,
-          name: product.name,
-          price: product.price,
+          id: cartItemId,
+          productId: product.id,
+          variantId: variantId || undefined,
+          selectedAttributes: selectedAttributes || undefined,
+          name: displayName,
+          price: finalPrice,
           quantity: 1,
-          image: product.image,
+          image: chosenImage,
         });
 
         // 3. Restaura cupom

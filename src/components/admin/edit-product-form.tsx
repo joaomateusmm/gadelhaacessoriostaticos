@@ -6,17 +6,12 @@ import {
   Check,
   ChevronLeft,
   ChevronsUpDown,
-  Hammer, // Novo
   ImageIcon,
-  Info, // Novo
-  Link as LinkIcon, // Novo
+  Link as LinkIcon,
   Package,
-  Palette, // Novo
+  Palette,
   Ruler,
-  ShieldCheck, // Novo
   Star,
-  Tag, // Novo
-  Truck,
   X,
 } from "lucide-react";
 import Image from "next/image";
@@ -30,6 +25,7 @@ import { z } from "zod";
 import { updateProduct } from "@/actions/create-product";
 import { getAllCategories } from "@/actions/get-all-categories";
 import { getBrands } from "@/app/admin/produtos/new/get-brands";
+import { VariantItem, VariantMatrix } from "@/components/admin/variant-matrix";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -62,7 +58,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -208,6 +203,7 @@ interface ProductData {
   brandId?: string | null;
   deliveryMode?: string | null;
   paymentMethods?: string[] | null;
+  variants?: VariantItem[] | null;
 }
 
 interface EditProductFormProps {
@@ -256,6 +252,9 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
 
   const [sizeCustom, setSizeCustom] = useState("");
   const [corCustom, setCorCustom] = useState("");
+  const [variantsList, setVariantsList] = useState<VariantItem[]>(
+    initialData.variants || [],
+  );
 
   useEffect(() => {
     async function loadData() {
@@ -362,8 +361,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
   const watchIsStockUnlimited = form.watch("isStockUnlimited");
   const watchCurrency = form.watch("currency");
   const watchShippingType = form.watch("shippingType");
-  const watchHasWarranty = form.watch("hasWarranty"); // Observar garantia
-  const watchDeliveryMode = form.watch("deliveryMode");
 
   const handlePriceChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -426,6 +423,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
         paymentLink: data.paymentLink === "" ? null : data.paymentLink,
         downloadUrl: data.downloadUrl === "" ? null : data.downloadUrl,
         paymentMethods: data.paymentMethods ?? [],
+        variants: variantsList,
       };
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -466,18 +464,18 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
           </h1>
         </div>
 
-<Button
-            type="button"
-            onClick={form.handleSubmit(onSubmit)}
-            className="h-12 w-auto cursor-pointer rounded-none border border-emerald-600 bg-emerald-950/60 px-12 font-mono text-xs font-bold text-emerald-400 uppercase duration-300 hover:bg-emerald-900/60 hover:text-emerald-300 disabled:opacity-50"
-            disabled={form.formState.isSubmitting || isUploading}
-          >
-            {form.formState.isSubmitting
-              ? "Atualizando..."
-              : isUploading
-                ? "Enviando imagens..."
-                : "Salvar Alterações"}
-          </Button>
+        <Button
+          type="button"
+          onClick={form.handleSubmit(onSubmit)}
+          className="h-12 w-auto cursor-pointer rounded-none border border-emerald-600 bg-emerald-950/60 px-12 font-mono text-xs font-bold text-emerald-400 uppercase duration-300 hover:bg-emerald-900/60 hover:text-emerald-300 disabled:opacity-50"
+          disabled={form.formState.isSubmitting || isUploading}
+        >
+          {form.formState.isSubmitting
+            ? "Atualizando..."
+            : isUploading
+              ? "Enviando imagens..."
+              : "Salvar Alterações"}
+        </Button>
       </div>
 
       <Form {...form}>
@@ -803,6 +801,18 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                 />
               </CardContent>
             </Card>
+
+            {/* MATRIZ DE VARIANTES E ESTOQUE INDEPENDENTE (NOVO) */}
+            <VariantMatrix
+              cores={form.watch("cores") || []}
+              tamanhos={form.watch("tamanhos") || []}
+              basePrice={
+                form.watch("price") ? Math.round(form.watch("price") * 100) : 0
+              }
+              baseStock={form.watch("stock") || 0}
+              variants={variantsList}
+              onChange={setVariantsList}
+            />
 
             {/* Informações Logísticas (OPCIONAL) */}
             {watchShippingType === "calculated" && (

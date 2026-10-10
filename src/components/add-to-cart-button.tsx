@@ -14,10 +14,13 @@ interface AddToCartButtonProps {
     price: number;
     discountPrice?: number | null;
     images: string[] | null;
-    // --- NOVAS PROPS DE ESTOQUE ---
     stock: number | null;
     isStockUnlimited: boolean;
   };
+  variantId?: string | null;
+  selectedAttributes?: Record<string, string>;
+  selectedImage?: string | null;
+  customPrice?: number | null;
   className?: string;
   variant?: "default" | "outline" | "secondary" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
@@ -26,6 +29,10 @@ interface AddToCartButtonProps {
 
 export function AddToCartButton({
   product,
+  variantId,
+  selectedAttributes,
+  selectedImage,
+  customPrice,
   className,
   variant = "default",
   size = "default",
@@ -42,13 +49,24 @@ export function AddToCartButton({
 
     if (isOutOfStock) return; // Bloqueio extra de segurança
 
-    const finalPrice = product.discountPrice ?? product.price;
+    const finalPrice = customPrice ?? product.discountPrice ?? product.price;
+
+    const cartItemId = variantId ? `${product.id}-${variantId}` : product.id;
+    const attributeSuffix = selectedAttributes
+      ? Object.values(selectedAttributes).filter(Boolean).join(" / ")
+      : "";
+    const displayName = attributeSuffix
+      ? `${product.name} (${attributeSuffix})`
+      : product.name;
 
     addItem({
-      id: product.id,
-      name: product.name,
+      id: cartItemId,
+      productId: product.id,
+      variantId: variantId || undefined,
+      selectedAttributes: selectedAttributes || undefined,
+      name: displayName,
       price: finalPrice,
-      image: product.images?.[0] || "",
+      image: selectedImage || product.images?.[0] || "",
       quantity: 1,
     });
 

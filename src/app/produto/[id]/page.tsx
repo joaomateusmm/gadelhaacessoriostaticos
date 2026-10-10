@@ -20,14 +20,7 @@ import { notFound } from "next/navigation";
 import { DeleteReviewButton } from "@/components/delete-review-button";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { ProductPurchaseCard } from "@/components/product-purchase-card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import { ProductPageClient } from "@/components/product-page-client";
 import { db } from "@/db";
 import { category, product, review, user as userTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
@@ -58,6 +51,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const productData = await db.query.product.findFirst({
     where: eq(product.id, id),
+    with: {
+      variants: true,
+    },
   });
 
   if (!productData) {
@@ -126,54 +122,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <div className="min-h-screen bg-[#f9f9f9]">
       <Header />
       <div className="mx-auto max-w-7xl px-4 pt-38 pb-12 md:px-8">
-        <div className="grid gap-8 lg:grid-cols-12">
-          {/* --- COLUNA ESQUERDA (Galeria + Descrição) --- */}
+        {/* --- GRADE PRINCIPAL: Galeria (reativa) + Card de Compra --- */}
+        <ProductPageClient
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          product={productData as any}
+          categoryNames={categoryNames}
+          defaultImages={productImages}
+        />
+
+        {/* --- LINHA INFERIOR: Descrição + Info úteis --- */}
+        <div className="mt-8 grid gap-8 lg:grid-cols-12">
+          {/* Coluna Esquerda: Descrição e Especificações */}
           <div className="space-y-8 lg:col-span-7">
-            {/* CARROSSEL DE IMAGENS */}
-            <div className="w-full rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-              <Carousel className="w-full">
-                <CarouselContent>
-                  {productImages.map((imgSrc, index) => (
-                    <CarouselItem key={index}>
-                      <div className="relative flex aspect-4/3 w-full items-center justify-center overflow-hidden rounded-lg bg-neutral-50 p-4">
-                        <Image
-                          src={imgSrc}
-                          alt={`${productData.name} - Imagem ${index + 1}`}
-                          fill
-                          className="object-contain object-center"
-                          priority={index === 0}
-                        />
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                {productImages.length > 1 && (
-                  <>
-                    <CarouselPrevious className="left-4 border-neutral-200 bg-white/80 text-neutral-900 hover:bg-white" />
-                    <CarouselNext className="right-4 border-neutral-200 bg-white/80 text-neutral-900 hover:bg-white" />
-                  </>
-                )}
-              </Carousel>
-
-              {productImages.length > 1 && (
-                <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
-                  {productImages.map((imgSrc, idx) => (
-                    <div
-                      key={idx}
-                      className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md border border-neutral-200 bg-neutral-50"
-                    >
-                      <Image
-                        src={imgSrc}
-                        alt="thumb"
-                        fill
-                        className="object-cover opacity-70 transition-opacity hover:opacity-100"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
             {/* DESCRIÇÃO & ESPECIFICAÇÕES */}
             <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm md:p-8">
               {/* DESCRIÇÃO */}
@@ -237,22 +197,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
           </div>
 
-          {/* --- COLUNA DIREITA (Sidebar de Compra + Info Útil) --- */}
+          {/* Coluna Direita: Informações úteis */}
           <div className="space-y-6 lg:col-span-5">
-            <ProductPurchaseCard
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              product={productData as any}
-              categoryNames={categoryNames}
-            />
-
-            {/* --- NOVO CARD: INFORMAÇÕES ÚTEIS --- */}
+            {/* --- CARD: INFORMAÇÕES ÚTEIS --- */}
             <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
               <h4 className="mb-4 flex items-center gap-2 text-base font-bold text-neutral-900">
                 <Info className="h-4 w-4 text-orange-600" />
                 Detalhes do Produto
               </h4>
               <div className="space-y-3">
-                {/* ID do Produto (NOVO) */}
+                {/* ID do Produto */}
                 <div className="flex items-center justify-between border-b border-neutral-100 pb-2 text-sm last:border-0 last:pb-0">
                   <div className="flex items-center gap-2 text-neutral-600">
                     <Hash className="h-4 w-4 text-neutral-400" />

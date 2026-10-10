@@ -187,6 +187,7 @@ export const productRelations = relations(product, ({ one, many }) => ({
     references: [brand.id],
   }),
   reviews: many(review),
+  variants: many(productVariant),
 }));
 
 // --- TABELA DE PEDIDOS (MANTIDA) ---
@@ -224,6 +225,39 @@ export const order = pgTable("order", {
     .$onUpdate(() => new Date()),
 });
 
+// --- TABELA DE VARIANTES DE PRODUTOS (NOVA: SUPORTE A CORES, TAMANHOS E ESTOQUE DEDICADO) ---
+export const productVariant = pgTable("product_variant", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  productId: text("productId")
+    .notNull()
+    .references(() => product.id, { onDelete: "cascade" }),
+  sku: text("sku"),
+  name: text("name"), // ex: "Preto / M"
+  price: integer("price"), // Em centavos (opcional - se nulo, herda do produto)
+  discountPrice: integer("discountPrice"), // Em centavos (opcional)
+  stock: integer("stock").notNull().default(0),
+  isStockUnlimited: boolean("isStockUnlimited").notNull().default(false),
+  image: text("image"), // Imagem específica desta variação/cor
+  attributes: jsonb("attributes")
+    .$type<Record<string, string>>()
+    .notNull()
+    .default({}), // ex: { "Cor": "Preto", "Tamanho": "M" }
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const productVariantRelations = relations(productVariant, ({ one }) => ({
+  product: one(product, {
+    fields: [productVariant.productId],
+    references: [product.id],
+  }),
+}));
+
 export const orderItem = pgTable("orderItem", {
   id: text("id")
     .primaryKey()
@@ -234,6 +268,10 @@ export const orderItem = pgTable("orderItem", {
   productId: text("productId")
     .notNull()
     .references(() => product.id),
+  variantId: text("variantId").references(() => productVariant.id, {
+    onDelete: "set null",
+  }),
+  selectedAttributes: jsonb("selectedAttributes").$type<Record<string, string>>(),
   productName: text("productName").notNull(),
   price: integer("price").notNull(),
   quantity: integer("quantity").notNull(),
@@ -350,6 +388,10 @@ export const orderItemRelations = relations(orderItem, ({ one }) => ({
   product: one(product, {
     fields: [orderItem.productId],
     references: [product.id],
+  }),
+  variant: one(productVariant, {
+    fields: [orderItem.variantId],
+    references: [productVariant.id],
   }),
 }));
 
