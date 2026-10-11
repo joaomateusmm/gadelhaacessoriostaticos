@@ -239,7 +239,7 @@ export const productVariant = pgTable("product_variant", {
   discountPrice: integer("discountPrice"), // Em centavos (opcional)
   stock: integer("stock").notNull().default(0),
   isStockUnlimited: boolean("isStockUnlimited").notNull().default(false),
-  image: text("image"), // Imagem específica desta variação/cor
+  images: text("images").array(),
   attributes: jsonb("attributes")
     .$type<Record<string, string>>()
     .notNull()

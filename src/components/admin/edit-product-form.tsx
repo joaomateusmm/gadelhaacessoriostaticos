@@ -346,12 +346,16 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
     mode: "onChange",
   });
 
-  const handleSetMainImage = (indexToPromote: number) => {
-    if (indexToPromote === 0) return;
+  const handleSetMainImage = (imageUrl: string) => {
+    const indexToPromote = uploadedImages.findIndex((img) => img === imageUrl);
     const newImages = [...uploadedImages];
-    const imageToMove = newImages[indexToPromote];
-    newImages.splice(indexToPromote, 1);
-    newImages.unshift(imageToMove);
+    if (indexToPromote > 0) {
+      const imageToMove = newImages.splice(indexToPromote, 1)[0];
+      newImages.unshift(imageToMove);
+    } else if (indexToPromote === -1) {
+      // Image not in the list, add it as cover
+      newImages.unshift(imageUrl);
+    }
     setUploadedImages(newImages);
     toast.success("Imagem de capa atualizada!");
   };
@@ -812,6 +816,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
               baseStock={form.watch("stock") || 0}
               variants={variantsList}
               onChange={setVariantsList}
+              onSetCover={handleSetMainImage}
             />
 
             {/* Informações Logísticas (OPCIONAL) */}
@@ -1146,7 +1151,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                               <button
                                 type="button"
-                                onClick={() => handleSetMainImage(index)}
+                                onClick={() => handleSetMainImage(url)}
                                 className="flex cursor-pointer items-center gap-2 border border-neutral-700 bg-neutral-950 px-4 py-2 font-mono text-xs font-bold text-neutral-200 uppercase duration-300 hover:bg-neutral-800 hover:text-white"
                               >
                                 <Star className="h-4 w-4" />

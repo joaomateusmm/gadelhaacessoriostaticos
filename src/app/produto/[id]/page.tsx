@@ -1,8 +1,10 @@
 import { desc, eq, inArray } from "drizzle-orm";
 import {
+  FileText,
   Hammer,
   Hash,
   Info,
+  ListChecks,
   MessageSquare,
   Ruler,
   ShieldCheck,
@@ -16,6 +18,7 @@ import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { DeleteReviewButton } from "@/components/delete-review-button";
 import { Footer } from "@/components/Footer";
@@ -40,6 +43,70 @@ type ReviewModel = {
     image: string | null;
   } | null;
 };
+
+// Superfície padrão dos blocos da página (dark: borda em vez de sombra)
+const surface = "rounded-2xl border border-neutral-800 bg-neutral-900";
+
+function SectionTitle({
+  icon,
+  children,
+}: {
+  icon: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <h3 className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-neutral-50">
+      <span className="text-orange-500">{icon}</span>
+      {children}
+    </h3>
+  );
+}
+
+function SpecItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string | null;
+}) {
+  return (
+    <div className="flex items-start gap-3 rounded-xl border border-neutral-800 bg-neutral-950/60 p-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-neutral-800 text-orange-500">
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-neutral-100">{label}</p>
+        <p
+          className={`text-sm ${value ? "text-neutral-400" : "text-neutral-500"}`}
+        >
+          {value ?? "Não informado"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({
+  icon,
+  label,
+  children,
+}: {
+  icon: ReactNode;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-3 text-sm first:pt-0 last:pb-0">
+      <div className="flex shrink-0 items-center gap-2 text-neutral-400">
+        <span className="text-neutral-500">{icon}</span>
+        <span>{label}</span>
+      </div>
+      <div className="text-right">{children}</div>
+    </div>
+  );
+}
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;
@@ -109,292 +176,254 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const productImages =
     productData.images && productData.images.length > 0
       ? productData.images
-      : ["https://placehold.co/600x600/f3f4f6/9ca3af.png?text=Sem+Imagem"];
+      : ["https://placehold.co/600x600/171717/525252.png?text=Sem+Imagem"];
 
-  // Tradução da condição
+  const defaultImages =
+    productData.variants && productData.variants.length > 0
+      ? []
+      : productImages;
+
   const conditionMap: Record<string, string> = {
     new: "Estado de novo",
     used: "Usado / Ótima condição",
     refurbished: "Recondicionado",
   };
 
+  const dimensions =
+    (productData.width ?? 0) > 0 &&
+    (productData.height ?? 0) > 0 &&
+    (productData.length ?? 0) > 0
+      ? `${productData.width}cm x ${productData.height}cm x ${productData.length}cm`
+      : null;
+
+  const weight =
+    (productData.weight ?? 0) > 0 ? `${productData.weight} kg` : null;
+
   return (
-    <div className="min-h-screen bg-[#f9f9f9]">
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 [color-scheme:dark]">
       <Header />
-      <div className="mx-auto max-w-7xl px-4 pt-38 pb-12 md:px-8">
-        {/* --- GRADE PRINCIPAL: Galeria (reativa) + Card de Compra --- */}
+
+      <main className="mx-auto max-w-7xl px-4 pt-38 pb-16 md:px-8">
         <ProductPageClient
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           product={productData as any}
           categoryNames={categoryNames}
-          defaultImages={productImages}
+          defaultImages={defaultImages}
         />
 
-        {/* --- LINHA INFERIOR: Descrição + Info úteis --- */}
+        {/* --- LINHA INFERIOR: Descrição + Informações úteis --- */}
         <div className="mt-8 grid gap-8 lg:grid-cols-12">
-          {/* Coluna Esquerda: Descrição e Especificações */}
-          <div className="space-y-8 lg:col-span-7">
-            {/* DESCRIÇÃO & ESPECIFICAÇÕES */}
-            <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm md:p-8">
-              {/* DESCRIÇÃO */}
-              <div className="mb-8">
-                <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-neutral-900">
-                  <span className="h-6 w-1 rounded-full bg-orange-600"></span>
+          {/* Coluna esquerda: Descrição e Especificações */}
+          <section className={`${surface} p-6 md:p-8 lg:col-span-7`}>
+            <div className="mb-8">
+              <div className="mb-4">
+                <SectionTitle icon={<FileText className="h-5 w-5" />}>
                   Descrição
-                </h3>
-                <div className="prose prose-neutral max-w-none text-neutral-600">
-                  <p className="leading-relaxed whitespace-pre-line">
-                    {productData.description || "Sem descrição disponível."}
-                  </p>
-                </div>
+                </SectionTitle>
+              </div>
+              <p className="max-w-prose leading-relaxed whitespace-pre-line text-neutral-400">
+                {productData.description || "Sem descrição disponível."}
+              </p>
+            </div>
+
+            <div className="border-t border-neutral-800 pt-8">
+              <div className="mb-6">
+                <SectionTitle icon={<ListChecks className="h-5 w-5" />}>
+                  Especificações técnicas
+                </SectionTitle>
               </div>
 
-              {/* ESPECIFICAÇÕES TÉCNICAS */}
-              <div className="border-t border-neutral-100 pt-8">
-                <h3 className="mb-6 flex items-center gap-2 text-xl font-bold text-neutral-900">
-                  <span className="h-6 w-1 rounded-full bg-orange-600"></span>
-                  Especificações Técnicas
-                </h3>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {/* Item: Dimensões */}
-                  <div className="flex items-start gap-3 rounded-lg border border-neutral-100 bg-neutral-50 p-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-orange-600 shadow-sm">
-                      <Ruler className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-neutral-800">
-                        Dimensões (Lar. x Alt. x Com.)
-                      </p>
-                      <p className="text-sm text-neutral-500">
-                        {(productData.width ?? 0) > 0 &&
-                        (productData.height ?? 0) > 0 &&
-                        (productData.length ?? 0) > 0
-                          ? `${productData.width}cm x ${productData.height}cm x ${productData.length}cm`
-                          : "Não informado"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Item: Peso */}
-                  <div className="flex items-start gap-3 rounded-lg border border-neutral-100 bg-neutral-50 p-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-orange-600 shadow-sm">
-                      <Weight className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-neutral-800">
-                        Peso
-                      </p>
-                      <p className="text-sm text-neutral-500">
-                        {(productData.weight ?? 0) > 0
-                          ? `${productData.weight} kg`
-                          : "Não informado"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <SpecItem
+                  icon={<Ruler className="h-5 w-5" />}
+                  label="Dimensões (Lar. x Alt. x Com.)"
+                  value={dimensions}
+                />
+                <SpecItem
+                  icon={<Weight className="h-5 w-5" />}
+                  label="Peso"
+                  value={weight}
+                />
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Coluna Direita: Informações úteis */}
-          <div className="space-y-6 lg:col-span-5">
-            {/* --- CARD: INFORMAÇÕES ÚTEIS --- */}
-            <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
-              <h4 className="mb-4 flex items-center gap-2 text-base font-bold text-neutral-900">
-                <Info className="h-4 w-4 text-orange-600" />
-                Detalhes do Produto
+          {/* Coluna direita: Informações úteis */}
+          <aside className="lg:col-span-5">
+            <div className={`${surface} p-6`}>
+              <h4 className="mb-5 flex items-center gap-2 text-base font-semibold text-neutral-50">
+                <Info className="h-4 w-4 text-orange-500" />
+                Detalhes do produto
               </h4>
-              <div className="space-y-3">
-                {/* ID do Produto */}
-                <div className="flex items-center justify-between border-b border-neutral-100 pb-2 text-sm last:border-0 last:pb-0">
-                  <div className="flex items-center gap-2 text-neutral-600">
-                    <Hash className="h-4 w-4 text-neutral-400" />
-                    <span>ID do Produto</span>
-                  </div>
-                  <span className="pl-4 text-right font-medium break-all text-neutral-800">
+
+              <div className="divide-y divide-neutral-800">
+                <DetailRow
+                  icon={<Hash className="h-4 w-4" />}
+                  label="ID do produto"
+                >
+                  <span className="font-mono text-xs break-all text-neutral-200">
                     {productData.id}
                   </span>
-                </div>
+                </DetailRow>
 
-                {/* Condição */}
-                <div className="flex items-center justify-between border-b border-neutral-100 pb-2 text-sm last:border-0 last:pb-0">
-                  <div className="flex items-center gap-2 text-neutral-600">
-                    <WandSparkles className="h-4 w-4 text-neutral-400" />
-                    <span>Condição</span>
-                  </div>
-                  <span className="font-medium text-neutral-800">
+                <DetailRow
+                  icon={<WandSparkles className="h-4 w-4" />}
+                  label="Condição"
+                >
+                  <span className="font-medium text-neutral-100">
                     {conditionMap[productData.condition || "new"] || "Novo"}
                   </span>
-                </div>
+                </DetailRow>
 
-                {/* Marca */}
-                <div className="flex items-center justify-between border-b border-neutral-100 pb-2 text-sm last:border-0 last:pb-0">
-                  <div className="flex items-center gap-2 text-neutral-600">
-                    <Tag className="h-4 w-4 text-neutral-400" />
-                    <span>Marca</span>
-                  </div>
-                  <span className="font-medium text-neutral-800">
-                    {productData.brand || "Sem Marca"}
+                <DetailRow icon={<Tag className="h-4 w-4" />} label="Marca">
+                  <span className="font-medium text-neutral-100">
+                    {productData.brand || "Sem marca"}
                   </span>
-                </div>
+                </DetailRow>
 
-                {/* Montagem Necessária */}
-                <div className="flex items-center justify-between border-b border-neutral-100 pb-2 text-sm last:border-0 last:pb-0">
-                  <div className="flex items-center gap-2 text-neutral-600">
-                    <Hammer className="h-4 w-4 text-neutral-400" />
-                    <span>Vem Montado?</span>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span
-                      className={`font-medium ${
-                        productData.isAssembled
-                          ? "text-neutral-800"
-                          : "text-neutral-800"
-                      }`}
-                    >
+                <DetailRow
+                  icon={<Hammer className="h-4 w-4" />}
+                  label="Vem montado?"
+                >
+                  <div className="flex flex-col items-end gap-0.5">
+                    <span className="font-medium text-neutral-100">
                       {productData.isAssembled
-                        ? "Sim. Produto já vem Montado"
-                        : "Não. Produto requer montagem"}
+                        ? "Sim, já vem montado"
+                        : "Não, requer montagem"}
                     </span>
-                    <Link href="/servicos">
-                      <p className="cursor-pointer text-[12px] font-medium text-orange-500 hover:underline">
-                        Contrate nosso serviço de montagem!
-                      </p>
+                    <Link
+                      href="/servicos"
+                      className="text-xs font-medium text-orange-500 hover:text-orange-400 hover:underline focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
+                    >
+                      Contrate nosso serviço de montagem
                     </Link>
                   </div>
-                </div>
+                </DetailRow>
 
-                {/* Garantia */}
-                <div className="flex items-center justify-between border-b border-neutral-100 pb-2 text-sm last:border-0 last:pb-0">
-                  <div className="flex items-center gap-2 text-neutral-600">
-                    <ShieldCheck className="h-4 w-4 text-neutral-400" />
-                    <span>Garantia</span>
-                  </div>
-                  <div className="text-right">
-                    <span
-                      className={`block font-medium ${
-                        productData.hasWarranty
-                          ? "text-neutral-800"
-                          : "text-neutral-800"
-                      }`}
-                    >
-                      {productData.hasWarranty
-                        ? "Garantia inclusa"
-                        : "Sem garantia"}
+                <DetailRow
+                  icon={<ShieldCheck className="h-4 w-4" />}
+                  label="Garantia"
+                >
+                  <span
+                    className={`block font-medium ${
+                      productData.hasWarranty
+                        ? "text-emerald-400"
+                        : "text-neutral-300"
+                    }`}
+                  >
+                    {productData.hasWarranty
+                      ? "Garantia inclusa"
+                      : "Sem garantia"}
+                  </span>
+                  {productData.hasWarranty && productData.warrantyDetails && (
+                    <span className="text-xs text-neutral-500">
+                      ({productData.warrantyDetails})
                     </span>
-                    {productData.hasWarranty && productData.warrantyDetails && (
-                      <span className="text-xs text-neutral-400">
-                        ({productData.warrantyDetails})
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  )}
+                </DetailRow>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
 
-        {/* --- SECÇÃO INFERIOR: AVALIAÇÕES --- */}
-        <div className="mt-8 grid gap-8">
-          <div className="lg:col-span-7 xl:col-span-8">
-            <div className="h-full rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
-              <div className="mb-6 flex items-center justify-between border-b border-neutral-100 pb-4">
-                <div>
-                  <h4 className="flex items-center gap-2 text-lg font-bold text-neutral-900">
-                    <MessageSquare className="h-5 w-5 text-orange-600" />
-                    Avaliações da Comunidade ({totalReviews})
-                  </h4>
-                </div>
-                {totalReviews > 0 && (
-                  <div className="flex items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-4 py-1">
-                    <div className="flex text-orange-500">
-                      <Star className="h-5 w-5 fill-current" />
-                    </div>
-                    <span className="text-xl font-bold text-neutral-900">
-                      {averageRating.toFixed(1)}
-                    </span>
-                    <span className="text-sm text-neutral-500">/ 5.0</span>
-                  </div>
-                )}
-              </div>
+        {/* --- SEÇÃO INFERIOR: AVALIAÇÕES --- */}
+        <section className={`${surface} mt-8 p-6 md:p-8`}>
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+            <h4 className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-neutral-50">
+              <MessageSquare className="h-5 w-5 text-orange-500" />
+              Avaliações da comunidade ({totalReviews})
+            </h4>
 
-              <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-neutral-200 max-h-[600px] overflow-y-auto pr-2">
-                {reviews.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    {reviews.map((reviewItem) => (
-                      <div
-                        key={reviewItem.id}
-                        className="group relative flex flex-col gap-3 rounded-lg border border-neutral-200 bg-neutral-50 p-5 transition-all hover:bg-white hover:shadow-md"
-                      >
-                        {currentUserId === reviewItem.userId && (
-                          <div className="absolute top-3 right-3 opacity-0 transition-opacity group-hover:opacity-100">
-                            <DeleteReviewButton
-                              reviewId={reviewItem.id}
-                              productId={id}
-                            />
+            {totalReviews > 0 && (
+              <div className="flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-1.5">
+                <Star className="h-5 w-5 fill-orange-500 text-orange-500" />
+                <span className="text-xl font-semibold text-neutral-50 tabular-nums">
+                  {averageRating.toFixed(1)}
+                </span>
+                <span className="text-sm text-neutral-400">/ 5,0</span>
+              </div>
+            )}
+          </div>
+
+          <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-neutral-700 max-h-[600px] overflow-y-auto pr-2">
+            {reviews.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {reviews.map((reviewItem) => (
+                  <article
+                    key={reviewItem.id}
+                    className="group relative flex flex-col gap-3 rounded-xl border border-neutral-800 bg-neutral-950/60 p-5 transition-colors hover:border-neutral-700 hover:bg-neutral-800/50"
+                  >
+                    {currentUserId === reviewItem.userId && (
+                      <div className="absolute top-3 right-3 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+                        <DeleteReviewButton
+                          reviewId={reviewItem.id}
+                          productId={id}
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-neutral-700 bg-neutral-800">
+                        {reviewItem.user?.image ? (
+                          <Image
+                            src={reviewItem.user.image}
+                            alt={reviewItem.user.name || "Usuário"}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center">
+                            <User className="h-5 w-5 text-neutral-500" />
                           </div>
                         )}
-
-                        <div className="flex items-center gap-3">
-                          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-white">
-                            {reviewItem.user?.image ? (
-                              <Image
-                                src={reviewItem.user.image}
-                                alt={reviewItem.user.name || "User"}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-full w-full items-center justify-center">
-                                <User className="h-5 w-5 text-neutral-400" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-neutral-900">
-                              {reviewItem.user?.name || "Usuário"}
-                            </p>
-                            <p className="text-xs text-neutral-500">
-                              {formatDate(reviewItem.createdAt)}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`h-3 w-3 ${
-                                reviewItem.rating >= star
-                                  ? "fill-orange-500 text-orange-500"
-                                  : "fill-transparent text-neutral-300"
-                              }`}
-                            />
-                          ))}
-                        </div>
-
-                        <p className="line-clamp-4 text-sm leading-relaxed break-words text-neutral-600">
-                          {reviewItem.comment}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-neutral-100">
+                          {reviewItem.user?.name || "Usuário"}
+                        </p>
+                        <p className="text-xs text-neutral-500">
+                          {formatDate(reviewItem.createdAt)}
                         </p>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="py-12 text-center">
-                    <p className="text-base text-neutral-500">
-                      Ainda não há avaliações para este produto.
+                    </div>
+
+                    <div
+                      className="flex gap-0.5"
+                      role="img"
+                      aria-label={`Nota ${reviewItem.rating} de 5`}
+                    >
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`h-3.5 w-3.5 ${
+                            reviewItem.rating >= star
+                              ? "fill-orange-500 text-orange-500"
+                              : "fill-transparent text-neutral-700"
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    <p className="line-clamp-4 text-sm leading-relaxed break-words text-neutral-400">
+                      {reviewItem.comment}
                     </p>
-                    <p className="mt-2 text-sm text-neutral-400">
-                      Seja o primeiro a avaliar!
-                    </p>
-                  </div>
-                )}
+                  </article>
+                ))}
               </div>
-            </div>
+            ) : (
+              <div className="py-12 text-center">
+                <p className="text-base text-neutral-300">
+                  Ainda não há avaliações para este produto.
+                </p>
+                <p className="mt-2 text-sm text-neutral-500">
+                  Seja o primeiro a avaliar.
+                </p>
+              </div>
+            )}
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
+
       <Footer />
     </div>
   );

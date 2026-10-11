@@ -8,17 +8,19 @@ import { z } from "zod";
 import { db } from "@/db";
 import { category, product, productVariant } from "@/db/schema";
 
-const variantSchema = z.object({
-  id: z.string().optional(),
-  sku: z.string().optional().nullable(),
-  name: z.string().optional().nullable(),
-  price: z.number().optional().nullable(),
-  discountPrice: z.number().optional().nullable(),
-  stock: z.number().default(0),
-  isStockUnlimited: z.boolean().default(false),
-  image: z.string().optional().nullable(),
-  attributes: z.record(z.string(), z.string()).default({}),
-});
+  const variantSchema = z.object({
+    id: z.string().optional(),
+    sku: z.string().optional().nullable(),
+    name: z.string().optional().nullable(),
+    price: z.number().optional().nullable(),
+    discountPrice: z.number().optional().nullable(),
+    stock: z.number().default(0),
+    isStockUnlimited: z.boolean().default(false),
+    /** Array de URLs das fotos da variante */
+    images: z.array(z.string()).optional().default([]),
+    image: z.string().optional().nullable(),
+    attributes: z.record(z.string(), z.string()).default({}),
+  });
 
 // --- SCHEMA ATUALIZADO COM OS NOVOS CAMPOS E VARIANTES ---
 const productSchema = z.object({
@@ -163,19 +165,21 @@ export async function createProduct(rawData: ProductServerPayload) {
     const createdProductId = insertedProduct?.id || data.id;
 
     if (createdProductId && data.variants && data.variants.length > 0) {
-      await db.insert(productVariant).values(
-        data.variants.map((v) => ({
-          productId: createdProductId,
-          sku: v.sku || null,
-          name: v.name || null,
-          price: v.price != null ? Math.round(v.price) : null,
-          discountPrice: v.discountPrice != null ? Math.round(v.discountPrice) : null,
-          stock: v.stock ?? 0,
-          isStockUnlimited: v.isStockUnlimited ?? false,
-          image: v.image || null,
-          attributes: v.attributes || {},
-        })),
-      );
+        await db.insert(productVariant).values(
+          data.variants.map((v) => ({
+            productId: createdProductId,
+            sku: v.sku || null,
+            name: v.name || null,
+            price: v.price != null ? Math.round(v.price) : null,
+            discountPrice: v.discountPrice != null ? Math.round(v.discountPrice) : null,
+            stock: v.stock ?? 0,
+            isStockUnlimited: v.isStockUnlimited ?? false,
+            images: v.images?.length ? v.images : [],
+            // legacy support
+            image: v.image || null,
+            attributes: v.attributes || {},
+          })),
+        );
     }
 
     revalidatePath("/admin/produtos");
@@ -261,6 +265,8 @@ export async function updateProduct(id: string, rawData: ProductServerPayload) {
             discountPrice: v.discountPrice != null ? Math.round(v.discountPrice) : null,
             stock: v.stock ?? 0,
             isStockUnlimited: v.isStockUnlimited ?? false,
+            images: v.images?.length ? v.images : [],
+            // legacy support
             image: v.image || null,
             attributes: v.attributes || {},
           })),
