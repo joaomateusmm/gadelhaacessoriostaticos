@@ -9,6 +9,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { AddToCartButton } from "@/components/add-to-cart-button";
@@ -80,6 +81,7 @@ interface ProductPurchaseCardProps {
   categoryNames: string[];
   /** Callback chamado quando a variante selecionada muda. Recebe o array de imagens da variante (ou null). */
   onVariantChange?: (variantImages: string[] | null | undefined) => void;
+  customColors?: { name: string; hex: string | null; imageUrl: string | null }[];
 }
 
 function corParaCss(cor: string): string {
@@ -122,6 +124,7 @@ export function ProductPurchaseCard({
   product,
   categoryNames,
   onVariantChange,
+  customColors = [],
 }: ProductPurchaseCardProps) {
   const variants = product.variants || [];
   const hasVariants = variants.length > 0;
@@ -312,7 +315,14 @@ export function ProductPurchaseCard({
               <div className="flex flex-wrap gap-2">
                 {coresDisponiveis.map((c) => {
                   const isSelected = selectedCor === c;
-                  const hex = corParaCss(c);
+                  const customMatch = customColors.find(
+                    (colorItem) =>
+                      colorItem.name.toLowerCase().trim() ===
+                      c.toLowerCase().trim(),
+                  );
+                  const hex = customMatch?.hex || corParaCss(c);
+                  const imageUrl = customMatch?.imageUrl;
+
                   return (
                     <button
                       key={c}
@@ -326,9 +336,20 @@ export function ProductPurchaseCard({
                       }`}
                     >
                       <span
-                        className="h-3.5 w-3.5 shrink-0 rounded-full border border-white/25"
-                        style={{ backgroundColor: hex }}
-                      />
+                        className="relative h-4 w-4 shrink-0 overflow-hidden rounded-full border border-white/25"
+                        style={{
+                          backgroundColor: imageUrl ? "transparent" : hex,
+                        }}
+                      >
+                        {imageUrl && (
+                          <Image
+                            src={imageUrl}
+                            alt={c}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
+                      </span>
                       <span>{c}</span>
                     </button>
                   );

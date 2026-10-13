@@ -116,160 +116,68 @@ export function ProductCard({ data, categoryName }: ProductCardProps) {
     }
   };
 
+  const installmentCount = 10;
+  const installmentValue = finalPrice / installmentCount;
+
   return (
     <div
       onClick={handleCardClick}
       className={cn(
-        "group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white transition-all duration-300 hover:border-orange-200 hover:shadow-lg",
+        "relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-800 bg-[#0A0A0A] transition-colors",
         isPending && "pointer-events-none cursor-wait opacity-80",
         isOutOfStock && "opacity-80 grayscale-[0.5]",
       )}
     >
       {isPending && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-[1px]">
-          <Loader2 className="h-10 w-10 animate-spin text-orange-600" />
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[1px]">
+          <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
         </div>
       )}
 
-      <div className="relative aspect-square w-full overflow-hidden bg-neutral-50 p-3">
+      {/* --- ÁREA DA IMAGEM (Fundo clean com cantos arredondados) --- */}
+      <div className="relative aspect-square w-full overflow-hidden bg-[#F2F2F2]">
+        {/* Badge Lançamento / Desconto no canto superior esquerdo */}
+        {discountPercentage > 0 && (
+          <span className="absolute top-3 left-3 z-10 rounded-full bg-[#FF4500] px-3.5 py-1 text-[11px] font-extrabold tracking-wide text-white uppercase shadow-sm">
+            -{discountPercentage}%
+          </span>
+        )}
+
         <Image
           src={productImage}
           alt={data.name}
           fill
-          className={cn(
-            "object-contain object-center transition-transform duration-500 group-hover:scale-105",
-            isPending && "scale-100 blur-[2px]",
-          )}
+          className="object-contain"
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
         />
 
         {isOutOfStock && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/40 backdrop-blur-[2px]">
-            <span className="rotate-[-10deg] rounded-md border-2 border-red-600 bg-white/80 px-4 py-2 text-lg font-bold tracking-widest text-red-600 uppercase shadow-sm">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 backdrop-blur-[2px]">
+            <span className="rounded-md border border-red-500 bg-red-950/80 px-3.5 py-1.5 text-xs font-bold tracking-wider text-red-200 uppercase">
               Esgotado
             </span>
           </div>
         )}
-
-        <div className="absolute right-3 bottom-3 z-[90] flex translate-y-4 flex-col gap-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <Link href="/servicos" onClick={(e) => e.stopPropagation()}>
-            <Button
-              size="icon"
-              className="h-9 w-9 cursor-pointer rounded-full bg-blue-500 text-white shadow-sm backdrop-blur-md duration-300 hover:scale-105 hover:bg-blue-600 active:scale-95"
-            >
-              <Hammer className="h-4 w-4" />
-            </Button>
-          </Link>
-
-          <Button
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation(); // É bom garantir aqui também no favorito
-              handleFavorite(e);
-            }}
-            className={cn(
-              "h-9 w-9 cursor-pointer rounded-full shadow-sm backdrop-blur-md duration-300 hover:scale-105",
-              isFavorite
-                ? "bg-orange-500 text-white hover:bg-orange-600"
-                : "bg-white text-orange-500 hover:bg-neutral-100", // Ajustei a cor do texto para ficar visível
-            )}
-          >
-            <Heart className={cn("h-4 w-4", isFavorite && "fill-current")} />
-          </Button>
-
-          {!isOutOfStock && (
-            <Button
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation(); // É bom garantir aqui também no carrinho
-                handleAddToCart(e);
-              }}
-              className="h-9 w-9 cursor-pointer rounded-full bg-orange-500 text-white shadow-sm backdrop-blur-md duration-300 hover:scale-105 hover:bg-orange-600"
-            >
-              <ShoppingCart className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
       </div>
 
-      <div className="flex flex-1 flex-col border-t border-neutral-100 px-4 py-2">
-        <span className="truncate text-[10px] font-bold tracking-wide text-neutral-400 uppercase">
-          {categoryName}
-        </span>
-        <h3 className="font-clash-display mt-1 text-base font-semibold text-neutral-900 transition-colors group-hover:text-orange-700">
+      {/* --- ÁREA DE INFORMAÇÕES (Fundo Preto com Texto Branco) --- */}
+      <div className="flex flex-1 flex-col items-center justify-center p-4 text-center">
+        {/* Nome do Produto */}
+        <h3 className="line-clamp-2 text-sm font-semibold text-white">
           {data.name}
         </h3>
 
-        {/* --- ID DO PRODUTO DISCRETO --- */}
-        <p
-          className="mt-0.5 truncate font-mono text-[11px] text-neutral-400"
-          title={`ID: ${data.id}`}
-        >
-          #{data.id.slice(0, 12)}...
-        </p>
-
-        <div className="mt-auto flex flex-col pt-3">
-          {data.discountPrice && !isFree && !isOutOfStock && (
-            <span className="text-xs text-neutral-400 line-through">
-              {formatPrice(data.price)}
+        {/* Preço Principal */}
+        <div className="mt-2">
+          {isFree ? (
+            <span className="text-lg font-bold text-emerald-400 uppercase">
+              Grátis
+            </span>
+          ) : (
+            <span className="text-lg font-extrabold text-white">
+              {formatPrice(finalPrice)}
             </span>
           )}
-
-          <div className="flex items-center justify-between">
-            {isOutOfStock ? (
-              <span className="font-montserrat text-lg font-bold text-neutral-400">
-                {formatPrice(finalPrice)}
-              </span>
-            ) : isFree ? (
-              <span className="font-montserrat text-lg font-bold text-green-600 uppercase">
-                Grátis
-              </span>
-            ) : (
-              <span className="font-montserrat text-lg font-bold text-neutral-900">
-                {formatPrice(finalPrice)}
-              </span>
-            )}
-
-            {discountPercentage > 0 && !isFree && !isOutOfStock && (
-              <span className="flex items-center justify-center gap-1 rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-bold text-green-700">
-                <TrendingDown className="h-3 w-3" />
-                {discountPercentage}%
-              </span>
-            )}
-          </div>
-
-          {/* --- INDICADOR DE ESTOQUE --- */}
-          <div className="mt-2 flex items-center justify-between">
-            <span className="text-[10px] font-medium text-neutral-500">
-              {isOutOfStock
-                ? "Indisponível"
-                : isFree
-                  ? "Download Imediato"
-                  : ""}
-            </span>
-
-            {!isOutOfStock && !data.isStockUnlimited && (
-              <span
-                className={cn(
-                  "flex items-center gap-1 text-[10px] font-medium",
-                  isLowStock ? "text-neutral-500" : "text-neutral-400",
-                )}
-              >
-                Restam
-                <span className="font-bold text-neutral-800">
-                  {" "}
-                  {stockCount}
-                </span>{" "}
-                un.
-              </span>
-            )}
-
-            {data.isStockUnlimited && !isOutOfStock && (
-              <span className="flex items-center gap-1 text-[10px] font-medium text-neutral-500">
-                Estoque Ilimitado
-              </span>
-            )}
-          </div>
         </div>
       </div>
     </div>

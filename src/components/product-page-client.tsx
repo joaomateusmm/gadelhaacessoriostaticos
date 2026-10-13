@@ -34,12 +34,14 @@ interface ProductPageClientProps {
   };
   categoryNames: string[];
   defaultImages: string[];
+  customColors?: { name: string; hex: string | null; imageUrl: string | null }[];
 }
 
 export function ProductPageClient({
   product,
   categoryNames,
   defaultImages,
+  customColors,
 }: ProductPageClientProps) {
   // activeImages: começa com as imagens do produto pai.
   // Quando o usuário seleciona uma cor com foto própria, exibe ela em destaque.
@@ -149,6 +151,7 @@ export function ProductPageClient({
           product={product}
           categoryNames={categoryNames}
           onVariantChange={handleVariantChange}
+          customColors={customColors}
         />
       </div>
     </div>

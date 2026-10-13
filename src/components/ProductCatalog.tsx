@@ -28,7 +28,7 @@ export default async function ProductCatalog() {
     .filter((cat) => cat.products.length > 0);
 
   return (
-    <section className="relative z-10 w-full pb-20">
+    <section className="relative z-10 w-full bg-neutral-950 pb-20 text-neutral-100">
       <div className="mx-auto max-w-[1440px]">
         {/* Cabeçalho Geral */}
         <div className="mb-8 flex flex-col text-start">
@@ -48,14 +48,13 @@ export default async function ProductCatalog() {
               <div key={catSection.id}>
                 {/* Título da Categoria */}
                 <div className="mb-6 flex items-center gap-4 border-b border-neutral-800 pb-2">
-                  <h3 className="font-clash-display text-3xl font-medium text-white">
+                  <h3 className="font-clash-display text-3xl font-normal tracking-wide text-white uppercase">
                     {catSection.name}
                   </h3>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-5">
                   {catSection.products.map((item) => (
-                    // Certifique-se de que o componente ProductCard também suporte o tema claro
                     <ProductCard
                       key={item.id}
                       data={item}

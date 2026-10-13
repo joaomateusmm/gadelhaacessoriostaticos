@@ -93,6 +93,19 @@ export const brand = pgTable("brand", {
   updatedAt: timestamp("updatedAt").notNull().defaultNow().$onUpdate(() => new Date()),
 });
 
+// --- TABELA DE CORES DE PRODUTOS ---
+export const productColor = pgTable("product_color", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  hex: text("hex"), // Ex: #000000
+  imageUrl: text("imageUrl"), // Para camuflados, texturas ou padrões
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
 // --- TABELA DE PRODUTOS (ATUALIZADA E MESCLADA) ---
 
 export const product = pgTable("product", {

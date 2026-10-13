@@ -6,6 +6,7 @@ import {
   Home,
   LayoutDashboard,
   Package,
+  Palette,
   Truck,
 } from "lucide-react";
 import Image from "next/image";
@@ -70,7 +71,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-
           {/* Pedidos */}
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -84,7 +84,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-
           {/* Produtos */}
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -98,7 +97,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-
           {/* Categorias */}
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -112,7 +110,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-
           {/* Marcas */}
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -123,6 +120,19 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               <Link href="/admin/marcas">
                 <Bird className="mr-2 h-5 w-5" />
                 <span>Marcas</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          {/* Marcas */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={pathname.startsWith("/admin/cores")}
+              className="h-10 font-medium text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-white data-[active=true]:border data-[active=true]:border-orange-500/30 data-[active=true]:bg-orange-500/15 data-[active=true]:font-semibold data-[active=true]:text-orange-400 data-[active=true]:shadow-sm"
+            >
+              <Link href="/admin/cores">
+                <Palette className="mr-2 h-5 w-5" />
+                <span>Cores</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -140,7 +150,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem> */}
-
           {/* Prestadores */}
           {/* <SidebarMenuItem>
             <SidebarMenuButton
@@ -154,7 +163,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem> */}
-
           {/* Solicitações de Serviços */}
           {/* <SidebarMenuItem>
             <SidebarMenuButton
@@ -168,7 +176,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem> */}
-
           {/* Afiliados */}
           {/* <SidebarMenuItem>
             <SidebarMenuButton
@@ -182,7 +189,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem> */}
-
           {/* Avaliações */}
           {/* <SidebarMenuItem>
             <SidebarMenuButton
@@ -196,7 +202,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem> */}
-
           {/* Cupons */}
           {/* <SidebarMenuItem>
             <SidebarMenuButton
@@ -210,10 +215,8 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem> */}
-
           {/* Separador */}
           <div className="my-4 h-[1px] bg-neutral-800" />
-
           {/* Voltar ao Site */}
           <SidebarMenuItem>
             <SidebarMenuButton

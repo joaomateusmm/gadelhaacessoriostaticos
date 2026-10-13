@@ -25,6 +25,7 @@ import { z } from "zod";
 import { updateProduct } from "@/actions/create-product";
 import { getAllCategories } from "@/actions/get-all-categories";
 import { getBrands } from "@/app/admin/produtos/new/get-brands";
+import { ColorOption, getProductColors } from "@/app/admin/produtos/new/get-colors";
 import { VariantItem, VariantMatrix } from "@/components/admin/variant-matrix";
 import { Button } from "@/components/ui/button";
 import {
@@ -248,6 +249,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
 
   const [categoriesList, setCategoriesList] = useState<OptionData[]>([]);
   const [brandsList, setBrandsList] = useState<OptionData[]>([]);
+  const [colorsList, setColorsList] = useState<ColorOption[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
   const [sizeCustom, setSizeCustom] = useState("");
@@ -280,6 +282,13 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
       } catch (error) {
         console.error(error);
         toast.error("Erro ao carregar marcas.");
+      }
+
+      try {
+        const clrs = await getProductColors();
+        setColorsList(clrs);
+      } catch (error) {
+        console.error("Erro ao carregar cores do banco:", error);
       } finally {
         setIsLoadingData(false);
       }
@@ -709,8 +718,9 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                   name="cores"
                   render={({ field }) => {
                     const selecionadas = field.value || [];
-                    const personalizadas = selecionadas.filter(
-                      (c) => !CORES_PADRAO.includes(c),
+                    const customNaoCadastradas = selecionadas.filter(
+                      (c) =>
+                        !colorsList.some((dbCor) => dbCor.name.toLowerCase() === c.toLowerCase()),
                     );
                     const alternar = (c: string) =>
                       field.onChange(
@@ -728,30 +738,71 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
 
                     return (
                       <FormItem>
-                        <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                          Cores Disponíveis
-                        </FormLabel>
-                        <div className="space-y-3">
-                          <div className="flex flex-wrap gap-2">
-                            {CORES_PADRAO.map((c) => (
-                              <button
-                                key={c}
-                                type="button"
-                                onClick={() => alternar(c)}
-                                className={chipClass(selecionadas.includes(c))}
-                              >
-                                {c}
-                              </button>
-                            ))}
-                          </div>
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
+                            Cores Disponíveis
+                          </FormLabel>
+                          <Link
+                            href="/admin/cores"
+                            target="_blank"
+                            className="font-mono text-[10px] text-orange-400 hover:text-orange-300 underline"
+                          >
+                            + Gerenciar cores / texturas
+                          </Link>
+                        </div>
+                        <div className="space-y-4">
+                          {/* Cores Cadastradas no Banco */}
+                          {colorsList.length > 0 && (
+                            <div className="space-y-2">
+                              <span className="block font-mono text-[10px] text-orange-400/90 uppercase tracking-wider">
+                                Cores da sua Biblioteca ({colorsList.length})
+                              </span>
+                              <div className="flex flex-wrap gap-2">
+                                {colorsList.map((c) => {
+                                  const isSelected = selecionadas.includes(c.name);
+                                  return (
+                                    <button
+                                      key={c.id}
+                                      type="button"
+                                      onClick={() => alternar(c.name)}
+                                      className={cn(
+                                        "flex items-center gap-2 h-9 border px-3 font-mono text-xs uppercase transition-all",
+                                        isSelected
+                                          ? "border-orange-500 bg-orange-950/40 text-orange-200 font-bold"
+                                          : "border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-600 hover:text-white",
+                                      )}
+                                    >
+                                      <span
+                                        className="relative h-4 w-4 shrink-0 overflow-hidden rounded-full border border-white/20"
+                                        style={{
+                                          backgroundColor: c.imageUrl ? "transparent" : c.hex || "#333333",
+                                        }}
+                                      >
+                                        {c.imageUrl && (
+                                          <Image
+                                            src={c.imageUrl}
+                                            alt={c.name}
+                                            fill
+                                            className="object-cover"
+                                          />
+                                        )}
+                                      </span>
+                                      <span>{c.name}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
 
-                          {personalizadas.length > 0 && (
-                            <div className="pt-2">
+                          {/* Cores Personalizadas */}
+                          {customNaoCadastradas.length > 0 && (
+                            <div className="pt-1">
                               <span className="block font-mono text-[11px] text-neutral-400 uppercase">
-                                Personalizadas
+                                Outras Selecionadas
                               </span>
                               <div className="mt-1 flex flex-wrap gap-2">
-                                {personalizadas.map((c) => (
+                                {customNaoCadastradas.map((c) => (
                                   <span
                                     key={c}
                                     className="flex items-center gap-1.5 border border-emerald-600 bg-emerald-950/60 px-2.5 py-1 font-mono text-xs font-bold text-emerald-400 uppercase"

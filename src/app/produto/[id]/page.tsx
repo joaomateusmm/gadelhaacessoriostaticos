@@ -25,7 +25,13 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { ProductPageClient } from "@/components/product-page-client";
 import { db } from "@/db";
-import { category, product, review, user as userTable } from "@/db/schema";
+import {
+  category,
+  product,
+  productColor,
+  review,
+  user as userTable,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 interface ProductPageProps {
@@ -136,6 +142,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
     categoryNames = categories.map((c) => c.name);
   }
 
+  const allColors = await db
+    .select({
+      name: productColor.name,
+      hex: productColor.hex,
+      imageUrl: productColor.imageUrl,
+    })
+    .from(productColor);
+
   const rows = await db
     .select({
       review: review,
@@ -209,6 +223,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           product={productData as any}
           categoryNames={categoryNames}
           defaultImages={defaultImages}
+          customColors={allColors}
         />
 
         {/* --- LINHA INFERIOR: Descrição + Informações úteis --- */}
