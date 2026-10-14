@@ -169,7 +169,7 @@ export function HeroBanners() {
   const getBanner = (pos: string) => BANNERS.find((b) => b.position === pos);
 
   return (
-    <section className="w-full px-4 pt-42 md:px-8 md:pt-36 md:pb-5">
+    <section className="w-full bg-neutral-950 px-4 pt-42 md:px-8 md:pt-36 md:pb-5">
       <div className="mx-auto max-w-[1440px]">
         <div className="grid h-auto w-full grid-cols-1 gap-4 md:h-[600px] md:grid-cols-4">
           {/* COLUNA 1 (ESQUERDA) */}
