@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, ne } from "drizzle-orm";
 
 import { db } from "@/db";
 import { category, product } from "@/db/schema";
@@ -11,7 +11,7 @@ export default async function ProductCatalog() {
   const allProducts = await db
     .select()
     .from(product)
-    .where(eq(product.status, "active"))
+    .where(and(eq(product.status, "active"), ne(product.hideFromClients, true)))
     .orderBy(desc(product.createdAt));
 
   const categoriesWithProducts = allCategories
@@ -28,7 +28,7 @@ export default async function ProductCatalog() {
     .filter((cat) => cat.products.length > 0);
 
   return (
-    <section className="relative z-10 w-full bg-neutral-950 pb-20 text-neutral-100">
+    <section className="relative z-10 w-full bg-neutral-950 px-4 pb-20 text-neutral-100 md:px-8">
       <div className="mx-auto max-w-[1440px]">
         {/* Cabeçalho Geral */}
         <div className="mb-8 flex flex-col text-start">

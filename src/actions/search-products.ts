@@ -1,6 +1,6 @@
 "use server";
 
-import { ilike } from "drizzle-orm";
+import { and, eq, ilike, ne } from "drizzle-orm";
 
 import { db } from "@/db";
 import { product } from "@/db/schema";
@@ -9,8 +9,7 @@ export async function searchProductsAction(query: string) {
   if (!query || query.length < 2) return [];
 
   try {
-    // Busca produtos onde o nome contém o texto (case insensitive)
-    // Limita a 5 resultados para o dropdown não ficar gigante
+    // Busca produtos onde o nome contém o texto (case insensitive) e não estão ocultos para clientes
     const results = await db
       .select({
         id: product.id,
@@ -20,7 +19,7 @@ export async function searchProductsAction(query: string) {
         discountPrice: product.discountPrice,
       })
       .from(product)
-      .where(ilike(product.name, `%${query}%`))
+      .where(and(ilike(product.name, `%${query}%`), ne(product.hideFromClients, true)))
       .limit(5);
 
     return results;

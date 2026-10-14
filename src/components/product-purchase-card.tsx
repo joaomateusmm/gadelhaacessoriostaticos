@@ -171,10 +171,14 @@ export function ProductPurchaseCard({
   // Notifica a galeria toda vez que a variante selecionada muda
   useEffect(() => {
     if (onVariantChange) {
-      const variantImgs = selectedVariant?.images || null;
-      onVariantChange(variantImgs);
+      const variantImgs = selectedVariant?.images;
+      if (variantImgs && variantImgs.length > 0) {
+        onVariantChange([...(product.images || []), ...variantImgs]);
+      } else {
+        onVariantChange(null);
+      }
     }
-  }, [selectedVariant?.id, selectedVariant?.images?.length, onVariantChange]);
+  }, [selectedVariant?.id, selectedVariant?.images?.length, onVariantChange, product.images]);
 
   // Preço e estoque da variante ou produto pai
   const activePrice = selectedVariant?.price ?? product.price;

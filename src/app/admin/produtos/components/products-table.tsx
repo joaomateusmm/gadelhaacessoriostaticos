@@ -324,22 +324,32 @@ export function ProductsTable({
                         </TableCell>
 
                         <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={`rounded-none border px-2 py-1 font-mono text-[10px] font-bold uppercase ${
-                              item.status === "active"
-                                ? "border-emerald-600 bg-emerald-950/60 text-emerald-400"
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              variant="outline"
+                              className={`rounded-none border px-2 py-1 font-mono text-[10px] font-bold uppercase ${
+                                item.status === "active"
+                                  ? "border-emerald-600 bg-emerald-950/60 text-emerald-400"
+                                  : item.status === "inactive"
+                                    ? "border-red-600 bg-red-950/60 text-red-400"
+                                    : "border-yellow-600 bg-yellow-950/60 text-yellow-400"
+                              }`}
+                            >
+                              {item.status === "active"
+                                ? "Ativo"
                                 : item.status === "inactive"
-                                  ? "border-red-600 bg-red-950/60 text-red-400"
-                                  : "border-yellow-600 bg-yellow-950/60 text-yellow-400"
-                            }`}
-                          >
-                            {item.status === "active"
-                              ? "Ativo"
-                              : item.status === "inactive"
-                                ? "Inativo"
-                                : "Rascunho"}
-                          </Badge>
+                                  ? "Inativo"
+                                  : "Rascunho"}
+                            </Badge>
+                            {item.hideFromClients && (
+                              <Badge
+                                variant="outline"
+                                className="rounded-none border border-yellow-600 bg-yellow-950/60 font-mono text-[10px] font-bold text-yellow-400 uppercase"
+                              >
+                                Oculto p/ Clientes
+                              </Badge>
+                            )}
+                          </div>
                         </TableCell>
 
                         <TableCell className="hidden md:table-cell">
@@ -390,7 +400,10 @@ export function ProductsTable({
                         </TableCell>
 
                         <TableCell>
-                          <ProductActions id={item.id} />
+                          <ProductActions
+                            id={item.id}
+                            hideFromClients={item.hideFromClients}
+                          />
                         </TableCell>
                       </TableRow>
                     );

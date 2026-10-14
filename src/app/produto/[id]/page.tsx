@@ -192,10 +192,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       ? productData.images
       : ["https://placehold.co/600x600/171717/525252.png?text=Sem+Imagem"];
 
-  const defaultImages =
-    productData.variants && productData.variants.length > 0
-      ? []
-      : productImages;
+  const defaultImages = productImages;
 
   const conditionMap: Record<string, string> = {
     new: "Estado de novo",

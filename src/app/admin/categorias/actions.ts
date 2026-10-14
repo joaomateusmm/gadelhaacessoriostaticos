@@ -37,6 +37,30 @@ export async function createCategory(data: CategoryFormValues) {
   revalidatePath("/admin/categorias");
 }
 
+export async function updateCategory(id: string, data: CategoryFormValues) {
+  const parsed = categorySchema.safeParse(data);
+
+  if (!parsed.success) {
+    throw new Error("Dados inválidos");
+  }
+
+  const slug = generateSlug(parsed.data.name);
+
+  await db
+    .update(category)
+    .set({
+      name: parsed.data.name,
+      description: parsed.data.description,
+      slug: slug,
+      updatedAt: new Date(),
+    })
+    .where(inArray(category.id, [id]));
+
+  revalidatePath("/admin/categorias");
+  revalidatePath("/");
+  revalidatePath("/admin/produtos");
+}
+
 export async function deleteCategories(ids: string[]) {
   if (ids.length === 0) return;
 

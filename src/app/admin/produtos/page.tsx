@@ -16,7 +16,7 @@ export default async function AdminProductsPage({
 }) {
   const params = await searchParams;
 
-  const limitParam = params.limit ?? "10";
+  const limitParam = params.limit ?? "all";
   const limit = limitParam === "all" ? undefined : Number(limitParam);
 
   const searchTerm = params.search;

@@ -21,6 +21,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { UploadButton } from "@/lib/uploadthing";
@@ -67,6 +75,7 @@ export function VariantMatrix({
 }: VariantMatrixProps) {
   const [globalStock, setGlobalStock] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [copiedImagesIndex, setCopiedImagesIndex] = useState<number | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [coverError, setCoverError] = useState(false);
 
@@ -126,6 +135,29 @@ export function VariantMatrix({
     onChange(updated);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const duplicarFotosParaOutras = (
+    sourceIndex: number,
+    targetIndices: number[],
+  ) => {
+    const sourceImages = getVariantImages(variants[sourceIndex]);
+    if (sourceImages.length === 0) return;
+
+    const updated = variants.map((v, i) => {
+      if (targetIndices.includes(i)) {
+        return {
+          ...v,
+          images: [...sourceImages],
+          image: null,
+        };
+      }
+      return v;
+    });
+
+    onChange(updated);
+    setCopiedImagesIndex(sourceIndex);
+    setTimeout(() => setCopiedImagesIndex(null), 2000);
   };
 
   const updateItem = (index: number, updates: Partial<VariantItem>) => {
@@ -335,20 +367,105 @@ export function VariantMatrix({
                       </div>
                     </div>
 
-                    {/* --- GALERIA DE FOTOS DA VARIANTE --- */}
+                     {/* --- GALERIA DE FOTOS DA VARIANTE --- */}
                     <div className="p-3">
-                      <div className="mb-2 flex items-center gap-2">
-                        <ImagePlus className="h-3.5 w-3.5 text-neutral-500" />
-                        <span className="font-mono text-[10px] text-neutral-400 uppercase">
-                          Fotos da variante{" "}
-                          <span className="text-orange-400">{cor}</span>
-                          {variantImages.length > 0 && (
-                            <span className="ml-1 text-neutral-600">
-                              ({variantImages.length} foto
-                              {variantImages.length !== 1 ? "s" : ""})
-                            </span>
-                          )}
-                        </span>
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <ImagePlus className="h-3.5 w-3.5 text-neutral-500" />
+                          <span className="font-mono text-[10px] text-neutral-400 uppercase">
+                            Fotos da variante{" "}
+                            <span className="text-orange-400">{cor}</span>
+                            {variantImages.length > 0 && (
+                              <span className="ml-1 text-neutral-600">
+                                ({variantImages.length} foto
+                                {variantImages.length !== 1 ? "s" : ""})
+                              </span>
+                            )}
+                          </span>
+                        </div>
+
+                        {variantImages.length > 0 && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-6 rounded-none border-neutral-700 bg-neutral-900 font-mono text-[10px] text-orange-400 hover:bg-neutral-800 hover:text-white"
+                              >
+                                {copiedImagesIndex === idx ? (
+                                  <>
+                                    <Check className="mr-1 h-3 w-3 text-green-500" />{" "}
+                                    Fotos linkadas com sucesso!
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="mr-1 h-3 w-3" /> Linkar estas
+                                    fotos a outras variantes...
+                                  </>
+                                )}
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-72 border-neutral-800 bg-neutral-950 font-mono text-xs text-neutral-200"
+                            >
+                              <DropdownMenuLabel className="text-[10px] text-neutral-500 uppercase">
+                                Selecione as variantes de destino:
+                              </DropdownMenuLabel>
+                              <DropdownMenuSeparator className="bg-neutral-800" />
+                              {variants.map((targetV, targetIdx) => {
+                                if (targetIdx === idx) return null;
+                                const tCor =
+                                  targetV.attributes?.["Cor"] ||
+                                  targetV.attributes?.["cor"] ||
+                                  "-";
+                                const tTam =
+                                  targetV.attributes?.["Tamanho"] ||
+                                  targetV.attributes?.["tamanho"] ||
+                                  "-";
+                                const isAlreadyLinked =
+                                  JSON.stringify(
+                                    getVariantImages(targetV),
+                                  ) === JSON.stringify(variantImages);
+
+                                return (
+                                  <DropdownMenuCheckboxItem
+                                    key={targetIdx}
+                                    checked={isAlreadyLinked}
+                                    onCheckedChange={(checked) => {
+                                      const currentSelected = variants
+                                        .map((v, i) =>
+                                          JSON.stringify(
+                                            getVariantImages(v),
+                                          ) ===
+                                            JSON.stringify(variantImages) &&
+                                          i !== idx
+                                            ? i
+                                            : -1,
+                                        )
+                                        .filter((i) => i !== -1);
+
+                                      const newTargets = checked
+                                        ? [...currentSelected, targetIdx]
+                                        : currentSelected.filter(
+                                            (i) => i !== targetIdx,
+                                          );
+
+                                      duplicarFotosParaOutras(idx, [
+                                        idx,
+                                        ...newTargets,
+                                      ]);
+                                    }}
+                                    className="cursor-pointer font-mono text-xs text-neutral-300 focus:bg-neutral-900 focus:text-white"
+                                  >
+                                    {tCor} / {tTam}
+                                  </DropdownMenuCheckboxItem>
+                                );
+                              })}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </div>
 
                       <div className="flex flex-wrap items-start gap-2">

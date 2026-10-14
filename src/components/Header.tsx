@@ -58,9 +58,8 @@ interface Product {
   images: string[] | null;
 }
 
-// Altura da barra de frete (h-10 = 2.5rem = 40px).
-// Se mudar a altura da barra, ajuste também a classe "-translate-y-10" abaixo.
-const SCROLL_THRESHOLD = 10;
+// Altura da barra superior e principal
+const SCROLL_THRESHOLD = 5;
 
 // --- COMPONENTE DE ÍCONE ---
 function HeaderIconButton({
@@ -97,7 +96,9 @@ function HeaderIconButton({
 // --- CONTEÚDO DO HEADER ---
 export function HeaderContent() {
   const [mounted, setMounted] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [hideMainBar, setHideMainBar] = useState(false);
+  const [hideTopBar, setHideTopBar] = useState(false);
+  const lastScrollY = useRef(0);
 
   // ESTADOS UNIFICADOS
   const [categories, setCategories] = useState<CategoryLink[]>([]);
@@ -146,12 +147,35 @@ export function HeaderContent() {
     fetchData();
   }, []);
 
-  // 2. ESCONDER BARRA DE FRETE AO ROLAR A PÁGINA
+  // 2. CONTROLE DE SCROLL PARA AS DUAS PARTES DO HEADER
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY <= SCROLL_THRESHOLD) {
+        setHideTopBar(false);
+        setHideMainBar(false);
+      } else if (currentScrollY > lastScrollY.current) {
+        // Rolando para baixo: some primeiro a TopBar (pequena), depois a Main (grande)
+        if (currentScrollY > 15) {
+          setHideTopBar(true);
+        }
+        if (currentScrollY > 60) {
+          setHideMainBar(true);
+        }
+      } else {
+        // Rolando para cima: aparece primeiro a Main (grande), e a TopBar (pequena) só volta no topo
+        setHideMainBar(false);
+        if (currentScrollY <= SCROLL_THRESHOLD) {
+          setHideTopBar(false);
+        }
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // 3. VERIFICAÇÃO DE ESTOQUE
@@ -240,16 +264,26 @@ export function HeaderContent() {
     "relative py-2 text-[13px] font-medium tracking-wide whitespace-nowrap text-white uppercase transition-colors duration-200 hover:text-orange-500 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-orange-500 after:transition-transform after:duration-300 hover:after:scale-x-100";
 
   return (
-    <header
-      className={`fixed top-0 z-50 w-full transition-transform duration-300 ease-out ${
-        scrolled ? "-translate-y-10 shadow-lg" : ""
-      }`}
-    >
-      {/* --- BARRA DE FRETE (some ao rolar) --- */}
-      <TopBar />
+    <header className="fixed top-0 z-50 w-full">
+      {/* --- BARRA DE FRETE (some primeiro ao rolar para baixo, só aparece no topo ao rolar para cima) --- */}
+      <div
+        className={`w-full transition-all duration-300 ease-in-out ${
+          hideTopBar
+            ? "-translate-y-full opacity-0 pointer-events-none h-0 overflow-hidden"
+            : "translate-y-0 opacity-100 h-10"
+        }`}
+      >
+        <TopBar />
+      </div>
 
-      {/* --- BARRA PRINCIPAL --- */}
-      <div className="relative w-full bg-black px-4 md:px-8">
+      {/* --- BARRA PRINCIPAL (some depois ao rolar para baixo, aparece primeiro ao rolar para cima) --- */}
+      <div
+        className={`w-full bg-black px-4 md:px-8 transition-all duration-300 ease-in-out ${
+          hideMainBar
+            ? "-translate-y-full opacity-0 pointer-events-none h-0 overflow-hidden shadow-none"
+            : "translate-y-0 opacity-100 h-20 shadow-lg"
+        }`}
+      >
         <div className="relative mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-4">
           {/* 1. ESQUERDA: Menu mobile + Logo */}
           <div className="flex items-center gap-3 sm:gap-4">

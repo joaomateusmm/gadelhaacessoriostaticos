@@ -130,6 +130,7 @@ export const product = pgTable("product", {
   stock: integer("stock").default(0),
   isStockUnlimited: boolean("isStockUnlimited").notNull().default(false),
   status: text("status").notNull().default("draft"),
+  hideFromClients: boolean("hideFromClients").notNull().default(false),
   sales: integer("sales").notNull().default(0),
   affiliateRate: integer("affiliateRate").default(10),
 

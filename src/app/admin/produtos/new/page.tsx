@@ -661,7 +661,10 @@ export default function NewProductPage() {
                       const selecionadas = field.value || [];
                       const customNaoCadastradas = selecionadas.filter(
                         (c) =>
-                          !colorsList.some((dbCor) => dbCor.name.toLowerCase() === c.toLowerCase()),
+                          !colorsList.some(
+                            (dbCor) =>
+                              dbCor.name.toLowerCase() === c.toLowerCase(),
+                          ),
                       );
                       const alternar = (c: string) =>
                         field.onChange(
@@ -686,7 +689,7 @@ export default function NewProductPage() {
                             <Link
                               href="/admin/cores"
                               target="_blank"
-                              className="font-mono text-[10px] text-orange-400 hover:text-orange-300 underline"
+                              className="font-mono text-[10px] text-orange-400 underline hover:text-orange-300"
                             >
                               + Gerenciar cores / texturas
                             </Link>
@@ -695,28 +698,32 @@ export default function NewProductPage() {
                             {/* Cores Cadastradas no Banco */}
                             {colorsList.length > 0 && (
                               <div className="space-y-2">
-                                <span className="block font-mono text-[10px] text-orange-400/90 uppercase tracking-wider">
+                                <span className="block font-mono text-[10px] tracking-wider text-orange-400/90 uppercase">
                                   Cores da sua Biblioteca ({colorsList.length})
                                 </span>
                                 <div className="flex flex-wrap gap-2">
                                   {colorsList.map((c) => {
-                                    const isSelected = selecionadas.includes(c.name);
+                                    const isSelected = selecionadas.includes(
+                                      c.name,
+                                    );
                                     return (
                                       <button
                                         key={c.id}
                                         type="button"
                                         onClick={() => alternar(c.name)}
                                         className={cn(
-                                          "flex items-center gap-2 h-9 border px-3 font-mono text-xs uppercase transition-all",
+                                          "flex h-9 items-center gap-2 border px-3 font-mono text-xs uppercase transition-all",
                                           isSelected
-                                            ? "border-orange-500 bg-orange-950/40 text-orange-200 font-bold"
+                                            ? "border-orange-500 bg-orange-950/40 font-bold text-orange-200"
                                             : "border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-600 hover:text-white",
                                         )}
                                       >
                                         <span
                                           className="relative h-4 w-4 shrink-0 overflow-hidden rounded-full border border-white/20"
                                           style={{
-                                            backgroundColor: c.imageUrl ? "transparent" : c.hex || "#333333",
+                                            backgroundColor: c.imageUrl
+                                              ? "transparent"
+                                              : c.hex || "#333333",
                                           }}
                                         >
                                           {c.imageUrl && (

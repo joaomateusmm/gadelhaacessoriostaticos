@@ -142,7 +142,11 @@ export function CategoriesTable({ data }: CategoriesTableProps) {
                     {new Date(item.createdAt).toLocaleDateString("pt-BR")}
                   </TableCell>
                   <TableCell>
-                    <CategoryActions id={item.id} />
+                    <CategoryActions
+                      id={item.id}
+                      initialName={item.name}
+                      initialDescription={item.description}
+                    />
                   </TableCell>
                 </TableRow>
               ))

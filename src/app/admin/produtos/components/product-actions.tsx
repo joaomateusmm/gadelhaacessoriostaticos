@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Archive, Edit, Eye, EyeOff, MoreHorizontal, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -28,13 +28,15 @@ import {
 import {
   archiveProduct,
   deleteProduct,
+  toggleHideFromClients,
 } from "../../../../actions/create-product";
 
 interface ProductActionsProps {
   id: string;
+  hideFromClients?: boolean;
 }
 
-export function ProductActions({ id }: ProductActionsProps) {
+export function ProductActions({ id, hideFromClients }: ProductActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
 
@@ -64,7 +66,21 @@ export function ProductActions({ id }: ProductActionsProps) {
     });
   };
 
-  // 2. Aceita Arquivar (Deixar Inativo)
+  const handleToggleHide = () => {
+    startTransition(async () => {
+      try {
+        const result = await toggleHideFromClients(id, !hideFromClients);
+        if (result.success) {
+          toast.success(result.message);
+          router.refresh();
+        } else {
+          toast.error(result.message);
+        }
+      } catch {
+        toast.error("Erro ao alterar visibilidade.");
+      }
+    });
+  };
   const handleArchive = () => {
     startTransition(async () => {
       try {
@@ -107,6 +123,21 @@ export function ProductActions({ id }: ProductActionsProps) {
             onClick={() => router.push(`/admin/produtos/${id}/editar`)}
           >
             <Edit className="mr-2 h-4 w-4 text-neutral-500" /> Editar
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="cursor-pointer font-mono text-xs uppercase duration-300 focus:bg-neutral-800 focus:text-white"
+            onClick={handleToggleHide}
+          >
+            {hideFromClients ? (
+              <>
+                <Eye className="mr-2 h-4 w-4 text-emerald-500" /> Mostrar p/ Clientes
+              </>
+            ) : (
+              <>
+                <EyeOff className="mr-2 h-4 w-4 text-yellow-500" /> Ocultar p/ Clientes
+              </>
+            )}
           </DropdownMenuItem>
 
           <DropdownMenuSeparator className="bg-neutral-800" />

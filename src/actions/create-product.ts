@@ -316,6 +316,24 @@ export async function archiveProduct(id: string) {
   }
 }
 
+export async function toggleHideFromClients(id: string, hide: boolean) {
+  try {
+    await db
+      .update(product)
+      .set({ hideFromClients: hide })
+      .where(eq(product.id, id));
+
+    revalidatePath("/admin/produtos");
+    revalidatePath("/");
+    revalidatePath(`/produto/${id}`);
+
+    return { success: true, message: hide ? "Produto oculto dos clientes com sucesso!" : "Produto visível para os clientes!" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Erro ao alterar visibilidade para clientes." };
+  }
+}
+
 export async function deleteProducts(ids: string[]) {
   try {
     await db.delete(product).where(inArray(product.id, ids));
