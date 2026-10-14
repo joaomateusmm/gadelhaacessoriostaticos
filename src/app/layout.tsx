@@ -82,7 +82,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-br" suppressHydrationWarning>
+    <html lang="pt-br" suppressHydrationWarning className="bg-neutral-950">
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} ${clash.variable} bg-background text-foreground antialiased`}
