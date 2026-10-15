@@ -8,7 +8,6 @@ import { notFound } from "next/navigation";
 import { DeleteReviewButton } from "@/components/delete-review-button";
 import { EditReviewButton } from "@/components/edit-review-button";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import { ReviewDialog } from "@/components/review-dialog";
 import { db } from "@/db";
 import {
@@ -330,7 +329,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
                       <div className="ml-auto flex items-center gap-2 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
                         <EditReviewButton
                           reviewId={reviewItem.id}
-                          productId={id}
                           initialRating={reviewItem.rating}
                           initialComment={reviewItem.comment}
                         />

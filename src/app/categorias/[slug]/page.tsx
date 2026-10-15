@@ -6,7 +6,6 @@ import { notFound } from "next/navigation";
 
 import { ProductCard } from "@/app/produto/[id]/ProductCard";
 import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import { db } from "@/db";
 import { category, product } from "@/db/schema";
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { Edit3, Star, Trash2 } from "lucide-react";
+import { Edit3, Star } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { deleteReviewAction, updateReviewAction } from "@/actions/review";
+import { updateReviewAction } from "@/actions/review";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,7 +25,6 @@ interface EditReviewButtonProps {
 
 export function EditReviewButton({
   reviewId,
-  productId,
   initialRating,
   initialComment,
 }: EditReviewButtonProps) {
