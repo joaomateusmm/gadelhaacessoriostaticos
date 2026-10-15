@@ -6,13 +6,11 @@ import {
   ImagePlus,
   Layers,
   Plus,
-  Star,
   Trash2,
   X,
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -56,8 +54,6 @@ interface VariantMatrixProps {
   baseStock?: number;
   variants: VariantItem[];
   onChange: (variants: VariantItem[]) => void;
-  /** Recebe a URL da imagem selecionada como capa geral */
-  onSetCover?: (imageUrl: string) => void;
 }
 
 /** Retorna as fotos da variante, com fallback para o campo legado `image` */
@@ -72,13 +68,10 @@ export function VariantMatrix({
   baseStock = 0,
   variants,
   onChange,
-  onSetCover,
 }: VariantMatrixProps) {
   const [globalStock, setGlobalStock] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [copiedImagesIndex, setCopiedImagesIndex] = useState<number | null>(null);
-  const [coverUrl, setCoverUrl] = useState<string | null>(null);
-  const [coverError, setCoverError] = useState(false);
 
   // Gera a matriz cartesiana de Cores x Tamanhos
   const gerarCombinacoes = () => {
@@ -172,15 +165,6 @@ export function VariantMatrix({
     onChange(updated);
   };
 
-  /** Define uma imagem como thumb principal da variante ou do produto sem alterar a galeria geral */
-  const handleSetCover = (url: string) => {
-    setCoverError(false);
-    setCoverUrl(url);
-    if (onSetCover) {
-      // Notifica o componente pai apenas para atualizar o indicador visual local, sem injetar na galeria geral `uploadedImages`
-    }
-    toast.success("Thumbnail/Capa da variante definida com sucesso!");
-  };
 
   /** Adiciona uma ou mais fotos (URLs) à variante */
   const addImages = (variantIndex: number, urls: string[]) => {
@@ -468,7 +452,6 @@ export function VariantMatrix({
                       <div className="flex flex-wrap items-start gap-2">
                         {/* Thumbnails das fotos já carregadas com suporte a arrastar e soltar (drag and drop) */}
                         {variantImages.map((imgUrl, imgIdx) => {
-                          const isCover = coverUrl === imgUrl;
                           return (
                             <div
                               key={imgUrl}
@@ -488,11 +471,7 @@ export function VariantMatrix({
                                 newImages.splice(imgIdx, 0, movedImage);
                                 updateItem(idx, { images: newImages, image: null });
                               }}
-                              className={`group relative h-24 w-24 shrink-0 cursor-move overflow-hidden rounded border bg-neutral-900 ${
-                                isCover
-                                  ? "border-emerald-500 ring-2 ring-emerald-500/60"
-                                  : "border-neutral-700"
-                              }`}
+                              className="group relative h-24 w-24 shrink-0 cursor-move overflow-hidden rounded border border-neutral-700 bg-neutral-900"
                             >
                               <Image
                                 src={imgUrl}
@@ -502,19 +481,12 @@ export function VariantMatrix({
                                 className="object-cover pointer-events-none"
                               />
 
-                              {/* Selo de capa atual */}
-                              {isCover && (
-                                <span className="absolute top-1 left-1 z-10 flex items-center gap-1 rounded bg-emerald-600 px-1.5 py-0.5 font-mono text-[9px] font-bold text-white">
-                                  <Check className="h-3 w-3" /> CAPA
-                                </span>
-                              )}
-
                               {/* Índice da foto */}
                               <span className="absolute top-1 right-1 z-10 rounded bg-black/60 px-1 font-mono text-[9px] text-white/80">
                                 {imgIdx + 1}
                               </span>
 
-                              {/* Setas de navegação rápida e ações */}
+                              {/* Setas de navegação rápida */}
                               <div className="absolute inset-x-1 bottom-1 z-20 flex items-center justify-between gap-0.5 bg-neutral-950/90 p-0.5 rounded opacity-0 transition-opacity group-hover:opacity-100">
                                 <button
                                   type="button"
@@ -533,17 +505,9 @@ export function VariantMatrix({
                                 >
                                   ◀
                                 </button>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleSetCover(imgUrl);
-                                  }}
-                                  className="text-[9px] font-mono text-emerald-400 hover:underline font-bold"
-                                  title="Definir como capa do produto"
-                                >
-                                  CAPA
-                                </button>
+                                <span className="font-mono text-[9px] text-neutral-400">
+                                  {imgIdx + 1}
+                                </span>
                                 <button
                                   type="button"
                                   disabled={imgIdx === variantImages.length - 1}
@@ -611,12 +575,6 @@ export function VariantMatrix({
                         </div>
                       </div>
 
-                      {coverError && (
-                        <p className="mt-2 font-mono text-[10px] text-red-400">
-                          Não foi possível definir a capa: o componente pai não
-                          passou a prop onSetCover ao VariantMatrix.
-                        </p>
-                      )}
 
                       {variantImages.length === 0 && (
                         <p className="mt-1 font-mono text-[10px] text-neutral-600">

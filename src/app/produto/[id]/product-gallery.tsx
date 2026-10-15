@@ -315,6 +315,11 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const [selected, setSelected] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
+  // Sempre que a lista de fotos mudar (ex: ao trocar a cor/variante), seleciona a primeira foto (foto da variante)
+  useEffect(() => {
+    setSelected(0);
+  }, [images]);
+
   const zoomLayerRef = useRef<HTMLDivElement>(null);
   const thumbsRef = useRef<HTMLDivElement>(null);
 

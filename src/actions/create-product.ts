@@ -61,6 +61,9 @@ const productSchema = z.object({
   deliveryMode: z.string().optional().nullable(),
   paymentMethods: z.array(z.string()).optional().default([]),
 
+  /** URL da imagem de capa. Pode ser de variante ou da galeria geral. Independente das duas. */
+  thumbnail: z.string().optional().nullable(),
+
   // --- VARIANTES DE PRODUTO (NOVO) ---
   variants: z.array(variantSchema).optional().default([]),
 });
@@ -155,6 +158,7 @@ export async function createProduct(rawData: ProductServerPayload) {
       downloadUrl: data.downloadUrl || null,
       deliveryMode: data.deliveryMode || undefined,
       paymentMethods: data.paymentMethods || [],
+      thumbnail: data.thumbnail || null,
     };
 
     const [insertedProduct] = await db
@@ -246,6 +250,7 @@ export async function updateProduct(id: string, rawData: ProductServerPayload) {
         downloadUrl: data.downloadUrl || null,
         deliveryMode: data.deliveryMode || undefined,
         paymentMethods: data.paymentMethods || [],
+        thumbnail: data.thumbnail ?? null,
 
         updatedAt: new Date(),
       })

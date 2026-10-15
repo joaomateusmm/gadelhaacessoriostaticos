@@ -7,11 +7,13 @@ import {
   ChevronLeft,
   ChevronsUpDown,
   ImageIcon,
+  ImagePlus,
   Link as LinkIcon,
   Package,
   Palette,
   Ruler,
   Star,
+  Trash2,
   X,
 } from "lucide-react";
 import Image from "next/image";
@@ -25,8 +27,10 @@ import { z } from "zod";
 import { updateProduct } from "@/actions/create-product";
 import { getAllCategories } from "@/actions/get-all-categories";
 import { getBrands } from "@/app/admin/produtos/new/get-brands";
-import { ColorOption, getProductColors } from "@/app/admin/produtos/new/get-colors";
-import { VariantItem, VariantMatrix } from "@/components/admin/variant-matrix";
+import {
+  ColorOption,
+  getProductColors,
+} from "@/app/admin/produtos/new/get-colors";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -70,6 +74,8 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { UploadButton } from "@/lib/uploadthing";
 import { cn } from "@/lib/utils";
+
+import { VariantItem, VariantMatrix } from "./variant-matrix";
 
 // --- CONSTANTES (tamanhos, cores e formas de pagamento) ---
 const TAMANHOS_ROUPAS = ["Infantil", "PP", "P", "M", "G", "GG", "XG", "XXG"];
@@ -192,6 +198,8 @@ interface ProductData {
   height?: number | null;
   length?: number | null;
   images: string[] | null;
+  /** URL da capa do produto — independente das galerias */
+  thumbnail?: string | null;
   condition?: string | null;
   isAssembled?: boolean | null;
   hasWarranty?: boolean | null;
@@ -245,6 +253,15 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
 
   const [uploadedImages, setUploadedImages] = useState<string[]>(
     initialData.images || [],
+  );
+
+  /**
+   * URL da capa do produto.
+   * Pode ser de variante OU da galeria geral.
+   * É completamente independente das duas galerias — não mistura nada.
+   */
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(
+    initialData.thumbnail || null,
   );
 
   const [categoriesList, setCategoriesList] = useState<OptionData[]>([]);
@@ -355,11 +372,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
     mode: "onChange",
   });
 
-  const handleSetMainImage = (imageUrlOrIndex: string | number) => {
-    // Não faz nada para evitar misturar fotos da variante com a galeria principal
-    void imageUrlOrIndex;
-    toast.success("Capa da variante selecionada!");
-  };
 
   const watchPrice = form.watch("price");
   const watchDiscountPrice = form.watch("discountPrice");
@@ -412,6 +424,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
         height: data.height ?? 0,
         length: data.length ?? 0,
         images: uploadedImages,
+        thumbnail: thumbnailUrl || null,
 
         // --- ESPECIFICAÇÕES (OPCIONAIS) ---
         condition: data.condition ?? null,
@@ -712,7 +725,10 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                     const selecionadas = field.value || [];
                     const customNaoCadastradas = selecionadas.filter(
                       (c) =>
-                        !colorsList.some((dbCor) => dbCor.name.toLowerCase() === c.toLowerCase()),
+                        !colorsList.some(
+                          (dbCor) =>
+                            dbCor.name.toLowerCase() === c.toLowerCase(),
+                        ),
                     );
                     const alternar = (c: string) =>
                       field.onChange(
@@ -737,7 +753,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                           <Link
                             href="/admin/cores"
                             target="_blank"
-                            className="font-mono text-[10px] text-orange-400 hover:text-orange-300 underline"
+                            className="font-mono text-[10px] text-orange-400 underline hover:text-orange-300"
                           >
                             + Gerenciar cores / texturas
                           </Link>
@@ -746,28 +762,32 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                           {/* Cores Cadastradas no Banco */}
                           {colorsList.length > 0 && (
                             <div className="space-y-2">
-                              <span className="block font-mono text-[10px] text-orange-400/90 uppercase tracking-wider">
+                              <span className="block font-mono text-[10px] tracking-wider text-orange-400/90 uppercase">
                                 Cores da sua Biblioteca ({colorsList.length})
                               </span>
                               <div className="flex flex-wrap gap-2">
                                 {colorsList.map((c) => {
-                                  const isSelected = selecionadas.includes(c.name);
+                                  const isSelected = selecionadas.includes(
+                                    c.name,
+                                  );
                                   return (
                                     <button
                                       key={c.id}
                                       type="button"
                                       onClick={() => alternar(c.name)}
                                       className={cn(
-                                        "flex items-center gap-2 h-9 border px-3 font-mono text-xs uppercase transition-all",
+                                        "flex h-9 items-center gap-2 border px-3 font-mono text-xs uppercase transition-all",
                                         isSelected
-                                          ? "border-orange-500 bg-orange-950/40 text-orange-200 font-bold"
+                                          ? "border-orange-500 bg-orange-950/40 font-bold text-orange-200"
                                           : "border-neutral-800 bg-neutral-900 text-neutral-300 hover:border-neutral-600 hover:text-white",
                                       )}
                                     >
                                       <span
                                         className="relative h-4 w-4 shrink-0 overflow-hidden rounded-full border border-white/20"
                                         style={{
-                                          backgroundColor: c.imageUrl ? "transparent" : c.hex || "#333333",
+                                          backgroundColor: c.imageUrl
+                                            ? "transparent"
+                                            : c.hex || "#333333",
                                         }}
                                       >
                                         {c.imageUrl && (
@@ -850,6 +870,100 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
             </Card>
 
             {/* MATRIZ DE VARIANTES E ESTOQUE INDEPENDENTE (NOVO) */}
+            {/* Preview da capa atual */}
+            {/* CARD DEDICADO: CAPA PRINCIPAL DO PRODUTO (THUMBNAIL) */}
+            <Card className="rounded-none border-neutral-800 bg-neutral-950 shadow-none">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-mono text-sm font-bold tracking-normal text-white uppercase">
+                  <Star className="h-5 w-5 text-emerald-500" /> Capa Principal do Produto (Thumbnail)
+                </CardTitle>
+                <CardDescription className="font-mono text-xs text-neutral-500">
+                  A imagem definida aqui é a capa exclusiva do produto exibida nos cards e catálogo. É 100% independente da galeria geral e das fotos das variantes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {thumbnailUrl ? (
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded border border-emerald-800/50 bg-emerald-950/20 p-4">
+                    <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded border border-emerald-600/40 bg-neutral-900 shadow-md">
+                      <Image
+                        src={thumbnailUrl}
+                        alt="Capa do produto"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 rounded bg-emerald-600/20 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-400 border border-emerald-500/30 uppercase">
+                          <Check className="h-3 w-3" /> Capa Ativa
+                        </span>
+                      </div>
+                      <p className="font-mono text-xs text-neutral-400 break-all">
+                        {thumbnailUrl}
+                      </p>
+                      <p className="font-mono text-[11px] text-neutral-500">
+                        Esta é a imagem que aparecerá no card do produto e no catálogo.
+                      </p>
+                    </div>
+                    <div className="flex sm:flex-col gap-2 shrink-0">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setThumbnailUrl(null)}
+                        className="h-8 rounded-none border-red-900/60 bg-red-950/30 font-mono text-xs text-red-400 hover:bg-red-900/50 hover:text-red-200"
+                      >
+                        <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Remover Capa
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex w-full flex-col items-center justify-center rounded-lg border border-dashed border-neutral-800 bg-neutral-900/40 p-6">
+                    <p className="mb-3 font-mono text-xs text-neutral-400">
+                      Nenhuma capa exclusiva definida. Envie a imagem que será a capa principal:
+                    </p>
+                    <UploadButton
+                      endpoint="imageUploader"
+                      onUploadBegin={() => setIsUploading(true)}
+                      onClientUploadComplete={(res) => {
+                        setIsUploading(false);
+                        if (res && res[0]?.url) {
+                          setThumbnailUrl(res[0].url);
+                          toast.success("Capa do produto definida com sucesso!");
+                        }
+                      }}
+                      onUploadError={(error: Error) => {
+                        setIsUploading(false);
+                        toast.error(`Erro: ${error.message}`);
+                      }}
+                      appearance={{
+                        button:
+                          "rounded-none border border-emerald-700 bg-emerald-800/80 font-mono text-xs font-bold uppercase text-white hover:bg-emerald-700 transition-all ut-uploading:cursor-not-allowed w-full max-w-[220px]",
+                        container: "w-full flex flex-col items-center gap-2",
+                        allowedContent: "font-mono text-xs text-neutral-500",
+                      }}
+                      content={{
+                        button({ ready }) {
+                          if (ready)
+                            return (
+                              <div className="flex items-center gap-2">
+                                <ImagePlus className="h-4 w-4" />
+                                Escolher Capa
+                              </div>
+                            );
+                          return "Carregando...";
+                        },
+                        allowedContent({ isUploading }) {
+                          if (isUploading) return "Enviando...";
+                          return "Imagem de capa até 4MB (JPG, PNG)";
+                        },
+                      }}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             <VariantMatrix
               cores={form.watch("cores") || []}
               tamanhos={form.watch("tamanhos") || []}
@@ -859,7 +973,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
               baseStock={form.watch("stock") || 0}
               variants={variantsList}
               onChange={setVariantsList}
-              onSetCover={handleSetMainImage}
             />
 
             {/* Informações Logísticas (OPCIONAL) */}
@@ -1108,12 +1221,12 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
               </CardContent>
             </Card>
 
-            {/* Galeria de Imagens (OPCIONAL) */}
+            {/* Galeria de Imagens Gerais do produto (OPCIONAL) */}
             <Card className="rounded-none border-neutral-800 bg-neutral-950 shadow-none">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 font-mono text-sm font-bold tracking-normal text-white uppercase">
                   <ImageIcon className="h-5 w-5 text-neutral-500" /> Galeria de
-                  Imagens (Opcional)
+                  Imagens Gerais (Opcional)
                 </CardTitle>
                 <CardDescription className="font-mono text-xs text-neutral-500">
                   Opcional. Adicione ou remova imagens do produto.
@@ -1166,52 +1279,47 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                     </p>
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                       {uploadedImages.map((url, index) => {
-                        const isCover = index === 0;
-
                         return (
                           <div
                             key={url}
                             draggable
                             onDragStart={(e) => {
-                              e.dataTransfer.setData("text/plain", index.toString());
+                              e.dataTransfer.setData(
+                                "text/plain",
+                                index.toString(),
+                              );
                             }}
                             onDragOver={(e) => {
                               e.preventDefault();
                             }}
                             onDrop={(e) => {
                               e.preventDefault();
-                              const draggedIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
-                              if (isNaN(draggedIndex) || draggedIndex === index) return;
+                              const draggedIndex = parseInt(
+                                e.dataTransfer.getData("text/plain"),
+                                10,
+                              );
+                              if (isNaN(draggedIndex) || draggedIndex === index)
+                                return;
                               const newImages = [...uploadedImages];
-                              const [movedImage] = newImages.splice(draggedIndex, 1);
+                              const [movedImage] = newImages.splice(
+                                draggedIndex,
+                                1,
+                              );
                               newImages.splice(index, 0, movedImage);
                               setUploadedImages(newImages);
                               toast.success("Ordem das imagens atualizada!");
                             }}
-                            className={cn(
-                              "group relative aspect-square cursor-move overflow-hidden rounded-lg border bg-neutral-900 p-2 transition-all",
-                              isCover
-                                ? "border-emerald-500/60 ring-2 ring-emerald-500/40"
-                                : "border-neutral-800 hover:border-neutral-600",
-                            )}
+                            className="group relative aspect-square cursor-move overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 p-2 transition-all hover:border-neutral-600"
                           >
                             <Image
                               src={url}
                               alt={`Imagem do produto ${index + 1}`}
                               fill
-                              className="object-contain object-center pointer-events-none"
+                              className="pointer-events-none object-contain object-center"
                             />
 
-                            {/* Badge de CAPA */}
-                            {isCover && (
-                              <div className="absolute top-2 left-2 z-10 flex items-center gap-1 border border-emerald-500/40 bg-neutral-950/90 px-2 py-1 font-mono text-[10px] font-bold text-emerald-400 uppercase">
-                                <Star className="h-3 w-3" />
-                                Capa
-                              </div>
-                            )}
-
-                            {/* Botões de Mover Esquerda / Direita / Capa */}
-                            <div className="absolute inset-x-2 bottom-2 z-10 flex items-center justify-between gap-1 opacity-0 transition-opacity group-hover:opacity-100 bg-neutral-950/80 p-1 rounded">
+                            {/* Botões de Mover Esquerda / Direita */}
+                            <div className="absolute inset-x-2 bottom-2 z-10 flex items-center justify-between gap-1 rounded bg-neutral-950/80 p-1 opacity-0 transition-opacity group-hover:opacity-100">
                               <button
                                 type="button"
                                 disabled={index === 0}
@@ -1224,35 +1332,28 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                                   newImages[index - 1] = temp;
                                   setUploadedImages(newImages);
                                 }}
-                                className="px-1.5 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-white text-[10px] font-mono disabled:opacity-30"
+                                className="bg-neutral-800 px-1.5 py-0.5 font-mono text-[10px] text-white hover:bg-neutral-700 disabled:opacity-30"
                                 title="Mover para esquerda"
                               >
                                 ◀
                               </button>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSetMainImage(index);
-                                }}
-                                className="text-[10px] font-mono text-emerald-400 hover:underline font-bold"
-                                title="Definir como capa"
-                              >
-                                {isCover ? "CAPA" : "Tornar Capa"}
-                              </button>
+                              <span className="font-mono text-[10px] text-neutral-400">
+                                {index + 1}
+                              </span>
                               <button
                                 type="button"
                                 disabled={index === uploadedImages.length - 1}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  if (index === uploadedImages.length - 1) return;
+                                  if (index === uploadedImages.length - 1)
+                                    return;
                                   const newImages = [...uploadedImages];
                                   const temp = newImages[index];
                                   newImages[index] = newImages[index + 1];
                                   newImages[index + 1] = temp;
                                   setUploadedImages(newImages);
                                 }}
-                                className="px-1.5 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-white text-[10px] font-mono disabled:opacity-30"
+                                className="bg-neutral-800 px-1.5 py-0.5 font-mono text-[10px] text-white hover:bg-neutral-700 disabled:opacity-30"
                                 title="Mover para direita"
                               >
                                 ▶
@@ -1262,7 +1363,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                             <button
                               type="button"
                               onClick={() => handleRemoveImage(index)}
-                              className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600/90 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700 z-20"
+                              className="absolute top-2 right-2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-red-600/90 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700"
                               title="Remover imagem"
                             >
                               <X className="h-3 w-3" />

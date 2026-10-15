@@ -118,12 +118,60 @@ export function ProductPurchaseCard({
   const getAttr = (v: ProductVariantData, key: "Cor" | "Tamanho") =>
     v.attributes?.[key] || v.attributes?.[key.toLowerCase()];
 
+  // Mapa de ordem fixa para cores com HEX solicitadas
+  const hexCorOrdemMap: Record<string, number> = {
+    preto: 1,
+    cinza: 2,
+    prata: 3,
+    bege: 4,
+    caqui: 5,
+    "azul mar.": 6,
+    "azul mar": 6,
+    "azul marinho": 6,
+    "verde militar": 7,
+  };
+
+  // Função para ordenar as cores: HEX primeiro (na ordem especificada) e Imagens/Estampas depois
+  const sortCores = (list: string[]) => {
+    return [...list].sort((a, b) => {
+      const matchA = customColors.find(
+        (item) => item.name.toLowerCase().trim() === a.toLowerCase().trim(),
+      );
+      const matchB = customColors.find(
+        (item) => item.name.toLowerCase().trim() === b.toLowerCase().trim(),
+      );
+
+      const hasImgA = Boolean(matchA?.imageUrl);
+      const hasImgB = Boolean(matchB?.imageUrl);
+
+      // Cores HEX vêm SEMPRE antes de cores com imagem
+      if (!hasImgA && hasImgB) return -1;
+      if (hasImgA && !hasImgB) return 1;
+
+      // Se ambas forem cores HEX
+      if (!hasImgA && !hasImgB) {
+        const cleanA = a.toLowerCase().trim();
+        const cleanB = b.toLowerCase().trim();
+        const ordA = hexCorOrdemMap[cleanA] ?? 99;
+        const ordB = hexCorOrdemMap[cleanB] ?? 99;
+
+        if (ordA !== ordB) return ordA - ordB;
+        return cleanA.localeCompare(cleanB);
+      }
+
+      // Se ambas forem cores com Imagem
+      return a.localeCompare(b);
+    });
+  };
+
   // Opções únicas de Cor e Tamanho
-  const coresDisponiveis = hasVariants
+  const rawCores = hasVariants
     ? Array.from(
         new Set(variants.map((v) => getAttr(v, "Cor")).filter(Boolean)),
       )
     : product.cores || [];
+
+  const coresDisponiveis = sortCores(rawCores);
 
   const tamanhoOrdemMap: Record<string, number> = {
     PP: 1,
@@ -187,16 +235,28 @@ export function ProductPurchaseCard({
   // Notifica a galeria quando a variante muda
   useEffect(() => {
     if (onVariantChange) {
-      const variantImgs = selectedVariant?.images;
-      if (variantImgs && variantImgs.length > 0) {
-        onVariantChange([...(product.images || []), ...variantImgs]);
+      const variantImgs =
+        selectedVariant?.images && selectedVariant.images.length > 0
+          ? selectedVariant.images
+          : selectedVariant?.image
+            ? [selectedVariant.image]
+            : [];
+
+      if (variantImgs.length > 0) {
+        // Imagens da variante têm PRIORIDADE MÁXIMA (aparecem primeiro).
+        // Remove eventuais duplicatas caso alguma imagem da variante também esteja na galeria geral.
+        const generalImgs = (product.images || []).filter(
+          (img) => !variantImgs.includes(img),
+        );
+        onVariantChange([...variantImgs, ...generalImgs]);
       } else {
         onVariantChange(null);
       }
     }
   }, [
     selectedVariant?.id,
-    selectedVariant?.images?.length,
+    selectedVariant?.image,
+    selectedVariant?.images,
     onVariantChange,
     product.images,
   ]);

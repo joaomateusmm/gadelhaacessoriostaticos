@@ -1,9 +1,10 @@
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
-import EditProductForm from "@/components/admin/edit-product-form";
 import { db } from "@/db";
 import { product } from "@/db/schema";
+
+import EditProductForm from "./edit-product-form";
 
 interface EditProductPageProps {
   params: Promise<{ id: string }>;

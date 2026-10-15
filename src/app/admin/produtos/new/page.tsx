@@ -23,7 +23,10 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { VariantItem, VariantMatrix } from "@/components/admin/variant-matrix";
+import {
+  VariantItem,
+  VariantMatrix,
+} from "@/app/admin/produtos/[id]/editar/variant-matrix";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -1132,17 +1135,30 @@ export default function NewProductPage() {
                               key={url}
                               draggable
                               onDragStart={(e) => {
-                                e.dataTransfer.setData("text/plain", index.toString());
+                                e.dataTransfer.setData(
+                                  "text/plain",
+                                  index.toString(),
+                                );
                               }}
                               onDragOver={(e) => {
                                 e.preventDefault();
                               }}
                               onDrop={(e) => {
                                 e.preventDefault();
-                                const draggedIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
-                                if (isNaN(draggedIndex) || draggedIndex === index) return;
+                                const draggedIndex = parseInt(
+                                  e.dataTransfer.getData("text/plain"),
+                                  10,
+                                );
+                                if (
+                                  isNaN(draggedIndex) ||
+                                  draggedIndex === index
+                                )
+                                  return;
                                 const newImages = [...uploadedImages];
-                                const [movedImage] = newImages.splice(draggedIndex, 1);
+                                const [movedImage] = newImages.splice(
+                                  draggedIndex,
+                                  1,
+                                );
                                 newImages.splice(index, 0, movedImage);
                                 setUploadedImages(newImages);
                                 toast.success("Ordem das imagens atualizada!");
@@ -1158,7 +1174,7 @@ export default function NewProductPage() {
                                 src={url}
                                 alt={`Imagem do produto ${index + 1}`}
                                 fill
-                                className="object-contain object-center pointer-events-none"
+                                className="pointer-events-none object-contain object-center"
                               />
 
                               {isCover && (
@@ -1169,7 +1185,7 @@ export default function NewProductPage() {
                               )}
 
                               {/* Botões de Mover Esquerda / Direita / Capa */}
-                              <div className="absolute inset-x-2 bottom-2 z-10 flex items-center justify-between gap-1 opacity-0 transition-opacity group-hover:opacity-100 bg-neutral-950/80 p-1 rounded">
+                              <div className="absolute inset-x-2 bottom-2 z-10 flex items-center justify-between gap-1 rounded bg-neutral-950/80 p-1 opacity-0 transition-opacity group-hover:opacity-100">
                                 <button
                                   type="button"
                                   disabled={index === 0}
@@ -1182,7 +1198,7 @@ export default function NewProductPage() {
                                     newImages[index - 1] = temp;
                                     setUploadedImages(newImages);
                                   }}
-                                  className="px-1.5 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-white text-[10px] font-mono disabled:opacity-30"
+                                  className="bg-neutral-800 px-1.5 py-0.5 font-mono text-[10px] text-white hover:bg-neutral-700 disabled:opacity-30"
                                   title="Mover para esquerda"
                                 >
                                   ◀
@@ -1193,7 +1209,7 @@ export default function NewProductPage() {
                                     e.stopPropagation();
                                     handleSetMainImage(index);
                                   }}
-                                  className="text-[10px] font-mono text-emerald-400 hover:underline font-bold"
+                                  className="font-mono text-[10px] font-bold text-emerald-400 hover:underline"
                                   title="Definir como capa"
                                 >
                                   {isCover ? "CAPA" : "Tornar Capa"}
@@ -1203,14 +1219,15 @@ export default function NewProductPage() {
                                   disabled={index === uploadedImages.length - 1}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    if (index === uploadedImages.length - 1) return;
+                                    if (index === uploadedImages.length - 1)
+                                      return;
                                     const newImages = [...uploadedImages];
                                     const temp = newImages[index];
                                     newImages[index] = newImages[index + 1];
                                     newImages[index + 1] = temp;
                                     setUploadedImages(newImages);
                                   }}
-                                  className="px-1.5 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-white text-[10px] font-mono disabled:opacity-30"
+                                  className="bg-neutral-800 px-1.5 py-0.5 font-mono text-[10px] text-white hover:bg-neutral-700 disabled:opacity-30"
                                   title="Mover para direita"
                                 >
                                   ▶
@@ -1220,7 +1237,7 @@ export default function NewProductPage() {
                               <button
                                 type="button"
                                 onClick={() => handleRemoveImage(index)}
-                                className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600/90 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700 z-20"
+                                className="absolute top-2 right-2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-red-600/90 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700"
                                 title="Remover imagem"
                               >
                                 <X className="h-3 w-3" />

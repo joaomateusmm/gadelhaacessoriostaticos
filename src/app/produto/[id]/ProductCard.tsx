@@ -4,12 +4,10 @@ import {
   Loader2,
 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
@@ -22,6 +20,8 @@ interface ProductCardProps {
     price: number;
     discountPrice?: number | null;
     images: string[] | null;
+    /** URL da capa definida explicitamente pelo admin — prioridade máxima */
+    thumbnail?: string | null;
     variants?: Array<{
       images?: string[] | null;
       image?: string | null;
@@ -75,16 +75,21 @@ export function ProductCard({ data, categoryName }: ProductCardProps) {
   const isLowStock =
     !data.isStockUnlimited && stockCount > 0 && stockCount <= 10;
 
-  // Procura imagem na galeria geral ou na primeira variante disponível
+  // Fallback: primeira imagem da galeria geral ou primeira foto de variante
+  const firstGalleryImage =
+    data.images && data.images.length > 0 ? data.images[0] : null;
+
   const firstVariantImage =
     data.variants?.find((v) => (v.images && v.images.length > 0) || v.image)
       ?.images?.[0] || data.variants?.find((v) => v.image)?.image;
 
+  // Prioridade: thumbnail explícito → galeria geral[0] → variante[0] → placeholder
   const productImage =
-    data.images && data.images.length > 0
-      ? data.images[0]
-      : firstVariantImage ||
-        "https://placehold.co/992x658/f3f4f6/9ca3af.png?text=Sem+Imagem";
+    data.thumbnail ||
+    firstGalleryImage ||
+    firstVariantImage ||
+    "https://placehold.co/992x658/f3f4f6/9ca3af.png?text=Sem+Imagem";
+
 
   const handleCardClick = () => {
     startTransition(() => {

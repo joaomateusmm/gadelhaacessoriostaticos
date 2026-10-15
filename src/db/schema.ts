@@ -119,6 +119,8 @@ export const product = pgTable("product", {
   discountPrice: integer("discountPrice"), // Em centavos
   currency: text("currency").notNull().default("BRL"),
   images: text("images").array(),
+  /** URL da imagem de capa do produto. Pode vir da galeria geral OU das fotos de variantes. É independente das duas galerias. */
+  thumbnail: text("thumbnail"),
   categories: text("categories").array(),
   weight: real("weight").default(0),
   width: integer("width").default(0),
