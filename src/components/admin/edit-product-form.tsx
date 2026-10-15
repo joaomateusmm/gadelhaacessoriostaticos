@@ -355,15 +355,9 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
     mode: "onChange",
   });
 
-  const handleSetMainImage = (indexToPromote: number) => {
-    // Apenas reordena a galeria geral (não puxa da variante)
-    if (indexToPromote === 0) return;
-    const newImages = [...uploadedImages];
-    const imageToMove = newImages[indexToPromote];
-    newImages.splice(indexToPromote, 1);
-    newImages.unshift(imageToMove);
-    setUploadedImages(newImages);
-    toast.success("Imagem de capa geral atualizada!");
+  const handleSetMainImage = (_imageUrlOrIndex: string | number) => {
+    // Não faz nada para evitar misturar fotos da variante com a galeria principal
+    toast.success("Capa da variante selecionada!");
   };
 
   const watchPrice = form.watch("price");
