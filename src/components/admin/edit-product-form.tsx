@@ -355,8 +355,9 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
     mode: "onChange",
   });
 
-  const handleSetMainImage = (_imageUrlOrIndex: string | number) => {
+  const handleSetMainImage = (imageUrlOrIndex: string | number) => {
     // Não faz nada para evitar misturar fotos da variante com a galeria principal
+    void imageUrlOrIndex;
     toast.success("Capa da variante selecionada!");
   };
 
