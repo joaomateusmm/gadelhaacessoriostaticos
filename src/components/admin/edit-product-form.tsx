@@ -72,7 +72,7 @@ import { UploadButton } from "@/lib/uploadthing";
 import { cn } from "@/lib/utils";
 
 // --- CONSTANTES (tamanhos, cores e formas de pagamento) ---
-const TAMANHOS_ROUPAS = ["PP", "P", "M", "G", "GG", "XG", "XXG"];
+const TAMANHOS_ROUPAS = ["Infantil", "PP", "P", "M", "G", "GG", "XG", "XXG"];
 const TAMANHOS_NUMERICOS = [
   "36",
   "38",
