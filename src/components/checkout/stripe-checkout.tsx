@@ -9,9 +9,8 @@ import { useCartStore } from "@/store/cart-store";
 
 import { CheckoutForm } from "./checkout-form-global";
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-);
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_placeholder";
+const stripePromise = loadStripe(stripeKey);
 
 export function StripeCheckout() {
   const { items, coupon } = useCartStore();

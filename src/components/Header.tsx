@@ -100,8 +100,15 @@ export function HeaderContent() {
   const [hideTopBar, setHideTopBar] = useState(false);
   const lastScrollY = useRef(0);
 
-  // ESTADOS UNIFICADOS
-  const [categories, setCategories] = useState<CategoryLink[]>([]);
+  // Lista fixa de categorias conforme solicitado
+  const staticCategories = [
+    { label: "ACESSÓRIOS", href: "/categorias/acessorios" },
+    { label: "OUTROS", href: "/categorias/outros" },
+    { label: "CANIVETES", href: "/categorias/canivetes" },
+    { label: "FACAS TÁTICAS", href: "/categorias/facas-taticas" },
+    { label: "ALGEMAS", href: "/categorias/algemas" },
+    { label: "SERVIÇOS", href: "/servicos" },
+  ];
   const [isAffiliate, setIsAffiliate] = useState(false);
 
   // PESQUISA
@@ -125,23 +132,15 @@ export function HeaderContent() {
     setSearchResults([]);
   };
 
-  // 1. CARREGAMENTO DE DADOS INICIAIS
+  // 1. CARREGAMENTO DE DADOS INICIAIS (Otimizado sem fetch de categorias)
   useEffect(() => {
     setMounted(true);
     const fetchData = async () => {
       try {
-        const [cats, affStatus] = await Promise.all([
-          getAllCategories(),
-          checkAffiliateStatus().catch(() => false),
-        ]);
-
-        if (cats && cats.length > 0) {
-          setCategories(cats);
-        }
-
+        const affStatus = await checkAffiliateStatus().catch(() => false);
         setIsAffiliate(affStatus);
       } catch (error) {
-        console.error("Erro ao carregar dados do header", error);
+        console.error("Erro ao carregar status de afiliado", error);
       }
     };
     fetchData();
@@ -288,7 +287,7 @@ export function HeaderContent() {
           {/* 1. ESQUERDA: Menu mobile + Logo */}
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="lg:hidden">
-              <MobileMenu categories={categories} isAffiliate={isAffiliate} />
+              <MobileMenu categories={staticCategories} isAffiliate={isAffiliate} />
             </div>
 
             {/* Logo desktop/tablet */}
@@ -333,20 +332,11 @@ export function HeaderContent() {
 
           {/* 2. CENTRO: Navegação (desktop) */}
           <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 lg:flex xl:gap-8">
-            {categories.slice(0, 5).map((cat, index) => (
-              <Link key={index} href={cat.href || "#"} className={navLinkClass}>
+            {staticCategories.map((cat, index) => (
+              <Link key={index} href={cat.href} className={navLinkClass}>
                 {cat.label}
               </Link>
             ))}
-            <Link href="/servicos" className={navLinkClass}>
-              Serviços
-            </Link>
-            <Link
-              href="/categorias/promocoes"
-              className={`${navLinkClass} !text-orange-500 hover:!text-orange-400`}
-            >
-              Sale
-            </Link>
           </nav>
 
           {/* 3. DIREITA: Ícones */}

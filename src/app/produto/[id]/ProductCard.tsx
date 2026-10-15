@@ -26,10 +26,14 @@ interface ProductCardProps {
     price: number;
     discountPrice?: number | null;
     images: string[] | null;
+    variants?: Array<{
+      images?: string[] | null;
+      image?: string | null;
+    }> | null;
     stock: number | null;
     isStockUnlimited: boolean;
     currency?: string;
-    sku?: string | null; // Adicionei SKU se quiser usar no futuro
+    sku?: string | null;
   };
   categoryName: string;
 }
@@ -75,10 +79,16 @@ export function ProductCard({ data, categoryName }: ProductCardProps) {
   const isLowStock =
     !data.isStockUnlimited && stockCount > 0 && stockCount <= 10;
 
+  // Procura imagem na galeria geral ou na primeira variante disponível
+  const firstVariantImage =
+    data.variants?.find((v) => (v.images && v.images.length > 0) || v.image)
+      ?.images?.[0] || data.variants?.find((v) => v.image)?.image;
+
   const productImage =
     data.images && data.images.length > 0
       ? data.images[0]
-      : "https://placehold.co/992x658/f3f4f6/9ca3af.png?text=Sem+Imagem";
+      : firstVariantImage ||
+        "https://placehold.co/992x658/f3f4f6/9ca3af.png?text=Sem+Imagem";
 
   const handleCardClick = () => {
     startTransition(() => {
@@ -125,7 +135,6 @@ export function ProductCard({ data, categoryName }: ProductCardProps) {
       className={cn(
         "relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-800 bg-[#0A0A0A] transition-colors",
         isPending && "pointer-events-none cursor-wait opacity-80",
-        isOutOfStock && "opacity-80 grayscale-[0.5]",
       )}
     >
       {isPending && (
@@ -135,7 +144,7 @@ export function ProductCard({ data, categoryName }: ProductCardProps) {
       )}
 
       {/* --- ÁREA DA IMAGEM (Fundo clean com cantos arredondados) --- */}
-      <div className="relative aspect-square w-full overflow-hidden bg-[#F2F2F2]">
+      <div className="relative aspect-square w-full overflow-hidden bg-white">
         {/* Badge Lançamento / Desconto no canto superior esquerdo */}
         {discountPercentage > 0 && (
           <span className="absolute top-3 left-3 z-10 rounded-full bg-[#FF4500] px-3.5 py-1 text-[11px] font-extrabold tracking-wide text-white uppercase shadow-sm">
@@ -150,14 +159,6 @@ export function ProductCard({ data, categoryName }: ProductCardProps) {
           className="object-contain"
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
         />
-
-        {isOutOfStock && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50 backdrop-blur-[2px]">
-            <span className="rounded-md border border-red-500 bg-red-950/80 px-3.5 py-1.5 text-xs font-bold tracking-wider text-red-200 uppercase">
-              Esgotado
-            </span>
-          </div>
-        )}
       </div>
 
       {/* --- ÁREA DE INFORMAÇÕES (Fundo Preto com Texto Branco) --- */}

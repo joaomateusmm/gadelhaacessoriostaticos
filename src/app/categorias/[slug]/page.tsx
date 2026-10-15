@@ -4,9 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ProductCard } from "@/app/produto/[id]/ProductCard";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { ProductCard } from "@/components/ProductCard";
 import { db } from "@/db";
 import { category, product } from "@/db/schema";
 
@@ -52,10 +52,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }
 
   // 3. Buscar produtos e filtrar pelo ID da categoria
-  const allProducts = await db
-    .select()
-    .from(product)
-    .orderBy(desc(product.createdAt));
+  const allProducts = await db.query.product.findMany({
+    with: {
+      variants: true,
+    },
+    orderBy: [desc(product.createdAt)],
+  });
 
   const categoryProducts = allProducts.filter((p) => {
     // Verifica se categories não é null e é um array
@@ -65,25 +67,23 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   });
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#ffffff]">
-      <Header />
-
+    <div className="flex min-h-screen flex-col bg-neutral-950 text-neutral-100">
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-36 pb-16 md:px-8">
         {/* --- CABEÇALHO DA CATEGORIA --- */}
         <div className="mb-12 flex flex-col gap-4">
           <Link
             href="/"
-            className="flex w-fit items-center gap-2 text-sm text-neutral-500 transition-colors hover:text-neutral-600"
+            className="flex w-fit items-center gap-2 text-sm text-neutral-400 transition-colors hover:text-neutral-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Voltar para o catálogo
           </Link>
 
           <div>
-            <h1 className="font-clash-display text-4xl font-medium text-black capitalize md:text-5xl">
+            <h1 className="font-clash-display text-4xl font-medium text-white capitalize md:text-5xl">
               {currentCategory.name}
             </h1>
-            <p className="mt-2 text-neutral-700">
+            <p className="mt-2 text-neutral-400">
               {currentCategory.description ||
                 `Confira os melhores produtos da categoria ${currentCategory.name}.`}
             </p>
@@ -107,7 +107,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-5">
             {categoryProducts.map((prod) => (
               <ProductCard
                 key={prod.id}
@@ -118,6 +118,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                   price: prod.price,
                   discountPrice: prod.discountPrice,
                   images: prod.images,
+                  variants: prod.variants,
                   stock: prod.stock,
                   isStockUnlimited: prod.isStockUnlimited ?? false,
                   // IMPORTANTE: Adicionei a moeda aqui

@@ -42,7 +42,7 @@ export function DeleteReviewButton({
       onClick={handleDelete}
       disabled={isDeleting}
       className={cn(
-        "text-neutral-600 transition-colors hover:text-red-500 disabled:opacity-50",
+        "cursor-pointer text-neutral-600 transition-colors hover:text-red-500 disabled:opacity-50",
         className,
       )}
       title="Apagar avaliação"

@@ -44,9 +44,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 // Carrega o Stripe
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-);
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "pk_test_placeholder";
+const stripePromise = loadStripe(stripeKey);
 
 interface ClientServicesListProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

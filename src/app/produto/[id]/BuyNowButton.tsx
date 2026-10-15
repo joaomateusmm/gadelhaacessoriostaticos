@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { createFreeOrder } from "@/actions/checkout";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart-store";
 
 interface BuyNowButtonProps {
@@ -106,7 +107,7 @@ export function BuyNowButton({
     }
 
     // --- FLUXO 2: PRODUTO GRATUITO ---
-    
+
     // Se não estiver logado, manda para o login
     if (!user) {
       toast.info("Você precisa entrar na sua conta para baixar este item.");
@@ -153,11 +154,12 @@ export function BuyNowButton({
   return (
     <Button
       size="lg"
-      className={`mb-4 h-14 w-full text-lg font-bold text-white shadow-lg transition-all ${
+      className={cn(
+        "text-md h-14 w-full cursor-pointer rounded-[3px] font-medium text-white shadow-lg",
         isOutOfStock
-          ? "cursor-not-allowed bg-neutral-400 hover:bg-neutral-400"
-          : "bg-orange-600 hover:-translate-y-0.5 hover:bg-orange-700 hover:shadow-xl"
-      }`}
+          ? "cursor-not-allowed bg-neutral-400 opacity-50 hover:bg-neutral-400"
+          : "bg-emerald-600 hover:bg-emerald-700 hover:shadow-xl",
+      )}
       onClick={handleBuyNow}
       disabled={loading || isOutOfStock}
     >
@@ -171,9 +173,7 @@ export function BuyNowButton({
       ) : isFree ? (
         "BAIXAR AGORA"
       ) : (
-        <span className="flex items-center gap-2">
-          <ShoppingCart className="h-5 w-5" /> COMPRAR AGORA
-        </span>
+        <span className="flex items-center gap-2">COMPRAR AGORA</span>
       )}
     </Button>
   );

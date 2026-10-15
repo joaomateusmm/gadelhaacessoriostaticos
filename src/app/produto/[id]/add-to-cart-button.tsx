@@ -25,6 +25,10 @@ interface AddToCartButtonProps {
   variant?: "default" | "outline" | "secondary" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
   showText?: boolean;
+  /** Quantidade a adicionar (padrão 1) */
+  quantity?: number;
+  /** Mostra o ícone de carrinho antes do texto (padrão true) */
+  showIcon?: boolean;
 }
 
 export function AddToCartButton({
@@ -37,6 +41,8 @@ export function AddToCartButton({
   variant = "default",
   size = "default",
   showText = true,
+  quantity = 1,
+  showIcon = true,
 }: AddToCartButtonProps) {
   const addItem = useCartStore((state) => state.addItem);
 
@@ -67,10 +73,14 @@ export function AddToCartButton({
       name: displayName,
       price: finalPrice,
       image: selectedImage || product.images?.[0] || "",
-      quantity: 1,
+      quantity,
     });
 
-    toast.success("Produto adicionado ao carrinho!");
+    toast.success(
+      quantity > 1
+        ? `${quantity} unidades adicionadas ao carrinho!`
+        : "Produto adicionado ao carrinho!",
+    );
   };
 
   return (
@@ -80,15 +90,13 @@ export function AddToCartButton({
       size={size}
       disabled={isOutOfStock}
       className={cn(
-        // ADICIONADO: Transição suave e movimento para cima no hover
-        "cursor-pointer transition-transform duration-200 hover:-translate-y-1",
+        "cursor-pointer rounded-sm transition-transform duration-200 hover:-translate-y-1",
         className,
-        // Estilo para quando estiver sem estoque
         isOutOfStock && "cursor-not-allowed opacity-50",
       )}
     >
-      <ShoppingCart className={showText ? "mr-2 h-4 w-4" : "h-4 w-4"} />
-      {showText && "Adicionar"}
+      {showIcon && <ShoppingCart className="mr-2 h-4 w-4" />}
+      ADICIONAR AO CARRINHO
     </Button>
   );
 }

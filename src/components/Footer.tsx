@@ -67,20 +67,20 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="relative w-full overflow-hidden bg-[#050505] pt-16 pb-8">
+    <footer className="relative w-full overflow-hidden bg-neutral-950 pt-16 pb-8">
       {/* --- BACKGROUND SILK --- */}
       <div className="pointer-events-none absolute inset-0 z-0 opacity-50">
         <Silk
           speed={12}
           scale={1}
-          color="#1c2116"
+          color="#4f2712"
           noiseIntensity={0.8}
           rotation={0}
         />
       </div>
 
       {/* --- GRADIENTE DE TRANSIÇÃO SUAVE (TOP) --- */}
-      <div className="pointer-events-none absolute top-0 left-0 z-10 h-52 w-full bg-gradient-to-b from-[#000000] to-transparent" />
+      <div className="pointer-events-none absolute top-0 left-0 z-10 h-52 w-full bg-gradient-to-b from-neutral-950 to-transparent" />
 
       {/* --- CONTEÚDO (Z-INDEX MAIOR) --- */}
       <div className="relative z-20 mx-auto max-w-7xl px-4 md:px-8">

@@ -10,6 +10,7 @@ import { Toaster } from "sonner";
 import { CouponPopup } from "@/components/coupon-popup";
 import FloatingScrollbar from "@/components/FloatingScrollbar";
 import { GoogleTranslator } from "@/components/google-translator";
+import { Header } from "@/components/Header";
 import SmoothScroll from "@/components/SmoothScroll";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/language-context";
@@ -98,6 +99,7 @@ export default function RootLayout({
             <LanguageProvider>
               <SmoothScroll>
                 <FloatingScrollbar />
+                <Header />
 
                 {children}
 

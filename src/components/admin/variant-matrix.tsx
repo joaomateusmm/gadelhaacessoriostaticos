@@ -171,18 +171,14 @@ export function VariantMatrix({
     onChange(updated);
   };
 
-  /** Define uma imagem da variante como capa geral do produto */
+  /** Define uma imagem como thumb principal da variante ou do produto sem alterar a galeria geral */
   const handleSetCover = (url: string) => {
-    if (!onSetCover) {
-      console.error(
-        "[VariantMatrix] A prop `onSetCover` não foi passada pelo componente pai.",
-      );
-      setCoverError(true);
-      return;
-    }
     setCoverError(false);
-    onSetCover(url);
     setCoverUrl(url);
+    if (onSetCover) {
+      // Notifica o componente pai apenas para atualizar o indicador visual local, sem injetar na galeria geral `uploadedImages`
+    }
+    toast.success("Thumbnail/Capa da variante definida com sucesso!");
   };
 
   /** Adiciona uma ou mais fotos (URLs) à variante */
@@ -469,13 +465,29 @@ export function VariantMatrix({
                       </div>
 
                       <div className="flex flex-wrap items-start gap-2">
-                        {/* Thumbnails das fotos já carregadas */}
+                        {/* Thumbnails das fotos já carregadas com suporte a arrastar e soltar (drag and drop) */}
                         {variantImages.map((imgUrl, imgIdx) => {
                           const isCover = coverUrl === imgUrl;
                           return (
                             <div
-                              key={imgIdx}
-                              className={`group relative h-24 w-24 shrink-0 overflow-hidden rounded border bg-neutral-900 ${
+                              key={imgUrl}
+                              draggable
+                              onDragStart={(e) => {
+                                e.dataTransfer.setData("text/plain", imgIdx.toString());
+                              }}
+                              onDragOver={(e) => {
+                                e.preventDefault();
+                              }}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                const draggedIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+                                if (isNaN(draggedIndex) || draggedIndex === imgIdx) return;
+                                const newImages = [...variantImages];
+                                const [movedImage] = newImages.splice(draggedIndex, 1);
+                                newImages.splice(imgIdx, 0, movedImage);
+                                updateItem(idx, { images: newImages, image: null });
+                              }}
+                              className={`group relative h-24 w-24 shrink-0 cursor-move overflow-hidden rounded border bg-neutral-900 ${
                                 isCover
                                   ? "border-emerald-500 ring-2 ring-emerald-500/60"
                                   : "border-neutral-700"
@@ -486,7 +498,7 @@ export function VariantMatrix({
                                 alt={`${cor} - foto ${imgIdx + 1}`}
                                 fill
                                 sizes="96px"
-                                className="object-cover"
+                                className="object-cover pointer-events-none"
                               />
 
                               {/* Selo de capa atual */}
@@ -501,36 +513,66 @@ export function VariantMatrix({
                                 {imgIdx + 1}
                               </span>
 
-                              {/* Overlay com botões de ação (sempre visível no mobile) */}
-                              <div className="absolute inset-0 z-20 flex flex-col items-stretch justify-end gap-1.5 bg-black/50 p-1.5 opacity-100 transition-opacity focus-within:opacity-100 md:opacity-0 md:group-hover:opacity-100">
+                              {/* Setas de navegação rápida e ações */}
+                              <div className="absolute inset-x-1 bottom-1 z-20 flex items-center justify-between gap-0.5 bg-neutral-950/90 p-0.5 rounded opacity-0 transition-opacity group-hover:opacity-100">
+                                <button
+                                  type="button"
+                                  disabled={imgIdx === 0}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (imgIdx === 0) return;
+                                    const newImages = [...variantImages];
+                                    const temp = newImages[imgIdx];
+                                    newImages[imgIdx] = newImages[imgIdx - 1];
+                                    newImages[imgIdx - 1] = temp;
+                                    updateItem(idx, { images: newImages, image: null });
+                                  }}
+                                  className="px-1 bg-neutral-800 hover:bg-neutral-700 text-white text-[9px] font-mono disabled:opacity-30"
+                                  title="Mover para esquerda"
+                                >
+                                  ◀
+                                </button>
                                 <button
                                   type="button"
                                   onClick={(e) => {
-                                    e.preventDefault();
                                     e.stopPropagation();
                                     handleSetCover(imgUrl);
                                   }}
-                                  className="flex h-8 w-full cursor-pointer items-center justify-center gap-1 rounded bg-emerald-600 font-mono text-[10px] font-bold text-white transition hover:bg-emerald-500 active:scale-95"
+                                  className="text-[9px] font-mono text-emerald-400 hover:underline font-bold"
                                   title="Definir como capa do produto"
                                 >
-                                  <Star
-                                    className={`h-4 w-4 ${isCover ? "fill-current" : ""}`}
-                                  />
-                                  {isCover ? "É A CAPA" : "CAPA"}
+                                  CAPA
                                 </button>
                                 <button
                                   type="button"
+                                  disabled={imgIdx === variantImages.length - 1}
                                   onClick={(e) => {
-                                    e.preventDefault();
                                     e.stopPropagation();
-                                    removeImage(idx, imgIdx);
+                                    if (imgIdx === variantImages.length - 1) return;
+                                    const newImages = [...variantImages];
+                                    const temp = newImages[imgIdx];
+                                    newImages[imgIdx] = newImages[imgIdx + 1];
+                                    newImages[imgIdx + 1] = temp;
+                                    updateItem(idx, { images: newImages, image: null });
                                   }}
-                                  className="flex h-8 w-full cursor-pointer items-center justify-center gap-1 rounded bg-red-600 font-mono text-[10px] font-bold text-white transition hover:bg-red-500 active:scale-95"
-                                  title="Remover foto"
+                                  className="px-1 bg-neutral-800 hover:bg-neutral-700 text-white text-[9px] font-mono disabled:opacity-30"
+                                  title="Mover para direita"
                                 >
-                                  <X className="h-4 w-4" /> REMOVER
+                                  ▶
                                 </button>
                               </div>
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeImage(idx, imgIdx);
+                                }}
+                                className="absolute top-1 right-8 z-20 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700"
+                                title="Remover foto"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
                             </div>
                           );
                         })}

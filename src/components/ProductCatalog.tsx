@@ -3,7 +3,7 @@ import { and, desc, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { category, product } from "@/db/schema";
 
-import { ProductCard } from "./ProductCard";
+import { ProductCard } from "../app/produto/[id]/ProductCard";
 
 export default async function ProductCatalog() {
   const allCategories = await db.select().from(category);

@@ -355,18 +355,15 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
     mode: "onChange",
   });
 
-  const handleSetMainImage = (imageUrl: string) => {
-    const indexToPromote = uploadedImages.findIndex((img) => img === imageUrl);
+  const handleSetMainImage = (indexToPromote: number) => {
+    // Apenas reordena a galeria geral (não puxa da variante)
+    if (indexToPromote === 0) return;
     const newImages = [...uploadedImages];
-    if (indexToPromote > 0) {
-      const imageToMove = newImages.splice(indexToPromote, 1)[0];
-      newImages.unshift(imageToMove);
-    } else if (indexToPromote === -1) {
-      // Image not in the list, add it as cover
-      newImages.unshift(imageUrl);
-    }
+    const imageToMove = newImages[indexToPromote];
+    newImages.splice(indexToPromote, 1);
+    newImages.unshift(imageToMove);
     setUploadedImages(newImages);
-    toast.success("Imagem de capa atualizada!");
+    toast.success("Imagem de capa geral atualizada!");
   };
 
   const watchPrice = form.watch("price");
@@ -1168,59 +1165,117 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                   />
                 </div>
                 {uploadedImages.length > 0 && (
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                    {uploadedImages.map((url, index) => {
-                      const isCover = index === 0;
+                  <div className="space-y-2">
+                    <p className="font-mono text-[11px] text-neutral-400 uppercase">
+                      Arraste os cards para reordenar, ou use as setas:
+                    </p>
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                      {uploadedImages.map((url, index) => {
+                        const isCover = index === 0;
 
-                      return (
-                        <div
-                          key={url}
-                          className={cn(
-                            "group relative aspect-square overflow-hidden rounded-lg border bg-neutral-900 p-2 transition-all",
-                            isCover
-                              ? "border-emerald-500/60 ring-2 ring-emerald-500/40"
-                              : "border-neutral-800 hover:border-neutral-600",
-                          )}
-                        >
-                          <Image
-                            src={url}
-                            alt={`Imagem do produto ${index + 1}`}
-                            fill
-                            className="object-contain object-center"
-                          />
+                        return (
+                          <div
+                            key={url}
+                            draggable
+                            onDragStart={(e) => {
+                              e.dataTransfer.setData("text/plain", index.toString());
+                            }}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              const draggedIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+                              if (isNaN(draggedIndex) || draggedIndex === index) return;
+                              const newImages = [...uploadedImages];
+                              const [movedImage] = newImages.splice(draggedIndex, 1);
+                              newImages.splice(index, 0, movedImage);
+                              setUploadedImages(newImages);
+                              toast.success("Ordem das imagens atualizada!");
+                            }}
+                            className={cn(
+                              "group relative aspect-square cursor-move overflow-hidden rounded-lg border bg-neutral-900 p-2 transition-all",
+                              isCover
+                                ? "border-emerald-500/60 ring-2 ring-emerald-500/40"
+                                : "border-neutral-800 hover:border-neutral-600",
+                            )}
+                          >
+                            <Image
+                              src={url}
+                              alt={`Imagem do produto ${index + 1}`}
+                              fill
+                              className="object-contain object-center pointer-events-none"
+                            />
 
-                          {/* Badge de CAPA */}
-                          {isCover && (
-                            <div className="absolute top-2 left-2 z-10 flex items-center gap-1 border border-emerald-500/40 bg-neutral-950/90 px-2 py-1 font-mono text-[10px] font-bold text-emerald-400 uppercase">
-                              <Star className="h-3 w-3" />
-                              Capa
-                            </div>
-                          )}
+                            {/* Badge de CAPA */}
+                            {isCover && (
+                              <div className="absolute top-2 left-2 z-10 flex items-center gap-1 border border-emerald-500/40 bg-neutral-950/90 px-2 py-1 font-mono text-[10px] font-bold text-emerald-400 uppercase">
+                                <Star className="h-3 w-3" />
+                                Capa
+                              </div>
+                            )}
 
-                          {/* Botão para DEFINIR COMO CAPA */}
-                          {!isCover && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                            {/* Botões de Mover Esquerda / Direita / Capa */}
+                            <div className="absolute inset-x-2 bottom-2 z-10 flex items-center justify-between gap-1 opacity-0 transition-opacity group-hover:opacity-100 bg-neutral-950/80 p-1 rounded">
                               <button
                                 type="button"
-                                onClick={() => handleSetMainImage(url)}
-                                className="flex cursor-pointer items-center gap-2 border border-neutral-700 bg-neutral-950 px-4 py-2 font-mono text-xs font-bold text-neutral-200 uppercase duration-300 hover:bg-neutral-800 hover:text-white"
+                                disabled={index === 0}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (index === 0) return;
+                                  const newImages = [...uploadedImages];
+                                  const temp = newImages[index];
+                                  newImages[index] = newImages[index - 1];
+                                  newImages[index - 1] = temp;
+                                  setUploadedImages(newImages);
+                                }}
+                                className="px-1.5 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-white text-[10px] font-mono disabled:opacity-30"
+                                title="Mover para esquerda"
                               >
-                                <Star className="h-4 w-4" />
-                                Definir Capa
+                                ◀
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSetMainImage(index);
+                                }}
+                                className="text-[10px] font-mono text-emerald-400 hover:underline font-bold"
+                                title="Definir como capa"
+                              >
+                                {isCover ? "CAPA" : "Tornar Capa"}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={index === uploadedImages.length - 1}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (index === uploadedImages.length - 1) return;
+                                  const newImages = [...uploadedImages];
+                                  const temp = newImages[index];
+                                  newImages[index] = newImages[index + 1];
+                                  newImages[index + 1] = temp;
+                                  setUploadedImages(newImages);
+                                }}
+                                className="px-1.5 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-white text-[10px] font-mono disabled:opacity-30"
+                                title="Mover para direita"
+                              >
+                                ▶
                               </button>
                             </div>
-                          )}
 
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveImage(index)}
-                            className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600/90 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      );
-                    })}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(index)}
+                              className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600/90 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700 z-20"
+                              title="Remover imagem"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </CardContent>

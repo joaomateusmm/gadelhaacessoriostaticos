@@ -31,7 +31,7 @@ export function AddToWishlistButton({
   const isFavorite = isInWishlist(product.id);
 
   const handleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault(); // Previne comportamentos indesejados
+    e.preventDefault();
     e.stopPropagation();
 
     if (isFavorite) {
@@ -50,32 +50,17 @@ export function AddToWishlistButton({
   };
 
   return (
-    <Button
-      variant="outline"
-      size="lg"
+    <button
+      type="button"
       onClick={handleFavorite}
+      aria-label="Favoritar"
       className={cn(
-        "text-md h-14 flex-1 cursor-pointer font-bold transition-all duration-300 hover:-translate-y-1 active:scale-95",
-        // Estilo quando NÃO é favorito (igual ao teu original)
-        !isFavorite &&
-          "border border-black/15 bg-transparent text-neutral-800 shadow-sm hover:bg-white/5",
-        // Estilo quando É favorito (feedback visual)
-        isFavorite &&
-          "border border-black/10 bg-transparent text-neutral-800 shadow-sm hover:bg-white/5",
+        "flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-800 shadow-sm transition-all duration-300 hover:bg-neutral-50 hover:scale-105 active:scale-95",
+        isFavorite && "border-red-500 bg-red-50 text-red-500",
         className,
       )}
     >
-      {isFavorite ? (
-        <>
-          <Heart className="mr-2 h-5 w-5 fill-current" />
-          Favoritado
-        </>
-      ) : (
-        <>
-          <HeartPlus className="mr-2 h-5 w-5" />
-          Favoritar
-        </>
-      )}
-    </Button>
+      <Heart className={cn("h-5 w-5", isFavorite && "fill-current")} />
+    </button>
   );
 }

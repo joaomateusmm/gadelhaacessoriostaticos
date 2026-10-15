@@ -63,12 +63,12 @@ export function AddCategoryButton() {
           <Plus className="h-4 w-4" /> Nova Categoria
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="border-neutral-200 bg-white text-neutral-900 shadow-lg sm:max-w-[425px]">
+      <AlertDialogContent className="rounded-none border-neutral-800 bg-neutral-950 text-neutral-100 shadow-xl sm:max-w-[425px]">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-neutral-900">
+          <AlertDialogTitle className="font-mono text-sm font-bold tracking-normal text-white uppercase">
             Criar Categoria
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-neutral-500">
+          <AlertDialogDescription className="font-mono text-xs text-neutral-400">
             Adicione uma nova categoria para organizar seus produtos.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -80,11 +80,13 @@ export function AddCategoryButton() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-neutral-700">Nome</FormLabel>
+                  <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
+                    Nome
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Ex: Eletrodomésticos"
-                      className="border-neutral-300 bg-white text-neutral-900 focus:border-orange-500 focus:ring-orange-500"
+                      className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0"
                       {...field}
                     />
                   </FormControl>
@@ -97,13 +99,13 @@ export function AddCategoryButton() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-neutral-700">
+                  <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
                     Descrição (Opcional)
                   </FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Breve descrição..."
-                      className="resize-none border-neutral-300 bg-white text-neutral-900 focus:border-orange-500 focus:ring-orange-500"
+                      className="min-h-[100px] resize-none rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0"
                       {...field}
                     />
                   </FormControl>
@@ -112,12 +114,12 @@ export function AddCategoryButton() {
               )}
             />
             <AlertDialogFooter>
-              <AlertDialogCancel className="border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900">
+              <AlertDialogCancel className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-neutral-300 uppercase hover:bg-neutral-800 hover:text-white">
                 Cancelar
               </AlertDialogCancel>
               <Button
                 type="submit"
-                className="bg-orange-600 text-white shadow-sm hover:bg-orange-700"
+                className="rounded-none border border-emerald-600 bg-emerald-950/60 font-mono text-xs font-bold text-emerald-400 uppercase hover:bg-emerald-900/60 hover:text-emerald-300"
                 disabled={isPending}
               >
                 {isPending ? "Salvando..." : "Salvar Categoria"}

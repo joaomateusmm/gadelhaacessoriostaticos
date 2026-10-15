@@ -135,15 +135,15 @@ export function ReviewCard({ review }: { review: any }) {
               <Edit className="h-4 w-4 text-neutral-600" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="border-neutral-200 bg-white sm:max-w-md">
+          <DialogContent className="border-neutral-200 bg-white text-neutral-900 sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Editar Avaliação</DialogTitle>
+              <DialogTitle className="text-neutral-900">Editar Avaliação</DialogTitle>
             </DialogHeader>
             <form action={handleUpdate} className="space-y-4 py-4">
               <input type="hidden" name="reviewId" value={review.id} />
 
               <div className="space-y-2">
-                <Label>Nota (1 a 5)</Label>
+                <Label className="text-neutral-900">Nota (1 a 5)</Label>
                 <Input
                   name="rating"
                   type="number"
@@ -151,19 +151,19 @@ export function ReviewCard({ review }: { review: any }) {
                   max="5"
                   defaultValue={review.rating}
                   required
-                  className="border-neutral-200 bg-white"
+                  className="border-neutral-300 bg-white text-neutral-900"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Comentário</Label>
+                <Label className="text-neutral-900">Comentário</Label>
                 <Textarea
                   name="comment"
                   defaultValue={review.comment || ""}
                   maxLength={155}
-                  className="resize-none border-neutral-200 bg-white"
+                  className="resize-none border-neutral-300 bg-white text-neutral-900"
                 />
-                <p className="text-right text-xs text-neutral-400">
+                <p className="text-right text-xs text-neutral-500">
                   Máx. 155 caracteres
                 </p>
               </div>

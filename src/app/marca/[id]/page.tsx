@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { ProductCard } from "@/components/ProductCard";
+import { ProductCard } from "@/app/produto/[id]/ProductCard";
 import { db } from "@/db";
 import { brand, product } from "@/db/schema";
 
@@ -25,15 +25,15 @@ export default async function BrandPage({ params }: BrandPageProps) {
     return notFound();
   }
 
-  const brandProducts = await db
-    .select()
-    .from(product)
-    .where(and(eq(product.brandId, id), eq(product.status, "active")));
+  const brandProducts = await db.query.product.findMany({
+    where: and(eq(product.brandId, id), eq(product.status, "active")),
+    with: {
+      variants: true,
+    },
+  });
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <Header />
-
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-36 pb-16 md:px-8">
         {/* CABEÇALHO */}
         <div className="mb-12 flex flex-col gap-4">
@@ -46,7 +46,7 @@ export default async function BrandPage({ params }: BrandPageProps) {
           </Link>
 
           <div>
-            <h1 className="font-clash-display text-4xl font-medium capitalize text-black md:text-5xl">
+            <h1 className="font-clash-display text-4xl font-medium text-black capitalize md:text-5xl">
               {currentBrand.name}
             </h1>
             <p className="mt-2 text-neutral-500">
@@ -85,6 +85,7 @@ export default async function BrandPage({ params }: BrandPageProps) {
                   price: prod.price,
                   discountPrice: prod.discountPrice,
                   images: prod.images,
+                  variants: prod.variants,
                   stock: prod.stock,
                   isStockUnlimited: prod.isStockUnlimited ?? false,
                   currency: prod.currency,
