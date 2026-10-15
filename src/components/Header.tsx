@@ -93,11 +93,6 @@ function HeaderIconButton({
 
 // --- CONTEÚDO DO HEADER ---
 export function HeaderContent() {
-  const pathname = usePathname();
-  if (pathname?.startsWith("/admin")) {
-    return null;
-  }
-
   const [mounted, setMounted] = useState(false);
   const [hideMainBar, setHideMainBar] = useState(false);
   const [hideTopBar, setHideTopBar] = useState(false);
@@ -124,9 +119,14 @@ export function HeaderContent() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session } = authClient.useSession();
   const { t } = useLanguage();
   const { items: cartItems, removeItem: removeCartItem } = useCartStore();
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   const closeSearch = () => {
     setIsSearchOpen(false);
