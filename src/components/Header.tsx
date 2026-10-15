@@ -124,10 +124,6 @@ export function HeaderContent() {
   const { t } = useLanguage();
   const { items: cartItems, removeItem: removeCartItem } = useCartStore();
 
-  if (pathname?.startsWith("/admin")) {
-    return null;
-  }
-
   const closeSearch = () => {
     setIsSearchOpen(false);
     setShowResults(false);
@@ -243,6 +239,10 @@ export function HeaderContent() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isSearchOpen]);
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   const formatPrice = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
