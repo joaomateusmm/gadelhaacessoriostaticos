@@ -62,8 +62,9 @@ export function ProductPageClient({
   );
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] lg:gap-16">
-      {/* key: ao trocar de variante a galeria reinicia na primeira imagem */}
+    // items-start é obrigatório: sem isso as colunas esticam até a mesma altura
+    // e o sticky não tem espaço para "andar" dentro do grid.
+    <div className="relative grid items-start gap-10 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] lg:gap-16">
       <div className="min-w-0 lg:sticky lg:top-32 lg:self-start">
         <ProductGallery
           key={activeImages.join("|")}
@@ -72,7 +73,8 @@ export function ProductPageClient({
         />
       </div>
 
-      <div>
+      {/* COLUNA DIREITA: rola normalmente com a página */}
+      <div className="min-w-0">
         <ProductPurchaseCard
           product={product}
           categoryNames={categoryNames}

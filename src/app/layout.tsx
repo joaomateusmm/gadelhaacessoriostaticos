@@ -96,8 +96,7 @@ export default function RootLayout({
         >
           <Suspense fallback={null}>
             <GoogleTranslator />
-            <LanguageProvider>
-              <SmoothScroll>
+              <LanguageProvider>
                 <FloatingScrollbar />
                 <Header />
 
@@ -106,10 +105,9 @@ export default function RootLayout({
                 <Suspense fallback={null}>
                   <CouponDataWrapper />
                 </Suspense>
-              </SmoothScroll>
 
-              <Toaster position="top-left" />
-            </LanguageProvider>
+                <Toaster position="top-left" />
+              </LanguageProvider>
           </Suspense>
         </ThemeProvider>
       </body>

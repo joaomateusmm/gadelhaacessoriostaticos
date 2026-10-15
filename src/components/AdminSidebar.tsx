@@ -7,6 +7,8 @@ import {
   LayoutDashboard,
   Package,
   Palette,
+  Star,
+  TicketPercent,
   Truck,
 } from "lucide-react";
 import Image from "next/image";
@@ -190,7 +192,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             </SidebarMenuButton>
           </SidebarMenuItem> */}
           {/* Avaliações */}
-          {/* <SidebarMenuItem>
+          <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={pathname === "/admin/avaliacoes"}
@@ -201,9 +203,9 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 <span>Avaliações</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem> */}
+          </SidebarMenuItem>
           {/* Cupons */}
-          {/* <SidebarMenuItem>
+          <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               isActive={pathname.startsWith("/admin/cupons")}
@@ -214,7 +216,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 <span>Cupons</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem> */}
+          </SidebarMenuItem>
           {/* Separador */}
           <div className="my-4 h-[1px] bg-neutral-800" />
           {/* Voltar ao Site */}

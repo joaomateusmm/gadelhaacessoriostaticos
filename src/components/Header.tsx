@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 
 import { checkStockAvailability } from "@/actions/check-stock";
@@ -93,6 +93,11 @@ function HeaderIconButton({
 
 // --- CONTEÚDO DO HEADER ---
 export function HeaderContent() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   const [mounted, setMounted] = useState(false);
   const [hideMainBar, setHideMainBar] = useState(false);
   const [hideTopBar, setHideTopBar] = useState(false);

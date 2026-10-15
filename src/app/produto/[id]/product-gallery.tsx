@@ -254,7 +254,7 @@ function Lightbox({
               sizes="100vw"
               quality={90}
               priority
-              className="object-contain p-4 md:p-10"
+              className="object-contain p-4 md:p-10 w-full h-full"
             />
           </div>
         </button>
@@ -332,8 +332,8 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   useCenterChild(thumbsRef, selected);
 
   return (
-    <div className="flex flex-col gap-3 md:flex-row-reverse md:gap-4">
-      {/* IMAGEM PRINCIPAL: quadrado fixo, a foto se encaixa sem cortar */}
+    <div className="flex flex-col gap-3 md:flex-row-reverse md:gap-4 w-full">
+      {/* IMAGEM PRINCIPAL: quadrada no celular/tablet; no desktop preenche a altura disponível */}
       <div
         className="group relative aspect-square w-full min-w-0 overflow-hidden border border-neutral-200 bg-white md:flex-1"
         {...swipe.handlers}

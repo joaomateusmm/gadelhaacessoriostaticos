@@ -77,6 +77,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     where: eq(product.id, id),
     with: {
       variants: true,
+      brandRef: true,
     },
   });
 
@@ -252,13 +253,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </ProductPageClient>
 
         {/* --- AVALIAÇÕES --- */}
-        <section className="mx-auto mt-16 w-full border-t border-neutral-200 pt-16">
+        <section className="mx-auto mt-16 w-full border-t border-neutral-200 pt-8">
           <h2 className="text-center text-xl font-light tracking-wide text-neutral-900 uppercase">
             Avaliações de clientes
           </h2>
 
           {totalReviews > 0 && (
-            <div className="mt-2 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-16">
+            <div className="my-8 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-16">
               <div className="flex flex-col items-center gap-2">
                 <div className="flex items-center gap-2">
                   <Stars rating={averageRating} size="h-4 w-4" />

@@ -155,7 +155,7 @@ export function BuyNowButton({
     <Button
       size="lg"
       className={cn(
-        "text-md h-14 w-full cursor-pointer rounded-[3px] font-medium text-white shadow-lg",
+        "text-md h-15 w-full cursor-pointer rounded-[3px] font-medium text-white shadow-lg",
         isOutOfStock
           ? "cursor-not-allowed bg-neutral-400 opacity-50 hover:bg-neutral-400"
           : "bg-emerald-600 hover:bg-emerald-700 hover:shadow-xl",

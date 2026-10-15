@@ -56,8 +56,9 @@ interface ProductPurchaseCardProps {
     cores?: string[] | null;
     tamanhos?: string[] | null;
     variants?: ProductVariantData[] | null;
-    /** Opcional: imagem/PDF da tabela de medidas. Sem isso o link não aparece. */
     sizeChartUrl?: string | null;
+    brandRef?: { name: string } | null;
+    brand?: string | null;
   };
   categoryNames: string[];
   /** Chamado quando a variante muda. Recebe as imagens da variante (ou null). */
@@ -125,15 +126,15 @@ export function ProductPurchaseCard({
     : product.cores || [];
 
   const tamanhoOrdemMap: Record<string, number> = {
-    "PP": 1,
-    "P": 2,
-    "M": 3,
-    "G": 4,
-    "GG": 5,
-    "XG": 6,
-    "XXG": 7,
-    "U": 8,
-    "ÚNICO": 9,
+    PP: 1,
+    P: 2,
+    M: 3,
+    G: 4,
+    GG: 5,
+    XG: 6,
+    XXG: 7,
+    U: 8,
+    ÚNICO: 9,
   };
 
   const sortTamanhos = (list: string[]) => {
@@ -267,31 +268,49 @@ export function ProductPurchaseCard({
         </div>
 
         {/* Sempre visível (mesmo com 0 avaliações). Clique leva às avaliações. */}
-        <a
-          href="#avaliacoes"
-          className="inline-flex items-center gap-2 text-sm text-neutral-600 transition-colors hover:text-neutral-900"
-        >
-          <span className="flex gap-0.5" aria-hidden>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star
-                key={star}
-                className="h-3.5 w-3.5"
-                style={
-                  averageRating >= star - 0.5
-                    ? { fill: STAR_COLOR, color: STAR_COLOR }
-                    : { fill: "#e5e5e5", color: "#e5e5e5" }
-                }
-              />
-            ))}
-          </span>
-          <span className="tabular-nums">
-            {averageRating.toFixed(2).replace(".", ",")}
-          </span>
-          <span className="h-3 w-px bg-neutral-300" />
-          <span>
-            {totalReviews} {totalReviews === 1 ? "avaliação" : "avaliações"}
-          </span>
-        </a>
+        <div className="flex items-center gap-3">
+          {(() => {
+            const brandName = product.brandRef?.name || product.brand;
+            if (!brandName) return null;
+            return (
+              <>
+                <span
+                  title="Marca do produto"
+                  className="text-sm text-neutral-600"
+                >
+                  {brandName}
+                </span>
+                <span className="h-3 w-px bg-neutral-300" />
+              </>
+            );
+          })()}
+
+          <a
+            href="#avaliacoes"
+            className="inline-flex items-center gap-2 text-sm text-neutral-600 transition-colors hover:text-neutral-900"
+          >
+            <span className="flex gap-0.5" aria-hidden>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className="h-3.5 w-3.5"
+                  style={
+                    averageRating >= star - 0.5
+                      ? { fill: STAR_COLOR, color: STAR_COLOR }
+                      : { fill: "#e5e5e5", color: "#e5e5e5" }
+                  }
+                />
+              ))}
+            </span>
+            <span className="tabular-nums">
+              {averageRating.toFixed(2).replace(".", ",")}
+            </span>
+            <span className="h-3 w-px bg-neutral-300" />
+            <span>
+              {totalReviews} {totalReviews === 1 ? "avaliação" : "avaliações"}
+            </span>
+          </a>
+        </div>
       </div>
 
       {/* --- PREÇO --- */}

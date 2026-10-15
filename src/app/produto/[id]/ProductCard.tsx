@@ -1,11 +1,7 @@
 "use client";
 
 import {
-  Hammer,
-  Heart,
   Loader2,
-  ShoppingCart,
-  TrendingDown,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
