@@ -528,6 +528,7 @@ export default function RegistrarPedidoPage() {
                         align="start"
                         className="custom-scrollbar max-h-[30rem] w-[var(--radix-dropdown-menu-trigger-width)] min-w-[280px] overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
                         onWheel={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
                       >
                         <div className="mb-2 flex items-center gap-2 border border-neutral-800 bg-neutral-900 px-2 py-1.5">
                           <Search className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
@@ -536,6 +537,7 @@ export default function RegistrarPedidoPage() {
                             placeholder="Pesquisar produto..."
                             value={searchProduto}
                             onChange={(e) => setSearchProduto(e.target.value)}
+                            onKeyDown={(e) => e.stopPropagation()}
                             className="w-full bg-transparent font-mono text-xs text-white placeholder:text-neutral-500 focus:outline-none"
                           />
                         </div>
@@ -560,6 +562,7 @@ export default function RegistrarPedidoPage() {
                                 {grupo.itens.map((p) => (
                                   <DropdownMenuItem
                                     key={p.id}
+                                    onSelect={(e) => e.preventDefault()}
                                     onClick={() => trocarProduto(p.id)}
                                     className={`my-0.5 flex cursor-pointer items-center justify-between font-mono text-xs uppercase ${
                                       produtoId === p.id
@@ -658,6 +661,7 @@ export default function RegistrarPedidoPage() {
                         align="start"
                         className="custom-scrollbar max-h-64 w-[var(--radix-dropdown-menu-trigger-width)] min-w-[200px] overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
                         onWheel={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
                       >
                         {(produtoSelecionado?.cores || []).length > 5 && (
                           <div className="mb-2 flex items-center gap-2 border border-neutral-800 bg-neutral-900 px-2 py-1.5">
@@ -689,6 +693,7 @@ export default function RegistrarPedidoPage() {
                               .map((c) => (
                                 <DropdownMenuItem
                                   key={c}
+                                  onSelect={(e) => e.preventDefault()}
                                   onClick={() => setCor(c)}
                                   className={`cursor-pointer font-mono text-xs uppercase ${
                                     cor === c

@@ -489,6 +489,9 @@ export function TabelaPedidosSistema({
               align="start"
               className="max-h-80 w-120 overflow-x-hidden rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
               onWheel={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                e.stopPropagation();
+              }}
             >
               <div className="mb-2 flex items-center gap-2 border border-neutral-800 bg-neutral-900 px-2 py-1">
                 <Search className="h-3.5 w-3.5 text-neutral-500" />
@@ -497,6 +500,7 @@ export function TabelaPedidosSistema({
                   placeholder="Pesquisar produto..."
                   value={searchProdutoFilter}
                   onChange={(e) => setSearchProdutoFilter(e.target.value)}
+                  onKeyDown={(e) => e.stopPropagation()}
                   className="w-full bg-transparent font-mono text-xs text-white placeholder:text-neutral-500 focus:outline-none"
                 />
               </div>
@@ -506,6 +510,7 @@ export function TabelaPedidosSistema({
                 onWheel={(e) => e.stopPropagation()}
               >
                 <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
                   onClick={() => {
                     setFiltroProduto("todos");
                     setFiltroTamanho("todos");
@@ -535,6 +540,7 @@ export function TabelaPedidosSistema({
                     .map((prod) => (
                       <DropdownMenuItem
                         key={prod}
+                        onSelect={(e) => e.preventDefault()}
                         onClick={() => {
                           setFiltroProduto(prod);
                           setFiltroTamanho("todos");
