@@ -18,7 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface EditReviewButtonProps {
   reviewId: string;
-  productId: string;
   initialRating: number;
   initialComment: string | null;
 }

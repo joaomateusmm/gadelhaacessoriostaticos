@@ -22,9 +22,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 
-import { checkAffiliateStatus } from "@/actions/check-affiliate-status";
 import { checkStockAvailability } from "@/actions/check-stock";
-import { getAllCategories } from "@/actions/get-all-categories";
 import { searchProductsAction } from "@/actions/search-products";
 import { CartSheet } from "@/components/cart-sheet";
 import { MobileMenu } from "@/components/mobile-menu";
@@ -137,7 +135,7 @@ export function HeaderContent() {
     setMounted(true);
     const fetchData = async () => {
       try {
-        const affStatus = await checkAffiliateStatus().catch(() => false);
+        const affStatus = false;
         setIsAffiliate(affStatus);
       } catch (error) {
         console.error("Erro ao carregar status de afiliado", error);
