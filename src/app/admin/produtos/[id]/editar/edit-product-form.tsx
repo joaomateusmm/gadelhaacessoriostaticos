@@ -92,6 +92,7 @@ const TAMANHOS_NUMERICOS = [
   "54",
   "56",
 ];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CORES_PADRAO = [
   "Preto",
   "Branco",
@@ -205,6 +206,7 @@ interface ProductData {
   thumbnail?: string | null;
 
   brand?: string | null;
+  paymentLink?: string | null;
   specsGroups?: { title: string; description: string }[] | null;
   downloadUrl?: string | null;
   tamanhos?: string[] | null;

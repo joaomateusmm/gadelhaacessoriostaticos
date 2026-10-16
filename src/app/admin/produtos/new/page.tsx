@@ -95,6 +95,7 @@ const TAMANHOS_NUMERICOS = [
   "54",
   "56",
 ];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CORES_PADRAO = [
   "Preto",
   "Branco",

@@ -40,6 +40,7 @@ export function AddToCartButton({
   className,
   variant = "default",
   size = "default",
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   showText = true,
   quantity = 1,
   showIcon = true,

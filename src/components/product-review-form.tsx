@@ -79,6 +79,7 @@ export function ProductReviewForm({
   };
 
   // Função para preencher e enviar comentário rápido
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleQuickComment = (text: string) => {
     setCommentText(text);
     setTimeout(() => {
