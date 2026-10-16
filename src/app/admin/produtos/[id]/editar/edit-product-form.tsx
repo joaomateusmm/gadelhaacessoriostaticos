@@ -20,7 +20,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -149,10 +149,7 @@ const formSchema = z.object({
   length: z.number().int().min(0, "Comprimento inválido").optional(),
 
   // --- ESPECIFICAÇÕES E DETALHES (OPCIONAIS) ---
-  condition: z.enum(["new", "used", "refurbished"]).optional(),
-  isAssembled: z.boolean().optional(),
-  hasWarranty: z.boolean().optional(),
-  warrantyDetails: z.string().optional(),
+
   brand: z.string().optional(),
 
   // --- LINKS (OPCIONAIS) ---
@@ -164,6 +161,12 @@ const formSchema = z.object({
     .optional(),
   tamanhos: z.array(z.string()),
   cores: z.array(z.string()),
+  specsGroups: z.array(
+    z.object({
+      title: z.string().min(1, "O título é obrigatório"),
+      description: z.string().min(1, "A descrição é obrigatória"),
+    })
+  ),
   brandId: z.string().optional(),
 
   // --- CONFIGURAÇÕES DE VENDA (OPCIONAIS) ---
@@ -200,12 +203,9 @@ interface ProductData {
   images: string[] | null;
   /** URL da capa do produto — independente das galerias */
   thumbnail?: string | null;
-  condition?: string | null;
-  isAssembled?: boolean | null;
-  hasWarranty?: boolean | null;
-  warrantyDetails?: string | null;
+
   brand?: string | null;
-  paymentLink?: string | null;
+  specsGroups?: { title: string; description: string }[] | null;
   downloadUrl?: string | null;
   tamanhos?: string[] | null;
   cores?: string[] | null;
@@ -348,11 +348,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
         : [],
 
       // --- ESPECIFICAÇÕES (OPCIONAIS) ---
-      condition:
-        (initialData.condition as "new" | "used" | "refurbished") || undefined,
-      isAssembled: initialData.isAssembled || false,
-      hasWarranty: initialData.hasWarranty || false,
-      warrantyDetails: initialData.warrantyDetails || "",
+
       brand: initialData.brand || "",
 
       // --- LINKS / VENDA (OPCIONAIS) ---
@@ -360,6 +356,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
       downloadUrl: initialData.downloadUrl || "",
       tamanhos: initialData.tamanhos || [],
       cores: initialData.cores || [],
+      specsGroups: initialData.specsGroups || [],
       brandId: initialData.brandId || undefined,
       deliveryMode: (initialData.deliveryMode as "email" | "none") || "none",
       paymentMethods: initialData.paymentMethods || [
@@ -373,7 +370,14 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
   });
 
 
-  const watchPrice = form.watch("price");
+  const {
+    fields: specsFields,
+    append: appendSpec,
+    remove: removeSpec,
+  } = useFieldArray({
+    control: form.control,
+    name: "specsGroups",
+  });
   const watchDiscountPrice = form.watch("discountPrice");
   const watchIsStockUnlimited = form.watch("isStockUnlimited");
   const watchCurrency = form.watch("currency");
@@ -427,15 +431,13 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
         thumbnail: thumbnailUrl || null,
 
         // --- ESPECIFICAÇÕES (OPCIONAIS) ---
-        condition: data.condition ?? null,
-        isAssembled: data.isAssembled ?? false,
-        hasWarranty: data.hasWarranty ?? false,
-        warrantyDetails: data.hasWarranty ? data.warrantyDetails || null : null,
+
         brand: data.brand?.trim() ? data.brand.trim() : null,
 
         // --- OUTROS DADOS ---
         tamanhos: data.tamanhos,
         cores: data.cores,
+        specsGroups: data.specsGroups,
         brandId: data.brandId,
         deliveryMode: data.deliveryMode ?? "none",
         paymentLink: data.paymentLink === "" ? null : data.paymentLink,
@@ -869,7 +871,91 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
               </CardContent>
             </Card>
 
-            {/* MATRIZ DE VARIANTES E ESTOQUE INDEPENDENTE (NOVO) */}
+            {/* ESPECIFICAÇÕES TÉCNICAS DO PRODUTO (GRUPOS) */}
+            <Card className="rounded-none border-neutral-800 bg-neutral-950 shadow-none">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 font-mono text-sm font-bold tracking-normal text-white uppercase">
+                    <Ruler className="h-5 w-5 text-neutral-500" /> Especificações Técnicas do Produto
+                  </CardTitle>
+                  <CardDescription className="font-mono text-xs text-neutral-500">
+                    Adicione grupos opcionais com Título e Descrição (ex: Título [Tamanho da lâmina], Descrição [19 cm]).
+                  </CardDescription>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-9 rounded-none border-neutral-700 bg-neutral-900 font-mono text-xs font-bold uppercase text-white hover:bg-neutral-800"
+                  onClick={() => appendSpec({ title: "", description: "" })}
+                >
+                  + Adicionar Grupo
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {specsFields.length === 0 && (
+                  <p className="font-mono text-xs text-neutral-500 italic">
+                    Nenhum grupo de especificação técnica adicionado.
+                  </p>
+                )}
+                {specsFields.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-3 border border-neutral-800 bg-neutral-900/50 p-4"
+                  >
+                    <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name={`specsGroups.${index}.title`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
+                              Título #{index + 1}
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Ex: Tamanho da lâmina"
+                                className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-xs"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`specsGroups.${index}.description`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
+                              Descrição #{index + 1}
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Ex: 19 cm"
+                                className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-xs"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="mt-7 text-neutral-400 hover:bg-neutral-800 hover:text-red-400"
+                      onClick={() => removeSpec(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
             {/* Preview da capa atual */}
             {/* CARD DEDICADO: CAPA PRINCIPAL DO PRODUTO (THUMBNAIL) */}
             <Card className="rounded-none border-neutral-800 bg-neutral-950 shadow-none">

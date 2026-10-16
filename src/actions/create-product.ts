@@ -47,14 +47,12 @@ const productSchema = z.object({
   length: z.number().int().min(0).default(0),
 
   // --- NOVOS CAMPOS ---
-  condition: z.enum(["new", "used", "refurbished"]).default("new").optional().nullable(),
-  isAssembled: z.boolean().default(false).optional(),
-  hasWarranty: z.boolean().default(false).optional(),
-  warrantyDetails: z.string().optional().nullable(),
+
   brand: z.string().optional().nullable(),
 
   tamanhos: z.array(z.string()).optional().default([]),
   cores: z.array(z.string()).optional().default([]),
+  specsGroups: z.array(z.object({ title: z.string(), description: z.string() })).optional().default([]),
   brandId: z.string().optional().nullable(),
   paymentLink: z.string().optional().nullable(),
   downloadUrl: z.string().optional().nullable(),
@@ -145,14 +143,12 @@ export async function createProduct(rawData: ProductServerPayload) {
       height: data.height,
       length: data.length,
 
-      condition: data.condition,
-      isAssembled: data.isAssembled,
-      hasWarranty: data.hasWarranty,
-      warrantyDetails: data.warrantyDetails,
+
       brand: data.brand,
 
       tamanhos: data.tamanhos || [],
       cores: data.cores || [],
+      specsGroups: data.specsGroups || [],
       brandId: data.brandId || null,
       paymentLink: data.paymentLink || null,
       downloadUrl: data.downloadUrl || null,
@@ -237,14 +233,12 @@ export async function updateProduct(id: string, rawData: ProductServerPayload) {
         length: data.length,
 
         // --- ATUALIZANDO NOVOS CAMPOS ---
-        condition: data.condition,
-        isAssembled: data.isAssembled,
-        hasWarranty: data.hasWarranty,
-        warrantyDetails: data.warrantyDetails,
+
         brand: data.brand,
 
         tamanhos: data.tamanhos || [],
         cores: data.cores || [],
+        specsGroups: data.specsGroups || [],
         brandId: data.brandId || null,
         paymentLink: data.paymentLink || null,
         downloadUrl: data.downloadUrl || null,

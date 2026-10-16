@@ -31,6 +31,7 @@ const createReviewSchema = z.object({
     .optional()
     .nullable()
     .transform((val) => val || ""),
+  images: z.array(z.string()).optional().default([]),
 });
 
 export async function createReviewAction(
@@ -52,11 +53,22 @@ export async function createReviewAction(
     const rawProductId = formData.get("productId");
     const rawRating = formData.get("rating");
     const rawComment = formData.get("comment");
+    const rawImagesJson = formData.get("images");
+
+    let parsedImages: string[] = [];
+    if (rawImagesJson && typeof rawImagesJson === "string") {
+      try {
+        parsedImages = JSON.parse(rawImagesJson);
+      } catch {
+        parsedImages = [];
+      }
+    }
 
     const rawData = {
       productId: rawProductId,
       rating: rawRating,
       comment: rawComment,
+      images: parsedImages,
     };
 
     const validatedFields = createReviewSchema.safeParse(rawData);
@@ -74,7 +86,7 @@ export async function createReviewAction(
       };
     }
 
-    const { productId, rating, comment } = validatedFields.data;
+    const { productId, rating, comment, images } = validatedFields.data;
 
     // Inserir no Banco
     await db.insert(review).values({
@@ -82,6 +94,7 @@ export async function createReviewAction(
       productId: productId,
       rating: rating,
       comment: comment,
+      images: images || [],
     });
 
     // Discord
@@ -150,7 +163,7 @@ export async function deleteReviewAction(reviewId: string, productId: string) {
 
 // Schema para atualização (basicamente o mesmo, mas precisa do reviewId)
 const updateReviewSchema = z.object({
-  reviewId: z.string().uuid(),
+  reviewId: z.string(),
   rating: z.coerce.number().int().min(1).max(5),
   comment: z
     .string()
@@ -159,6 +172,7 @@ const updateReviewSchema = z.object({
     .optional()
     .nullable()
     .transform((val) => val || ""),
+  images: z.array(z.string()).optional().default([]),
 });
 
 export async function updateReviewAction(
@@ -174,10 +188,21 @@ export async function updateReviewAction(
       return { success: false, message: "Não autorizado." };
     }
 
+    const rawImagesJson = formData.get("images");
+    let parsedImages: string[] = [];
+    if (rawImagesJson && typeof rawImagesJson === "string") {
+      try {
+        parsedImages = JSON.parse(rawImagesJson);
+      } catch {
+        parsedImages = [];
+      }
+    }
+
     const rawData = {
       reviewId: formData.get("reviewId"),
       rating: formData.get("rating"),
       comment: formData.get("comment"),
+      images: parsedImages,
     };
 
     const validated = updateReviewSchema.safeParse(rawData);
@@ -190,7 +215,7 @@ export async function updateReviewAction(
       };
     }
 
-    const { reviewId, rating, comment } = validated.data;
+    const { reviewId, rating, comment, images } = validated.data;
 
     // Atualiza APENAS se o review pertencer ao usuário
     const updated = await db
@@ -198,6 +223,7 @@ export async function updateReviewAction(
       .set({
         rating,
         comment,
+        images: images || [],
       })
       .where(and(eq(review.id, reviewId), eq(review.userId, session.user.id)))
       .returning();
@@ -209,12 +235,8 @@ export async function updateReviewAction(
       };
     }
 
-    // Revalida a página de lista de avaliações e a página do produto original
-    // (Como não temos o productId fácil aqui sem buscar, revalidamos o path da conta)
     revalidatePath("/minha-conta/avaliacoes");
-
-    // Opcional: Buscar o productId para revalidar a página do produto também
-    // revalidatePath(`/produto/${updated[0].productId}`);
+    revalidatePath(`/produto/${updated[0].productId}`);
 
     return { success: true, message: "Avaliação atualizada!" };
   } catch (error) {

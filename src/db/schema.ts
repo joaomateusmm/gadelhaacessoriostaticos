@@ -137,10 +137,7 @@ export const product = pgTable("product", {
   affiliateRate: integer("affiliateRate").default(10),
 
   // Informações úteis originais do banco X
-  condition: text("condition").default("new"), // 'new', 'used', 'refurbished', etc.
-  isAssembled: boolean("isAssembled").default(false), // true = sim, false = não
-  hasWarranty: boolean("hasWarranty").default(false),
-  warrantyDetails: text("warrantyDetails"), // ex: "12 meses"
+
   brand: text("brand"), // Texto livre mantido por compatibilidade com X
 
   // --- NOVOS CAMPOS: ADICIONADOS DO BANCO Y ---
@@ -155,6 +152,7 @@ export const product = pgTable("product", {
     .array()
     .notNull()
     .default(["Pix", "Cartão de Crédito", "Cartão de Débito", "Boleto"]),
+  specsGroups: jsonb("specsGroups").$type<{ title: string; description: string }[]>().default([]).notNull(),
 
   // Timestamps mantidos
   createdAt: timestamp("createdAt").notNull().defaultNow(),
@@ -172,6 +170,7 @@ export const review = pgTable("review", {
     .$defaultFn(() => crypto.randomUUID()),
   rating: integer("rating").notNull(),
   comment: text("comment"),
+  images: text("images").array(),
   productId: text("productId")
     .notNull()
     .references(() => product.id, { onDelete: "cascade" }),

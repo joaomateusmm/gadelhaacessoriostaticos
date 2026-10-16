@@ -26,28 +26,28 @@ export function ReviewDialog({ productId, productName }: ReviewDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="outline"
+          variant="default"
           size="sm"
-          className="h-8 gap-2 border-orange-200 bg-white text-xs font-medium text-orange-600 hover:bg-orange-50 hover:text-orange-700"
+          className="h-11 rounded-none gap-2 bg-orange-600 px-6 text-xs font-medium uppercase tracking-wider text-white shadow-none hover:bg-orange-700 cursor-pointer"
         >
-          <MessageSquarePlus className="h-3.5 w-3.5" />
-          Avaliar
+          <MessageSquarePlus className="h-4 w-4" />
+          Avaliar Produto
         </Button>
       </DialogTrigger>
-      {/* Modal Branco Clean */}
-      <DialogContent className="border-neutral-200 bg-white text-neutral-900 sm:max-w-[425px]">
+      {/* Modal Branco Clean Horizontal / Retangular aumentado em 20% */}
+      <DialogContent className="rounded-none border-neutral-200 bg-white text-neutral-900 sm:max-w-[840px] p-10">
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold text-neutral-900">
+          <DialogTitle className="font-sans text-2xl font-medium tracking-wide text-neutral-900 uppercase">
             Avaliar Produto
           </DialogTitle>
-          <DialogDescription className="text-neutral-500">
+          <DialogDescription className="font-sans text-base text-neutral-500">
             Dê sua opinião sobre{" "}
-            <strong className="text-neutral-800">{productName}</strong>.
+            <strong className="text-neutral-900 font-medium">{productName}</strong>.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="pt-2">
-          <ProductReviewForm productId={productId} />
+        <div className="pt-6">
+          <ProductReviewForm productId={productId} onSuccess={() => setOpen(false)} />
         </div>
       </DialogContent>
     </Dialog>

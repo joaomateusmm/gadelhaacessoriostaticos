@@ -1,12 +1,14 @@
 "use client";
 
-import { Star } from "lucide-react";
+import { Image as ImageIcon, Star, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { createReviewAction } from "@/actions/review";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { UploadButton } from "@/lib/uploadthing";
 import { cn } from "@/lib/utils";
 
 import { Label } from "./ui/label";
@@ -38,6 +40,7 @@ export function ProductReviewForm({
   const [hoverRating, setHoverRating] = useState(0);
   const [localError, setLocalError] = useState("");
   const [commentText, setCommentText] = useState("");
+  const [reviewImages, setReviewImages] = useState<string[]>([]);
 
   // Referência para o formulário para podermos enviar automaticamente
   const formRef = useRef<HTMLFormElement>(null);
@@ -86,23 +89,27 @@ export function ProductReviewForm({
   };
 
   return (
-    // ESTILO: Fundo branco e borda suave
-    <div className="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm duration-200 hover:shadow-md">
+    // ESTILO: Clean, minimalista, profissional idêntico à loja (ampliado em 20%)
+    <div className="rounded-none border border-neutral-200 bg-white p-8 shadow-none">
       {state?.success ? (
-        <div className="animate-in fade-in zoom-in flex flex-col items-center justify-center gap-2 rounded-lg border border-green-100 bg-green-50 p-6 text-center text-sm text-green-700 duration-300">
-          <div className="rounded-full bg-white p-2 shadow-sm ring-1 ring-green-100">
-            <div className="flex gap-1">
+        <div className="animate-in fade-in zoom-in flex flex-col items-center justify-center gap-4 rounded-none border border-neutral-200 bg-neutral-50 p-10 text-center text-base text-neutral-900">
+          <div className="rounded-full bg-white p-4 shadow-sm ring-1 ring-neutral-200">
+            <div className="flex gap-1.5">
               {Array.from({ length: rating }).map((_, i) => (
                 <Star
                   key={i}
-                  className="h-4 w-4 fill-orange-400 text-orange-400"
+                  className="h-5 w-5 fill-orange-500 text-orange-500"
                 />
               ))}
             </div>
           </div>
           <div>
-            <p className="font-bold text-green-800">Obrigado por Avaliar!</p>
-            <p className="text-green-600 opacity-90">{state.message}</p>
+            <p className="font-sans text-lg font-medium text-neutral-900">
+              Obrigado por avaliar!
+            </p>
+            <p className="mt-1 font-sans text-sm text-neutral-500">
+              {state.message}
+            </p>
           </div>
         </div>
       ) : (
@@ -111,154 +118,191 @@ export function ProductReviewForm({
           action={action}
           onSubmit={handleSubmit}
           noValidate
-          className="space-y-5"
+          className="space-y-8"
         >
           <input type="hidden" name="productId" value={productId} />
+          <input
+            type="hidden"
+            name="images"
+            value={JSON.stringify(reviewImages)}
+          />
 
-          {/* Seletor de Estrelas */}
-          <div className="flex flex-col items-center justify-center space-y-2 rounded-lg border border-dashed bg-orange-50 py-4">
-            <Label className="text-xs font-medium tracking-wide text-neutral-500 uppercase">
-              Sua nota
-            </Label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  className="transition-transform hover:scale-110 focus:outline-none"
-                  onMouseEnter={() => setHoverRating(star)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  onClick={() => setRating(star)}
-                >
-                  <Star
-                    className={cn(
-                      "h-8 w-8 transition-all duration-200",
-                      (hoverRating || rating) >= star
-                        ? "fill-orange-500 text-orange-500 drop-shadow-sm"
-                        : "fill-neutral-100 text-neutral-300",
-                    )}
-                  />
-                </button>
-              ))}
-            </div>
-            <input type="hidden" name="rating" value={rating} />
-            <p className="h-4 text-xs font-medium text-orange-600">
-              {(hoverRating || rating) === 5 && "Excelente!"}
-              {(hoverRating || rating) === 4 && "Muito Bom"}
-              {(hoverRating || rating) === 3 && "Bom"}
-              {(hoverRating || rating) === 2 && "Razoável"}
-              {(hoverRating || rating) === 1 && "Ruim"}
-            </p>
-          </div>
-
-          {/* Comentário */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between px-1">
-              <Label
-                htmlFor="comment"
-                className="text-sm font-medium text-neutral-700"
-              >
-                Seu comentário
-                <span className="ml-1 text-xs font-normal text-neutral-400">
-                  (Opcional)
-                </span>
+          <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2">
+            {/* COLUNA ESQUERDA: Estrelas */}
+            <div className="flex h-full flex-col items-center justify-center space-y-4 rounded-none border border-neutral-200 bg-neutral-50 p-8">
+              <Label className="font-sans text-sm font-normal tracking-wide text-neutral-500 uppercase">
+                Sua nota
               </Label>
-              <span
-                className={cn(
-                  "text-[10px] transition-colors",
-                  commentText.length >= MAX_CHARS
-                    ? "font-bold text-red-500"
-                    : "text-neutral-400",
-                )}
-              >
-                {commentText.length} / {MAX_CHARS}
-              </span>
+              <div className="flex gap-2.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    className="cursor-pointer transition-transform hover:scale-110 focus:outline-none"
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    onClick={() => setRating(star)}
+                  >
+                    <Star
+                      className={cn(
+                        "h-9 w-9 transition-all duration-200",
+                        (hoverRating || rating) >= star
+                          ? "fill-orange-500 text-orange-500"
+                          : "fill-neutral-200 text-neutral-300",
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
+              <input type="hidden" name="rating" value={rating} />
+              <p className="h-5 font-sans text-sm font-medium text-orange-600">
+                {(hoverRating || rating) === 5 && "Excelente!"}
+                {(hoverRating || rating) === 4 && "Muito Bom"}
+                {(hoverRating || rating) === 3 && "Bom"}
+                {(hoverRating || rating) === 2 && "Razoável"}
+                {(hoverRating || rating) === 1 && "Ruim"}
+              </p>
             </div>
 
-            <Textarea
-              id="comment"
-              name="comment"
-              placeholder="O que você achou do produto? Conte detalhes..."
-              className={cn(
-                "min-h-[100px] resize-none border-neutral-200 bg-white text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500",
-                localError &&
-                  "border-red-500 focus:border-red-500 focus:ring-red-500",
-              )}
-              maxLength={MAX_CHARS}
-              value={commentText}
-              onChange={(e) => {
-                setCommentText(e.target.value);
-                setLocalError("");
-              }}
-            />
+            {/* COLUNA DIREITA: Comentário & Fotos */}
+            <div className="space-y-6">
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between px-1">
+                  <Label
+                    htmlFor="comment"
+                    className="font-sans text-sm font-medium tracking-wide text-neutral-700 uppercase"
+                  >
+                    Seu comentário
+                    <span className="ml-1.5 text-xs font-normal text-neutral-400 normal-case">
+                      (Opcional)
+                    </span>
+                  </Label>
+                  <span
+                    className={cn(
+                      "text-xs transition-colors",
+                      commentText.length >= MAX_CHARS
+                        ? "font-medium text-red-500"
+                        : "text-neutral-400",
+                    )}
+                  >
+                    {commentText.length} / {MAX_CHARS}
+                  </span>
+                </div>
 
-            {localError && (
-              <p className="animate-in slide-in-from-left-1 text-xs font-medium text-red-500">
-                {localError}
-              </p>
-            )}
+                <Textarea
+                  id="comment"
+                  name="comment"
+                  placeholder="O que você achou do produto? Conte detalhes..."
+                  className={cn(
+                    "min-h-[120px] resize-none rounded-none border-neutral-300 bg-white text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-0",
+                    localError && "border-red-500 focus:border-red-500",
+                  )}
+                  maxLength={MAX_CHARS}
+                  value={commentText}
+                  onChange={(e) => {
+                    setCommentText(e.target.value);
+                    setLocalError("");
+                  }}
+                />
 
-            {state?.errors?.comment && (
-              <p className="text-xs text-red-500">{state.errors.comment[0]}</p>
-            )}
+                {localError && (
+                  <p className="animate-in slide-in-from-left-1 font-sans text-sm text-red-500">
+                    {localError}
+                  </p>
+                )}
+
+                {state?.errors?.comment && (
+                  <p className="font-sans text-sm text-red-500">
+                    {state.errors.comment[0]}
+                  </p>
+                )}
+              </div>
+
+              {/* FOTOS DO PRODUTO */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2 font-sans text-sm font-medium tracking-wide text-neutral-700 uppercase">
+                  <ImageIcon className="h-4 w-4 text-orange-500" /> Fotos do
+                  Produto (Opcional)
+                </Label>
+
+                <div className="flex flex-wrap gap-3">
+                  {reviewImages.map((url, index) => (
+                    <div
+                      key={url}
+                      className="relative aspect-square h-20 w-20 overflow-hidden rounded-none border border-neutral-300 bg-neutral-100"
+                    >
+                      <Image
+                        src={url}
+                        alt={`Foto da avaliação ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReviewImages(
+                            reviewImages.filter((_, i) => i !== index),
+                          );
+                          toast.success("Foto removida!");
+                        }}
+                        className="absolute top-1 right-1 bg-black/75 p-1 text-white transition-colors hover:bg-orange-600"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+
+                  {reviewImages.length < 10 && (
+                    <div className="flex h-20 w-20 items-center justify-center border border-dashed border-neutral-300 bg-neutral-50 transition-colors hover:border-neutral-900">
+                      <UploadButton
+                        endpoint="imageUploader"
+                        onClientUploadComplete={(res) => {
+                          if (res && res[0]?.url) {
+                            setReviewImages([...reviewImages, res[0].url]);
+                            toast.success("Foto enviada com sucesso!");
+                          }
+                        }}
+                        onUploadError={(error: Error) => {
+                          toast.error(`Erro ao enviar foto: ${error.message}`);
+                        }}
+                        appearance={{
+                          button:
+                            "h-full w-full bg-transparent text-neutral-600 hover:text-neutral-900 text-sm p-0 ut-uploading:cursor-not-allowed border-0 shadow-none",
+                          container:
+                            "h-full w-full flex items-center justify-center",
+                          allowedContent: "hidden",
+                        }}
+                        content={{
+                          button() {
+                            return (
+                              <span className="text-xs font-medium text-neutral-600 hover:text-neutral-900">
+                                + Foto
+                              </span>
+                            );
+                          },
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+                <p className="font-sans text-xs text-neutral-400">
+                  Envie até 10 fotos reais do produto recebido (
+                  {reviewImages.length}/10).
+                </p>
+              </div>
+            </div>
           </div>
 
           {state?.message && !state.success && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+            <div className="rounded-none bg-red-50 p-3.5 font-sans text-sm text-red-600">
               {state.message}
             </div>
           )}
 
-          {/* Comentários Rápidos */}
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-medium text-neutral-400">
-              Comentários Rápidos:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  handleQuickComment("Fácil e rápido, gostei da loja.")
-                }
-                className="cursor-pointer rounded-full bg-orange-100 px-3 py-1.5 text-xs font-medium text-orange-700 transition-colors hover:bg-orange-200 active:scale-95"
-              >
-                Fácil e rápido, gostei da loja.
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickComment("Muito fácil de comprar.")}
-                className="cursor-pointer rounded-full bg-orange-100 px-3 py-1.5 text-xs font-medium text-orange-700 transition-colors hover:bg-orange-200 active:scale-95"
-              >
-                Muito fácil de comprar.
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickComment("Gostei da loja.")}
-                className="cursor-pointer rounded-full bg-orange-100 px-3 py-1.5 text-xs font-medium text-orange-700 transition-colors hover:bg-orange-200 active:scale-95"
-              >
-                Gostei da loja.
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickComment("Gostei da loja.")}
-                className="cursor-pointer rounded-full bg-orange-100 px-3 py-1.5 text-xs font-medium text-orange-700 transition-colors hover:bg-orange-200 active:scale-95"
-              >
-                Muito bom.
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickComment("Gostei da loja.")}
-                className="cursor-pointer rounded-full bg-orange-100 px-3 py-1.5 text-xs font-medium text-orange-700 transition-colors hover:bg-orange-200 active:scale-95"
-              >
-                Produto chegou ótimo, obrigado.
-              </button>
-            </div>
-          </div>
-
           <Button
             type="submit"
             disabled={isPending}
-            className="h-11 w-full bg-orange-600 font-bold text-white shadow-sm transition-all hover:bg-orange-700 hover:shadow active:scale-[0.98]"
+            className="h-12 w-full cursor-pointer rounded-none bg-orange-600 font-sans text-sm font-medium tracking-wider text-white uppercase shadow-none transition-all hover:bg-orange-700 active:scale-[0.98]"
           >
             {isPending ? "Enviando..." : "Enviar Avaliação"}
           </Button>

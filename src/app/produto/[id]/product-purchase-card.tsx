@@ -421,60 +421,91 @@ export function ProductPurchaseCard({
             )}
           </div>
           <div className="flex flex-wrap gap-2">
-            {coresDisponiveis.map((c) => {
-              const isSelected = selectedCor === c;
-              const customMatch = customColors.find(
-                (item) =>
-                  item.name.toLowerCase().trim() === c.toLowerCase().trim(),
-              );
-              const hex = customMatch?.hex || corParaCss(c);
-              const imageUrl = customMatch?.imageUrl;
-              const soldOut =
-                hasVariants &&
-                variants
-                  .filter((v) => getAttr(v, "Cor") === c)
-                  .every((v) => !v.isStockUnlimited && v.stock <= 0);
+            {(() => {
+              const sortedCores = [...coresDisponiveis].sort((a, b) => {
+                const matchA = customColors.find(
+                  (item) => item.name.toLowerCase().trim() === a.toLowerCase().trim(),
+                );
+                const matchB = customColors.find(
+                  (item) => item.name.toLowerCase().trim() === b.toLowerCase().trim(),
+                );
+                const hasImgA = !!matchA?.imageUrl;
+                const hasImgB = !!matchB?.imageUrl;
 
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setSelectedCor(c)}
-                  aria-pressed={isSelected}
-                  aria-label={c}
-                  title={c}
-                  className={cn(
-                    "relative cursor-pointer rounded-md border-2 p-0.5 transition-colors",
-                    focusRing,
-                    isSelected && soldOut
-                      ? "border-dashed border-neutral-900"
-                      : isSelected
-                        ? "border-neutral-900"
-                        : "border-transparent hover:border-neutral-300",
-                  )}
-                >
-                  <span
-                    className="relative block h-8 w-8 overflow-hidden rounded-sm shadow-md shadow-black/30"
-                    style={{ backgroundColor: imageUrl ? "transparent" : hex }}
+                if (!hasImgA && !hasImgB) return 0;
+                if (!hasImgA) return -1; // non-image first
+                if (!hasImgB) return 1;
+
+                const soldOutA =
+                  hasVariants &&
+                  variants
+                    .filter((v) => getAttr(v, "Cor") === a)
+                    .every((v) => !v.isStockUnlimited && v.stock <= 0);
+                const soldOutB =
+                  hasVariants &&
+                  variants
+                    .filter((v) => getAttr(v, "Cor") === b)
+                    .every((v) => !v.isStockUnlimited && v.stock <= 0);
+
+                if (soldOutA === soldOutB) return 0;
+                return soldOutA ? 1 : -1; // sold out image goes to the right
+              });
+
+              return sortedCores.map((c) => {
+                const isSelected = selectedCor === c;
+                const customMatch = customColors.find(
+                  (item) =>
+                    item.name.toLowerCase().trim() === c.toLowerCase().trim(),
+                );
+                const hex = customMatch?.hex || corParaCss(c);
+                const imageUrl = customMatch?.imageUrl;
+                const soldOut =
+                  hasVariants &&
+                  variants
+                    .filter((v) => getAttr(v, "Cor") === c)
+                    .every((v) => !v.isStockUnlimited && v.stock <= 0);
+
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setSelectedCor(c)}
+                    aria-pressed={isSelected}
+                    aria-label={c}
+                    title={c}
+                    className={cn(
+                      "relative cursor-pointer rounded-md border-2 p-0.5 transition-colors",
+                      focusRing,
+                      isSelected && soldOut
+                        ? "border-dashed border-neutral-900"
+                        : isSelected
+                          ? "border-neutral-900"
+                          : "border-transparent hover:border-neutral-300",
+                    )}
                   >
-                    {imageUrl && (
-                      <Image
-                        src={imageUrl}
-                        alt={c}
-                        fill
-                        sizes="32px"
-                        className="object-cover"
-                      />
-                    )}
-                    {soldOut && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/0">
-                        <span className="h-px w-full rotate-45 bg-white shadow-sm" />
-                      </span>
-                    )}
-                  </span>
-                </button>
-              );
-            })}
+                    <span
+                      className="relative block h-8 w-8 overflow-hidden rounded-sm shadow-md shadow-black/30"
+                      style={{ backgroundColor: imageUrl ? "transparent" : hex }}
+                    >
+                      {imageUrl && (
+                        <Image
+                          src={imageUrl}
+                          alt={c}
+                          fill
+                          sizes="32px"
+                          className="object-cover"
+                        />
+                      )}
+                      {soldOut && (
+                        <span className="absolute inset-0 flex items-center justify-center bg-black/0">
+                          <span className="h-px w-full rotate-45 bg-white shadow-sm" />
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                );
+              });
+            })()}
           </div>
         </div>
       )}

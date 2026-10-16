@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, ShoppingCart } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -157,7 +157,7 @@ export function BuyNowButton({
       className={cn(
         "text-md h-15 w-full cursor-pointer rounded-[3px] font-medium text-white shadow-lg",
         isOutOfStock
-          ? "cursor-not-allowed bg-neutral-400 opacity-50 hover:bg-neutral-400"
+          ? "cursor-not-allowed bg-[#676767] hover:bg-[#676767]"
           : "bg-emerald-600 hover:bg-emerald-700 hover:shadow-xl",
       )}
       onClick={handleBuyNow}

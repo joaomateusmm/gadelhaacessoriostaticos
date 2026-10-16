@@ -2,13 +2,12 @@ import { desc, eq, inArray } from "drizzle-orm";
 import { Star, User } from "lucide-react";
 import { headers } from "next/headers";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ReviewDialog } from "@/app/produto/[id]/review-dialog";
 import { DeleteReviewButton } from "@/components/delete-review-button";
 import { EditReviewButton } from "@/components/edit-review-button";
 import { Footer } from "@/components/Footer";
-import { ReviewDialog } from "@/components/review-dialog";
 import { db } from "@/db";
 import {
   category,
@@ -32,6 +31,7 @@ type ReviewModel = {
   userId: string;
   rating: number;
   comment: string | null;
+  images: string[] | null;
   createdAt: Date;
   user: {
     name: string | null;
@@ -150,6 +150,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     userId: row.review.userId,
     rating: row.review.rating,
     comment: row.review.comment,
+    images: row.review.images,
     createdAt: row.review.createdAt,
     user: row.user
       ? {
@@ -175,12 +176,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const defaultImages = productImages;
 
-  const conditionMap: Record<string, string> = {
-    new: "Estado de novo",
-    used: "Usado / Ótima condição",
-    refurbished: "Recondicionado",
-  };
-
   const dimensions =
     (productData.width ?? 0) > 0 &&
     (productData.height ?? 0) > 0 &&
@@ -191,37 +186,23 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const weight =
     (productData.weight ?? 0) > 0 ? `${productData.weight} kg` : null;
 
+  const specsGroups =
+    (productData.specsGroups as
+      | { title: string; description: string }[]
+      | null) || [];
+
   const specs: ProductSpec[] = [
     ...(dimensions
       ? [{ label: "Dimensões (L x A x C)", value: dimensions }]
       : []),
     ...(weight ? [{ label: "Peso", value: weight }] : []),
-    {
-      label: "Condição",
-      value: conditionMap[productData.condition || "new"] || "Novo",
-    },
     ...(productData.brand
       ? [{ label: "Marca", value: productData.brand }]
       : []),
-    {
-      label: "Montagem",
-      value: productData.isAssembled ? (
-        "Já vem montado"
-      ) : (
-        <>
-          Requer montagem.{" "}
-          <Link href="/servicos" className="underline hover:text-neutral-900">
-            Contrate nosso serviço de montagem
-          </Link>
-        </>
-      ),
-    },
-    {
-      label: "Garantia",
-      value: productData.hasWarranty
-        ? `Garantia inclusa${productData.warrantyDetails ? ` (${productData.warrantyDetails})` : ""}`
-        : "Sem garantia",
-    },
+    ...specsGroups.map((g) => ({
+      label: g.title,
+      value: g.description,
+    })),
   ];
 
   // Distribuição das notas (5 → 1)
@@ -253,7 +234,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </ProductPageClient>
 
         {/* --- AVALIAÇÕES --- */}
-        <section className="mx-auto mt-16 w-full border-t border-neutral-200 pt-8">
+        <section className="mx-auto mt-16 w-full border-t border-neutral-200 pt-6">
           <h2 className="text-center text-xl font-light tracking-wide text-neutral-900 uppercase">
             Avaliações de clientes
           </h2>
@@ -332,6 +313,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                           reviewId={reviewItem.id}
                           initialRating={reviewItem.rating}
                           initialComment={reviewItem.comment}
+                          initialImages={reviewItem.images}
                         />
                         <DeleteReviewButton
                           reviewId={reviewItem.id}
@@ -346,15 +328,38 @@ export default async function ProductPage({ params }: ProductPageProps) {
                       {reviewItem.comment}
                     </p>
                   )}
+
+                  {reviewItem.images && reviewItem.images.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {reviewItem.images.map((imgUrl, imgIndex) => (
+                        <a
+                          key={imgUrl}
+                          href={imgUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="relative h-20 w-20 overflow-hidden rounded-none border border-neutral-200 transition-opacity hover:opacity-90"
+                        >
+                          <Image
+                            src={imgUrl}
+                            alt={`Foto da avaliação ${imgIndex + 1}`}
+                            fill
+                            sizes="80px"
+                            className="object-cover"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </article>
               ))
             ) : (
-              <div className="pt-12 text-center">
-                <p className="text-base text-neutral-700">
-                  Ainda não há avaliações para este produto.
+              <div className="my-6 mt-6 border-1 border-dashed border-neutral-200 py-16 text-center">
+                <p className="font-sans text-base font-medium tracking-wide text-neutral-900 uppercase">
+                  Ainda não há avaliações
                 </p>
-                <p className="mt-2 mb-6 text-sm text-neutral-400">
-                  Seja o primeiro a avaliar.
+                <p className="mt-1 mb-6 text-xs text-neutral-500">
+                  Seja o primeiro a avaliar este produto e compartilhe sua
+                  experiência.
                 </p>
                 <div className="flex justify-center">
                   <ReviewDialog productId={id} productName={productData.name} />

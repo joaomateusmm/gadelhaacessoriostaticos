@@ -92,7 +92,8 @@ export function AddToCartButton({
       className={cn(
         "cursor-pointer rounded-sm transition-transform duration-200 hover:-translate-y-1",
         className,
-        isOutOfStock && "cursor-not-allowed opacity-50",
+        isOutOfStock &&
+          "cursor-not-allowed bg-[#676767] opacity-100 hover:bg-[#676767]",
       )}
     >
       {showIcon && <ShoppingCart className="mr-2 h-4 w-4" />}
