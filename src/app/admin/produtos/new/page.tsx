@@ -298,6 +298,8 @@ export default function NewProductPage() {
     control: form.control,
     name: "specsGroups",
   });
+
+  const handleSetMainImage = (indexToPromote: number) => {
     // Apenas reordena a galeria geral (não puxa da variante)
     if (indexToPromote === 0) return;
     const newImages = [...uploadedImages];
