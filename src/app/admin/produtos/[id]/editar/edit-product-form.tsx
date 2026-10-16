@@ -371,7 +371,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
     mode: "onChange",
   });
 
-
   const {
     fields: specsFields,
     append: appendSpec,
@@ -380,6 +379,9 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
     control: form.control,
     name: "specsGroups",
   });
+
+  // Declaração das variáveis monitoradas pelo watch do formulário
+  const watchPrice = form.watch("price");
   const watchDiscountPrice = form.watch("discountPrice");
   const watchIsStockUnlimited = form.watch("isStockUnlimited");
   const watchCurrency = form.watch("currency");
@@ -395,8 +397,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
   };
 
   const onSubmit: SubmitHandler<ProductFormValues> = async (data) => {
-    // Imagens agora são opcionais (sem validação)
-
     if (
       data.discountPrice !== undefined &&
       data.discountPrice > 0 &&
@@ -958,7 +958,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                 ))}
               </CardContent>
             </Card>
-            {/* Preview da capa atual */}
+
             {/* CARD DEDICADO: CAPA PRINCIPAL DO PRODUTO (THUMBNAIL) */}
             <Card className="rounded-none border-neutral-800 bg-neutral-950 shadow-none">
               <CardHeader>
