@@ -403,6 +403,17 @@ export function HeaderContent() {
                     Minha Conta
                   </DropdownMenuLabel>
 
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  {session && (session.user as any).role === "admin" && (
+                    <DropdownMenuItem
+                      className={menuItemClass}
+                      onClick={() => router.push("/admin")}
+                    >
+                      <LayoutDashboard className="h-4 w-4 text-orange-600" />
+                      <span className="font-bold text-orange-600">Painel Admin</span>
+                    </DropdownMenuItem>
+                  )}
+
                   <DropdownMenuItem
                     className={menuItemClass}
                     onClick={() => router.push("/minha-conta/compras")}
