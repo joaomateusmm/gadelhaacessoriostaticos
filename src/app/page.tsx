@@ -9,18 +9,19 @@ export const revalidate = 0;
 
 export default function Home() {
   return (
+    // REMOVIDO: overflow-x-hidden (Isso causava o travamento do scroll)
     <div className="font-montserrat relative flex min-h-screen flex-col bg-neutral-950">
       <HeroBanners />
 
-      <div className="relative z-10 shadow-2xl" id="catalogo">
+      <div className="mt-5" id="catalogo">
         <ProductCatalog />
       </div>
 
-      <div className="relative z-10 bg-neutral-950">
-        <ServicesSection />
-        <FaqSection />
-        <Footer />
-      </div>
+      <ServicesSection />
+
+      <FaqSection />
+
+      <Footer />
     </div>
   );
 }
