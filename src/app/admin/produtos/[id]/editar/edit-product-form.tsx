@@ -154,12 +154,6 @@ const formSchema = z.object({
   brand: z.string().optional(),
 
   // --- LINKS (OPCIONAIS) ---
-  paymentLink: z
-    .union([z.literal(""), z.string().url("URL inválida. Inclua https://")])
-    .optional(),
-  downloadUrl: z
-    .union([z.literal(""), z.string().url("URL inválida. Inclua https://")])
-    .optional(),
   tamanhos: z.array(z.string()),
   cores: z.array(z.string()),
   specsGroups: z.array(
@@ -354,8 +348,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
       brand: initialData.brand || "",
 
       // --- LINKS / VENDA (OPCIONAIS) ---
-      paymentLink: initialData.paymentLink || "",
-      downloadUrl: initialData.downloadUrl || "",
       tamanhos: initialData.tamanhos || [],
       cores: initialData.cores || [],
       specsGroups: initialData.specsGroups || [],
@@ -365,7 +357,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
         "pix",
         "credit_card",
         "debit_card",
-        "boleto",
       ],
     },
     mode: "onChange",
@@ -380,6 +371,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
     control: form.control,
     name: "specsGroups",
   });
+  const watchPrice = form.watch("price");
   const watchDiscountPrice = form.watch("discountPrice");
   const watchIsStockUnlimited = form.watch("isStockUnlimited");
   const watchCurrency = form.watch("currency");
@@ -442,8 +434,6 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
         specsGroups: data.specsGroups,
         brandId: data.brandId,
         deliveryMode: data.deliveryMode ?? "none",
-        paymentLink: data.paymentLink === "" ? null : data.paymentLink,
-        downloadUrl: data.downloadUrl === "" ? null : data.downloadUrl,
         paymentMethods: data.paymentMethods ?? [],
         variants: variantsList,
       };
@@ -557,30 +547,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="paymentLink"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2 font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                        <LinkIcon className="h-4 w-4 text-neutral-500" /> Link
-                        de Pagamento Externo (Opcional)
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: https://pag.seguro/..."
-                          className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-xs"
-                          {...field}
-                          value={field.value ?? ""}
-                        />
-                      </FormControl>
-                      <FormDescription className="font-mono text-[11px] text-neutral-500">
-                        Opcional. Caso utilize um checkout externo.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
               </CardContent>
             </Card>
 
@@ -1228,32 +1195,7 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="downloadUrl"
-                  render={({ field }) => (
-                    <FormItem className="animate-in fade-in slide-in-from-top-2">
-                      <FormLabel className="flex items-center gap-2 font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                        <LinkIcon className="h-4 w-4 text-neutral-500" /> Link
-                        do Arquivo (Download) (Opcional)
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: https://drive.google.com/..."
-                          className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-xs"
-                          {...field}
-                          value={field.value ?? ""}
-                        />
-                      </FormControl>
-                      <FormDescription className="font-mono text-[11px] text-neutral-500">
-                        Enviado automaticamente após a compra, se informado.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
-                <Separator className="bg-neutral-800" />
 
                 <FormField
                   control={form.control}

@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronsUpDown,
   ImageIcon,
+  ImagePlus,
   Link as LinkIcon,
   Loader2,
   Package,
@@ -160,12 +161,6 @@ const formSchema = z.object({
   brand: z.string().optional(),
 
   // --- LINKS / VENDA (OPCIONAIS) ---
-  paymentLink: z
-    .union([z.literal(""), z.string().url("URL inválida. Inclua https://")])
-    .optional(),
-  downloadUrl: z
-    .union([z.literal(""), z.string().url("URL inválida. Inclua https://")])
-    .optional(),
   tamanhos: z.array(z.string()),
   cores: z.array(z.string()),
   specsGroups: z.array(
@@ -213,6 +208,7 @@ export default function NewProductPage() {
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
   const [categoriesList, setCategoriesList] = useState<OptionData[]>([]);
   const [brandsList, setBrandsList] = useState<OptionData[]>([]);
@@ -279,14 +275,12 @@ export default function NewProductPage() {
 
       brand: "",
 
-      paymentLink: "",
-      downloadUrl: "",
       tamanhos: [],
       cores: [],
       specsGroups: [],
       brandId: undefined,
       deliveryMode: "none",
-      paymentMethods: ["pix", "credit_card", "debit_card", "boleto"],
+      paymentMethods: ["pix", "credit_card", "debit_card"],
     },
     mode: "onChange",
   });
@@ -300,16 +294,7 @@ export default function NewProductPage() {
     name: "specsGroups",
   });
 
-  const handleSetMainImage = (indexToPromote: number) => {
-    // Apenas reordena a galeria geral (não puxa da variante)
-    if (indexToPromote === 0) return;
-    const newImages = [...uploadedImages];
-    const imageToMove = newImages[indexToPromote];
-    newImages.splice(indexToPromote, 1);
-    newImages.unshift(imageToMove);
-    setUploadedImages(newImages);
-    toast.success("Imagem de capa geral atualizada!");
-  };
+
 
   const watchPrice = form.watch("price");
   const watchDiscountPrice = form.watch("discountPrice");
@@ -381,12 +366,11 @@ export default function NewProductPage() {
         specsGroups: data.specsGroups,
         brandId: data.brandId,
         deliveryMode: data.deliveryMode ?? "none",
-        paymentLink: data.paymentLink === "" ? null : data.paymentLink,
-        downloadUrl: data.downloadUrl === "" ? null : data.downloadUrl,
         paymentMethods: data.paymentMethods ?? [],
         variants: variantsList,
 
         images: uploadedImages,
+        thumbnail: thumbnailUrl || null,
       } as unknown as ProductServerPayload;
 
       await createProduct(formattedData);
@@ -499,30 +483,7 @@ export default function NewProductPage() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="paymentLink"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                          <LinkIcon className="h-4 w-4 text-neutral-500" /> Link
-                          de Pagamento Externo (Opcional)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ex: https://pag.seguro/..."
-                            className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-xs"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                        <FormDescription className="font-mono text-[11px] text-neutral-500">
-                          Opcional. Caso utilize um checkout externo.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
                 </CardContent>
               </Card>
 
@@ -1071,6 +1032,99 @@ export default function NewProductPage() {
                 </Card>
               )}
 
+            {/* CARD DEDICADO: CAPA PRINCIPAL DO PRODUTO (THUMBNAIL) */}
+            <Card className="rounded-none border-neutral-800 bg-neutral-950 shadow-none">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-mono text-sm font-bold tracking-normal text-white uppercase">
+                  <Star className="h-5 w-5 text-emerald-500" /> Capa Principal do Produto (Thumbnail)
+                </CardTitle>
+                <CardDescription className="font-mono text-xs text-neutral-500">
+                  A imagem definida aqui é a capa exclusiva do produto exibida nos cards e catálogo. É 100% independente da galeria geral e das fotos das variantes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {thumbnailUrl ? (
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded border border-emerald-800/50 bg-emerald-950/20 p-4">
+                    <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded border border-emerald-600/40 bg-neutral-900 shadow-md">
+                      <Image
+                        src={thumbnailUrl}
+                        alt="Capa do produto"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 rounded bg-emerald-600/20 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-400 border border-emerald-500/30 uppercase">
+                          <Check className="h-3 w-3" /> Capa Ativa
+                        </span>
+                      </div>
+                      <p className="font-mono text-xs text-neutral-400 break-all">
+                        {thumbnailUrl}
+                      </p>
+                      <p className="font-mono text-[11px] text-neutral-500">
+                        Esta é a imagem que aparecerá no card do produto e no catálogo.
+                      </p>
+                    </div>
+                    <div className="flex sm:flex-col gap-2 shrink-0">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setThumbnailUrl(null)}
+                        className="h-8 rounded-none border-red-900/60 bg-red-950/30 font-mono text-xs text-red-400 hover:bg-red-900/50 hover:text-red-200"
+                      >
+                        <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Remover Capa
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex w-full flex-col items-center justify-center rounded-lg border border-dashed border-neutral-800 bg-neutral-900/40 p-6">
+                    <p className="mb-3 font-mono text-xs text-neutral-400">
+                      Nenhuma capa exclusiva definida. Envie a imagem que será a capa principal:
+                    </p>
+                    <UploadButton
+                      endpoint="imageUploader"
+                      onUploadBegin={() => setIsUploading(true)}
+                      onClientUploadComplete={(res) => {
+                        setIsUploading(false);
+                        if (res && res[0]?.url) {
+                          setThumbnailUrl(res[0].url);
+                          toast.success("Capa do produto definida com sucesso!");
+                        }
+                      }}
+                      onUploadError={(error: Error) => {
+                        setIsUploading(false);
+                        toast.error(`Erro: ${error.message}`);
+                      }}
+                      appearance={{
+                        button:
+                          "rounded-none border border-emerald-700 bg-emerald-800/80 font-mono text-xs font-bold uppercase text-white hover:bg-emerald-700 transition-all ut-uploading:cursor-not-allowed w-full max-w-[220px]",
+                        container: "w-full flex flex-col items-center gap-2",
+                        allowedContent: "font-mono text-xs text-neutral-500",
+                      }}
+                      content={{
+                        button({ ready }) {
+                          if (ready)
+                            return (
+                              <div className="flex items-center gap-2">
+                                <ImagePlus className="h-4 w-4" />
+                                Escolher Capa
+                              </div>
+                            );
+                          return "Carregando...";
+                        },
+                        allowedContent({ isUploading }) {
+                          if (isUploading) return "Enviando...";
+                          return "Imagem de capa até 4MB (JPG, PNG)";
+                        },
+                      }}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
               {/* CONFIGURAÇÕES DE VENDA (OPCIONAL) */}
               <Card className="rounded-none border-neutral-800 bg-neutral-950 shadow-none">
                 <CardHeader>
@@ -1082,32 +1136,7 @@ export default function NewProductPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="downloadUrl"
-                    render={({ field }) => (
-                      <FormItem className="animate-in fade-in slide-in-from-top-2">
-                        <FormLabel className="flex items-center gap-2 font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
-                          <LinkIcon className="h-4 w-4 text-neutral-500" /> Link
-                          do Arquivo (Download) (Opcional)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ex: https://drive.google.com/..."
-                            className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-xs text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-xs"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                        <FormDescription className="font-mono text-[11px] text-neutral-500">
-                          Enviado automaticamente após a compra, se informado.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
-                  <Separator className="bg-neutral-800" />
 
                   <FormField
                     control={form.control}
@@ -1264,69 +1293,54 @@ export default function NewProductPage() {
                                   : "border-neutral-800 hover:border-neutral-600",
                               )}
                             >
-                              <Image
-                                src={url}
-                                alt={`Imagem do produto ${index + 1}`}
-                                fill
-                                className="pointer-events-none object-contain object-center"
-                              />
+                               <Image
+                                 src={url}
+                                 alt={`Imagem do produto ${index + 1}`}
+                                 fill
+                                 className="pointer-events-none object-contain object-center"
+                               />
 
-                              {isCover && (
-                                <div className="absolute top-2 left-2 z-10 flex items-center gap-1 border border-emerald-500/40 bg-neutral-950/90 px-2 py-1 font-mono text-[10px] font-bold text-emerald-400 uppercase">
-                                  <Star className="h-3 w-3" />
-                                  Capa
-                                </div>
-                              )}
-
-                              {/* Botões de Mover Esquerda / Direita / Capa */}
-                              <div className="absolute inset-x-2 bottom-2 z-10 flex items-center justify-between gap-1 rounded bg-neutral-950/80 p-1 opacity-0 transition-opacity group-hover:opacity-100">
-                                <button
-                                  type="button"
-                                  disabled={index === 0}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (index === 0) return;
-                                    const newImages = [...uploadedImages];
-                                    const temp = newImages[index];
-                                    newImages[index] = newImages[index - 1];
-                                    newImages[index - 1] = temp;
-                                    setUploadedImages(newImages);
-                                  }}
-                                  className="bg-neutral-800 px-1.5 py-0.5 font-mono text-[10px] text-white hover:bg-neutral-700 disabled:opacity-30"
-                                  title="Mover para esquerda"
-                                >
-                                  ◀
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleSetMainImage(index);
-                                  }}
-                                  className="font-mono text-[10px] font-bold text-emerald-400 hover:underline"
-                                  title="Definir como capa"
-                                >
-                                  {isCover ? "CAPA" : "Tornar Capa"}
-                                </button>
-                                <button
-                                  type="button"
-                                  disabled={index === uploadedImages.length - 1}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (index === uploadedImages.length - 1)
-                                      return;
-                                    const newImages = [...uploadedImages];
-                                    const temp = newImages[index];
-                                    newImages[index] = newImages[index + 1];
-                                    newImages[index + 1] = temp;
-                                    setUploadedImages(newImages);
-                                  }}
-                                  className="bg-neutral-800 px-1.5 py-0.5 font-mono text-[10px] text-white hover:bg-neutral-700 disabled:opacity-30"
-                                  title="Mover para direita"
-                                >
-                                  ▶
-                                </button>
-                              </div>
+                               {/* Botões de Mover Esquerda / Direita */}
+                               <div className="absolute inset-x-2 bottom-2 z-10 flex items-center justify-between gap-1 rounded bg-neutral-950/80 p-1 opacity-0 transition-opacity group-hover:opacity-100">
+                                 <button
+                                   type="button"
+                                   disabled={index === 0}
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     if (index === 0) return;
+                                     const newImages = [...uploadedImages];
+                                     const temp = newImages[index];
+                                     newImages[index] = newImages[index - 1];
+                                     newImages[index - 1] = temp;
+                                     setUploadedImages(newImages);
+                                   }}
+                                   className="bg-neutral-800 px-1.5 py-0.5 font-mono text-[10px] text-white hover:bg-neutral-700 disabled:opacity-30"
+                                   title="Mover para esquerda"
+                                 >
+                                   ◀
+                                 </button>
+                                 <span className="font-mono text-[10px] text-neutral-400">
+                                   {index + 1}
+                                 </span>
+                                 <button
+                                   type="button"
+                                   disabled={index === uploadedImages.length - 1}
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     if (index === uploadedImages.length - 1)
+                                       return;
+                                     const newImages = [...uploadedImages];
+                                     const temp = newImages[index];
+                                     newImages[index] = newImages[index + 1];
+                                     newImages[index + 1] = temp;
+                                     setUploadedImages(newImages);
+                                   }}
+                                   className="bg-neutral-800 px-1.5 py-0.5 font-mono text-[10px] text-white hover:bg-neutral-700 disabled:opacity-30"
+                                   title="Mover para direita"
+                                 >
+                                   ▶
+                                 </button>
+                               </div>
 
                               <button
                                 type="button"

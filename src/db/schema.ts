@@ -142,16 +142,14 @@ export const product = pgTable("product", {
 
   // --- NOVOS CAMPOS: ADICIONADOS DO BANCO Y ---
   code: text("code"),
-  downloadUrl: text("downloadUrl"),
   tamanhos: jsonb("tamanhos").$type<string[]>().default([]).notNull(),
   cores: jsonb("cores").$type<string[]>().default([]).notNull(),
   brandId: text("brandId").references(() => brand.id, { onDelete: "set null" }), // Relação com a tabela brand
-  paymentLink: text("paymentLink"), // <-- AGORA OPCIONAL (antes era notNull)
   deliveryMode: text("deliveryMode").notNull().default("email"),
   paymentMethods: text("paymentMethods")
     .array()
     .notNull()
-    .default(["Pix", "Cartão de Crédito", "Cartão de Débito", "Boleto"]),
+    .default(["pix", "credit_card", "debit_card"]),
   specsGroups: jsonb("specsGroups").$type<{ title: string; description: string }[]>().default([]).notNull(),
 
   // Timestamps mantidos
