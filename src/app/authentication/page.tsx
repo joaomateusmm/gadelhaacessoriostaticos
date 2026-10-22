@@ -14,24 +14,26 @@ type Slide = { image: string; title: string; caption: string };
 const AuthenticationLayout = () => {
   const slidesData: Slide[] = [
     {
-      image: "/images/banners/moveis-usados.jpg",
-      title: "Móveis Usados",
-      caption: "Compre móveis usados no melhor preço na Inglaterra.",
+      image: "/banners/banner8.jpeg",
+      title: "Coldres Táticos",
+      caption: "Segurança, firmeza e saque rápido para o seu equipamento.",
     },
     {
-      image: "/images/banners/eletrodomesticos.jpg",
-      title: "Eletrodomésticos",
-      caption: "Produtos testados e aprovados por milhares de clientes.",
+      image: "/banners/banner8.jpeg",
+      title: "Cintos Táticos",
+      caption:
+        "Resistência extrema e suporte ideal para operações e uso diário.",
     },
     {
-      image: "/images/banners/cozinha.jpg",
-      title: "Comunidade Premium",
-      caption: "Junte-se à elite dos jogadores e tenha suporte dedicado.",
+      image: "/banners/banner8.jpeg",
+      title: "Acessórios Militares",
+      caption: "Equipamentos de alta performance para complementar sua missão.",
     },
     {
-      image: "/images/banners/quarto.jpg",
-      title: "Contas Exclusivas",
-      caption: "Obtenha as melhores contas para começar nos games com estilo.",
+      image: "/banners/banner8.jpeg",
+      title: "Equipamentos Táticos & Muito Mais",
+      caption:
+        "Tudo o que você precisa em artigos táticos com qualidade garantida.",
     },
   ];
 
@@ -59,10 +61,10 @@ const AuthenticationLayout = () => {
   }, [slidesData.length]);
 
   return (
-    <div className="font-montserrat min-h-screen bg-white text-neutral-900">
+    <div className="font-montserrat min-h-screen bg-neutral-950 text-white">
       <div className="flex h-screen w-full">
         {/* LADO ESQUERDO: CARROSSEL */}
-        <aside className="relative hidden h-screen w-[60vw] overflow-hidden bg-neutral-100 lg:flex">
+        <aside className="relative hidden h-screen w-[60vw] overflow-hidden bg-neutral-900 lg:flex">
           <div className="absolute inset-0 h-full w-full">
             {slidesData.map((slide, index) => (
               <div
@@ -104,7 +106,7 @@ const AuthenticationLayout = () => {
         </aside>
 
         {/* LADO DIREITO: FORMULÁRIOS */}
-        <main className="flex h-screen w-full flex-1 flex-col items-center justify-center bg-white p-8 lg:w-[40vw]">
+        <main className="flex h-screen w-full flex-1 flex-col items-center justify-center bg-neutral-950 p-8 lg:w-[40vw]">
           <div className="w-full max-w-md">
             <Tabs value={currentForm} className="w-full">
               <div className="relative min-h-[600px] w-full">
@@ -136,10 +138,10 @@ export default function AuthenticationPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex h-screen w-full items-center justify-center bg-white">
+        <div className="flex h-screen w-full items-center justify-center bg-neutral-950">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-10 w-10 animate-spin text-orange-600" />
-            <p className="animate-pulse text-neutral-500">
+            <p className="animate-pulse text-neutral-400">
               Carregando autenticação...
             </p>
           </div>

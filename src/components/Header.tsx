@@ -163,6 +163,7 @@ export function HeaderContent() {
   const [isAffiliate, setIsAffiliate] = useState(false);
 
   // PESQUISA
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -319,7 +320,7 @@ export function HeaderContent() {
     };
   }, [showResults]);
 
-  if (pathname?.startsWith("/admin")) {
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/authentication")) {
     return null;
   }
 
@@ -495,27 +496,34 @@ export function HeaderContent() {
 
             {/* USER / MINHA CONTA */}
             {session ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="group flex cursor-pointer items-center gap-1 outline-none">
-                    <Avatar className="h-10 w-10 rounded-md border border-white/60 shadow-sm transition-all duration-300 group-hover:border-orange-500">
-                      <AvatarImage
-                        src={session.user.image || ""}
-                        className="rounded-md"
-                      />
-                      <AvatarFallback className="rounded-md bg-orange-100 text-sm font-bold text-orange-700">
-                        {session.user.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <ChevronDown className="hidden h-4 w-4 text-neutral-400 transition-transform duration-300 group-data-[state=open]:rotate-180 sm:block" />
-                  </button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent
-                  align="end"
-                  sideOffset={12}
-                  className="z-[150] w-72 rounded-xl border border-neutral-100 bg-white p-2 shadow-xl ring-1 ring-neutral-900/5"
+              <div
+                onMouseEnter={() => setIsUserMenuOpen(true)}
+                onMouseLeave={() => setIsUserMenuOpen(false)}
+              >
+                <DropdownMenu
+                  open={isUserMenuOpen}
+                  onOpenChange={setIsUserMenuOpen}
                 >
+                  <DropdownMenuTrigger asChild>
+                    <button className="group flex cursor-pointer items-center gap-1 outline-none">
+                      <Avatar className="h-10 w-10 rounded-md border border-white/60 shadow-sm transition-all duration-300 group-hover:border-orange-500">
+                        <AvatarImage
+                          src={session.user.image || ""}
+                          className="rounded-md"
+                        />
+                        <AvatarFallback className="rounded-md bg-orange-100 text-sm font-bold text-orange-700">
+                          {session.user.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <ChevronDown className="hidden h-4 w-4 text-neutral-400 transition-transform duration-300 group-data-[state=open]:rotate-180 sm:block" />
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent
+                    align="end"
+                    sideOffset={12}
+                    className="z-[150] w-72 rounded-xl border border-neutral-100 bg-white p-2 shadow-xl ring-1 ring-neutral-900/5"
+                  >
                   {/* CABEÇALHO DO PERFIL */}
                   <div className="mb-2 flex items-center gap-3 rounded-lg bg-neutral-50 p-3">
                     <Avatar className="h-10 w-10 border border-neutral-200">
@@ -640,12 +648,16 @@ export function HeaderContent() {
                     <LogOut className="h-4 w-4" />
                     <span>{t.header.account.logout}</span>
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ) : (
               <Link href="/authentication" aria-label="Entrar">
-                <div className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-neutral-700 bg-neutral-900 text-neutral-400 transition-colors hover:border-neutral-500 hover:text-white">
+                <div className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-neutral-700 bg-neutral-900 text-neutral-400 transition-colors hover:border-neutral-500 hover:text-white md:hidden">
                   <UserRound className="h-5 w-5" />
+                </div>
+                <div className="hidden md:block">
+                  <HeaderIconButton icon={UserRound} />
                 </div>
               </Link>
             )}

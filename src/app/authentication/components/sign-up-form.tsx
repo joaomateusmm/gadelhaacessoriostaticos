@@ -114,25 +114,25 @@ export default function SignUpForm({
   };
 
   return (
-    <Card className="w-full border-none bg-white shadow-none">
+    <Card className="w-full border-none bg-transparent text-white shadow-none">
       <CardHeader className="px-0">
         {callbackUrl === "/" && (
           <Link
             href="/"
-            className="mb-4 inline-block text-xs font-medium text-neutral-500 transition-colors hover:text-orange-600"
+            className="mb-4 inline-block text-xs font-medium text-neutral-400 transition-colors hover:text-orange-500"
           >
             ⟵ Voltar para Loja
           </Link>
         )}
-        <CardTitle className="text-3xl font-bold tracking-tight text-neutral-900">
+        <CardTitle className="text-3xl font-bold tracking-tight text-white">
           Crie sua Conta
         </CardTitle>
-        <CardDescription className="text-neutral-500">
+        <CardDescription className="text-neutral-400">
           Já tem cadastro?{" "}
           <button
             type="button"
             onClick={switchToSignIn}
-            className="font-medium text-orange-600 transition-colors hover:text-orange-700 hover:underline"
+            className="font-medium text-orange-500 transition-colors hover:text-orange-400 hover:underline"
           >
             Faça login.
           </button>
@@ -149,7 +149,7 @@ export default function SignUpForm({
                 <FormItem>
                   <FormControl>
                     <Input
-                      className="h-12 border-neutral-200 bg-white"
+                      className="h-12 border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500"
                       placeholder="Seu nome"
                       {...field}
                     />
@@ -169,6 +169,7 @@ export default function SignUpForm({
                       placeholder="(11) 1234-5678"
                       defaultCountry="BR"
                       {...field}
+                      className="h-12 border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 dark:border-neutral-950"
                     />
                   </FormControl>
                   <FormMessage />
@@ -183,7 +184,7 @@ export default function SignUpForm({
                 <FormItem>
                   <FormControl>
                     <Input
-                      className="h-12 border-neutral-200 bg-white"
+                      className="h-12 border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500"
                       placeholder="seu@email.com"
                       {...field}
                     />
@@ -202,7 +203,7 @@ export default function SignUpForm({
                     <FormControl>
                       <div className="relative">
                         <Input
-                          className="h-12 border-neutral-200 bg-white pr-10"
+                          className="h-12 border-neutral-800 bg-neutral-900 pr-10 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500"
                           placeholder="Senha"
                           type={showPassword ? "text" : "password"}
                           {...field}
@@ -211,7 +212,7 @@ export default function SignUpForm({
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute top-0 right-0 h-full text-neutral-400"
+                          className="absolute top-0 right-0 h-full text-neutral-400 hover:bg-transparent hover:text-white"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? (
@@ -234,7 +235,7 @@ export default function SignUpForm({
                   <FormItem className="w-full">
                     <FormControl>
                       <Input
-                        className="h-12 border-neutral-200 bg-white"
+                        className="h-12 border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500"
                         placeholder="Confirme a senha"
                         type={showPassword ? "text" : "password"}
                         {...field}
@@ -261,11 +262,11 @@ export default function SignUpForm({
             </Button>
 
             <div className="relative flex w-full items-center justify-center">
-              <div className="w-full border-t border-neutral-200"></div>
-              <span className="relative w-full bg-white px-2 text-xs text-neutral-500 uppercase">
+              <div className="w-full border-t border-neutral-800"></div>
+              <span className="relative whitespace-nowrap bg-neutral-950 px-3 text-xs text-neutral-500 uppercase">
                 Ou continue com
               </span>
-              <div className="w-full border-t border-neutral-200"></div>
+              <div className="w-full border-t border-neutral-800"></div>
             </div>
 
             <Button
@@ -273,7 +274,7 @@ export default function SignUpForm({
               variant="outline"
               onClick={handleSignInWithGoogle}
               disabled={isLoading || isGoogleLoading}
-              className="h-12 w-full border-neutral-200"
+              className="h-12 w-full border-neutral-800 bg-neutral-900 text-white hover:bg-neutral-800 hover:text-white"
             >
               {isGoogleLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

@@ -62,8 +62,7 @@ const InputComponent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <Input
     className={cn(
-      // ADICIONEI "placeholder:text-neutral-400" AQUI EMBAIXO 👇
-      "h-12 rounded-s-none rounded-e-lg border-neutral-200 bg-white text-neutral-900 placeholder:text-neutral-400 focus:border-orange-600 focus-visible:ring-orange-600",
+      "h-12 rounded-s-none rounded-e-lg border-neutral-200 bg-white text-neutral-900 placeholder:text-neutral-400 focus:border-orange-600 focus-visible:ring-orange-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500",
       className,
     )}
     {...props}
@@ -101,7 +100,7 @@ const CountrySelect = ({
           type="button"
           variant={"outline"}
           className={cn(
-            "flex h-12 gap-1 rounded-s-lg rounded-e-none border-neutral-200 bg-white px-3 hover:bg-neutral-50",
+            "flex h-12 gap-1 rounded-s-lg rounded-e-none border-neutral-200 bg-white px-3 text-neutral-900 hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800",
           )}
           disabled={disabled}
         >

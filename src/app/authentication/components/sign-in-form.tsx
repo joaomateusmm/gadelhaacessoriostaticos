@@ -94,26 +94,26 @@ export default function SignInForm({
   };
 
   return (
-    <Card className="w-full border-none bg-white shadow-none">
+    <Card className="w-full border-none bg-transparent shadow-none text-white">
       <CardHeader className="px-0">
         {/* Renderiza o link apenas se NÃO estivermos em um fluxo interno (opcional, mantive fixo por enquanto) */}
         {callbackUrl === "/" && (
           <Link
             href="/"
-            className="mb-4 inline-block text-xs font-medium text-neutral-500 transition-colors hover:text-orange-600"
+            className="mb-4 inline-block text-xs font-medium text-neutral-400 transition-colors hover:text-orange-500"
           >
             ⟵ Voltar para Loja
           </Link>
         )}
-        <CardTitle className="text-3xl font-bold tracking-tight text-neutral-900">
+        <CardTitle className="text-3xl font-bold tracking-tight text-white">
           Bem-vindo de volta
         </CardTitle>
-        <CardDescription className="text-neutral-500">
+        <CardDescription className="text-neutral-400">
           Não tem uma conta?{" "}
           <button
             type="button"
             onClick={switchToSignUp}
-            className="font-medium text-orange-600 transition-colors hover:text-orange-700 hover:underline"
+            className="font-medium text-orange-500 transition-colors hover:text-orange-400 hover:underline"
           >
             Crie uma agora.
           </button>
@@ -130,7 +130,7 @@ export default function SignInForm({
                 <FormItem>
                   <FormControl>
                     <Input
-                      className="h-12 border-neutral-200 bg-white text-neutral-900 placeholder:text-neutral-400 focus:border-orange-500 focus:ring-orange-500"
+                      className="h-12 border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500"
                       placeholder="seu@email.com"
                       {...field}
                     />
@@ -148,7 +148,7 @@ export default function SignInForm({
                   <FormControl>
                     <div className="relative">
                       <Input
-                        className="h-12 border-neutral-200 bg-white pr-10 text-neutral-900 placeholder:text-neutral-400 focus:border-orange-500 focus:ring-orange-500"
+                        className="h-12 border-neutral-800 bg-neutral-900 pr-10 text-white placeholder:text-neutral-500 focus:border-orange-500 focus:ring-orange-500"
                         placeholder="Sua senha"
                         type={showPassword ? "text" : "password"}
                         {...field}
@@ -157,7 +157,7 @@ export default function SignInForm({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute top-0 right-0 h-full px-3 text-neutral-400 hover:bg-transparent"
+                        className="absolute top-0 right-0 h-full px-3 text-neutral-400 hover:bg-transparent hover:text-white"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
@@ -188,11 +188,11 @@ export default function SignInForm({
             </Button>
 
             <div className="relative flex w-full items-center justify-center">
-              <div className="w-full border-t border-neutral-200"></div>
-              <span className="relative w-full bg-white px-2 text-xs text-neutral-500 uppercase">
+              <div className="w-full border-t border-neutral-800"></div>
+              <span className="relative whitespace-nowrap bg-neutral-950 px-3 text-xs text-neutral-500 uppercase">
                 Ou continue com
               </span>
-              <div className="w-full border-t border-neutral-200"></div>
+              <div className="w-full border-t border-neutral-800"></div>
             </div>
 
             <Button
@@ -200,7 +200,7 @@ export default function SignInForm({
               variant="outline"
               onClick={handleSignInWithGoogle}
               disabled={isLoading || isGoogleLoading}
-              className="h-12 w-full border-neutral-200"
+              className="h-12 w-full border-neutral-800 bg-neutral-900 text-white hover:bg-neutral-800 hover:text-white"
             >
               {isGoogleLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
