@@ -91,6 +91,59 @@ function HeaderIconButton({
   );
 }
 
+// --- LISTA DE RESULTADOS DA PESQUISA (usada no desktop e no celular) ---
+function SearchResultsList({
+  results,
+  formatPrice,
+  onSelect,
+}: {
+  results: Product[];
+  formatPrice: (value: number) => string;
+  onSelect: () => void;
+}) {
+  if (results.length === 0) {
+    return (
+      <div className="p-8 text-center text-sm text-neutral-500">
+        Nenhum produto encontrado.
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col py-2">
+      {results.map((product) => (
+        <Link
+          key={product.id}
+          href={`/produto/${product.id}`}
+          onClick={onSelect}
+          className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-neutral-50 active:bg-neutral-100"
+        >
+          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border border-neutral-100 bg-neutral-50">
+            {product.images?.[0] ? (
+              <Image
+                src={product.images[0]}
+                alt={product.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <ShoppingCart className="m-auto mt-3 h-6 w-6 text-neutral-300" />
+            )}
+          </div>
+          <div className="flex min-w-0 flex-col">
+            <span className="line-clamp-1 font-medium text-neutral-900">
+              {product.name}
+            </span>
+            <span className="text-sm font-bold text-orange-600">
+              {formatPrice(product.discountPrice || product.price)}
+            </span>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 // --- CONTEÚDO DO HEADER ---
 export function HeaderContent() {
   const [mounted, setMounted] = useState(false);
@@ -117,6 +170,8 @@ export function HeaderContent() {
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -240,6 +295,30 @@ export function HeaderContent() {
     };
   }, [isSearchOpen]);
 
+  // 6. FECHAR RESULTADOS DA PESQUISA MOBILE AO TOCAR FORA / ESC
+  useEffect(() => {
+    if (!showResults) return;
+
+    function handleOutside(event: PointerEvent) {
+      const el = mobileSearchRef.current;
+      // offsetParent === null => elemento oculto (desktop), ignora
+      if (!el || el.offsetParent === null) return;
+      if (!el.contains(event.target as Node)) setShowResults(false);
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      const el = mobileSearchRef.current;
+      if (!el || el.offsetParent === null) return;
+      if (event.key === "Escape") setShowResults(false);
+    }
+
+    document.addEventListener("pointerdown", handleOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handleOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showResults]);
+
   if (pathname?.startsWith("/admin")) {
     return null;
   }
@@ -271,8 +350,8 @@ export function HeaderContent() {
       <div
         className={`w-full transition-all duration-300 ease-in-out ${
           hideTopBar
-            ? "-translate-y-full opacity-0 pointer-events-none h-0 overflow-hidden"
-            : "translate-y-0 opacity-100 h-10"
+            ? "pointer-events-none h-0 -translate-y-full overflow-hidden opacity-0"
+            : "h-10 translate-y-0 opacity-100"
         }`}
       >
         <TopBar />
@@ -280,17 +359,20 @@ export function HeaderContent() {
 
       {/* --- BARRA PRINCIPAL (some depois ao rolar para baixo, aparece primeiro ao rolar para cima) --- */}
       <div
-        className={`w-full bg-black px-4 md:px-8 transition-all duration-300 ease-in-out ${
+        className={`w-full bg-black px-4 transition-all duration-300 ease-in-out md:px-8 ${
           hideMainBar
-            ? "-translate-y-full opacity-0 pointer-events-none h-0 overflow-hidden shadow-none"
-            : "translate-y-0 opacity-100 h-20 shadow-lg"
+            ? "pointer-events-none h-0 -translate-y-full overflow-hidden opacity-0 shadow-none"
+            : "h-20 translate-y-0 opacity-100 shadow-lg"
         }`}
       >
-        <div className="relative mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-4">
+        <div className="relative mx-auto flex h-20 max-w-[1440px] items-center justify-between gap-3 md:gap-4">
           {/* 1. ESQUERDA: Menu mobile + Logo */}
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="lg:hidden">
-              <MobileMenu categories={staticCategories} isAffiliate={isAffiliate} />
+              <MobileMenu
+                categories={staticCategories}
+                isAffiliate={isAffiliate}
+              />
             </div>
 
             {/* Logo desktop/tablet */}
@@ -309,20 +391,6 @@ export function HeaderContent() {
               </span>
             </Link>
 
-            {/* Logo mobile (centralizada) */}
-            <Link
-              href="/"
-              className="absolute left-1/2 flex -translate-x-1/2 items-center justify-center duration-300 active:scale-95 md:hidden"
-            >
-              <Image
-                src="/logo.svg"
-                alt="Logo ESG Group"
-                width={48}
-                height={48}
-                className="rounded-full object-cover shadow-lg"
-              />
-            </Link>
-
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {session && (session.user as any).role === "admin" && (
               <Link href="/admin" className="hidden md:block">
@@ -333,7 +401,67 @@ export function HeaderContent() {
             )}
           </div>
 
-          {/* 2. CENTRO: Navegação (desktop) */}
+          {/* 2a. CENTRO (CELULAR): Formulário de pesquisa ocupando todo o espaço */}
+          <div ref={mobileSearchRef} className="min-w-0 flex-1 md:hidden">
+            <form
+              role="search"
+              onSubmit={(e) => {
+                e.preventDefault();
+                mobileInputRef.current?.blur();
+              }}
+              className="flex h-10 w-full items-center gap-2 rounded-full border border-neutral-700 bg-neutral-950 pr-1.5 pl-3.5 transition-all duration-300 focus-within:border-orange-600"
+            >
+              <Search
+                className="h-4 w-4 shrink-0 text-neutral-400"
+                strokeWidth={1.5}
+              />
+              <input
+                ref={mobileInputRef}
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (searchQuery.length >= 2) setShowResults(true);
+                }}
+                placeholder="O que você procura?"
+                aria-label="Pesquisar produtos"
+                enterKeyHint="search"
+                autoComplete="off"
+                className="h-full min-w-0 flex-1 bg-transparent text-base text-white placeholder:text-neutral-500 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+              />
+              {isSearching && (
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin text-neutral-400" />
+              )}
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSearchResults([]);
+                    setShowResults(false);
+                    mobileInputRef.current?.focus();
+                  }}
+                  aria-label="Limpar pesquisa"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-neutral-400 transition-colors duration-200 hover:bg-neutral-800 hover:text-white active:scale-95"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </form>
+
+            {/* RESULTADOS (CELULAR) */}
+            {showResults && searchQuery.length >= 2 && (
+              <div className="animate-in fade-in slide-in-from-top-2 absolute inset-x-0 top-full z-50 mt-1 max-h-[60vh] overflow-y-auto rounded-xl border border-neutral-200 bg-white shadow-xl duration-200">
+                <SearchResultsList
+                  results={searchResults}
+                  formatPrice={formatPrice}
+                  onSelect={closeSearch}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* 2b. CENTRO: Navegação (desktop) */}
           <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 lg:flex xl:gap-8">
             {staticCategories.map((cat, index) => (
               <Link key={index} href={cat.href} className={navLinkClass}>
@@ -344,29 +472,38 @@ export function HeaderContent() {
 
           {/* 3. DIREITA: Ícones */}
           <div className="flex items-center gap-4 sm:gap-6">
-            {/* PESQUISA */}
-            <HeaderIconButton
-              icon={Search}
-              label="Pesquisar"
-              onClick={() =>
-                isSearchOpen ? closeSearch() : setIsSearchOpen(true)
-              }
-            />
+            {/* PESQUISA (somente tablet/desktop; no celular a busca fica no centro) */}
+            <div className="hidden md:block">
+              <HeaderIconButton
+                icon={Search}
+                label="Pesquisar"
+                onClick={() =>
+                  isSearchOpen ? closeSearch() : setIsSearchOpen(true)
+                }
+              />
+            </div>
 
-            {/* FAVORITOS */}
-            <WishlistSheet />
+            {/* FAVORITOS (oculto no celular) */}
+            <div className="hidden md:block">
+              <WishlistSheet />
+            </div>
 
-            {/* CARRINHO */}
-            <CartSheet />
+            {/* CARRINHO (oculto no celular) */}
+            <div className="hidden md:block">
+              <CartSheet />
+            </div>
 
             {/* USER / MINHA CONTA */}
             {session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="group flex cursor-pointer items-center gap-1 outline-none">
-                    <Avatar className="h-8 w-8 border border-white/60 shadow-sm transition-all duration-300 group-hover:border-orange-500">
-                      <AvatarImage src={session.user.image || ""} />
-                      <AvatarFallback className="bg-orange-100 text-sm font-bold text-orange-700">
+                    <Avatar className="h-10 w-10 rounded-md border border-white/60 shadow-sm transition-all duration-300 group-hover:border-orange-500">
+                      <AvatarImage
+                        src={session.user.image || ""}
+                        className="rounded-md"
+                      />
+                      <AvatarFallback className="rounded-md bg-orange-100 text-sm font-bold text-orange-700">
                         {session.user.name.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -410,7 +547,9 @@ export function HeaderContent() {
                       onClick={() => router.push("/admin")}
                     >
                       <LayoutDashboard className="h-4 w-4 text-orange-600" />
-                      <span className="font-bold text-orange-600">Painel Admin</span>
+                      <span className="font-bold text-orange-600">
+                        Painel Admin
+                      </span>
                     </DropdownMenuItem>
                   )}
 
@@ -505,7 +644,9 @@ export function HeaderContent() {
               </DropdownMenu>
             ) : (
               <Link href="/authentication" aria-label="Entrar">
-                <HeaderIconButton icon={UserRound} />
+                <div className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-neutral-700 bg-neutral-900 text-neutral-400 transition-colors hover:border-neutral-500 hover:text-white">
+                  <UserRound className="h-5 w-5" />
+                </div>
               </Link>
             )}
           </div>
@@ -515,7 +656,7 @@ export function HeaderContent() {
         {isSearchOpen && (
           <div
             ref={searchRef}
-            className="animate-in fade-in slide-in-from-top-2 absolute inset-x-0 top-full z-40 bg-black px-4 py-4 shadow-xl duration-200 md:px-8"
+            className="animate-in fade-in slide-in-from-top-2 absolute inset-x-0 top-full z-40 hidden bg-black px-4 py-4 shadow-xl duration-200 md:block md:px-8"
           >
             <div className="relative mx-auto max-w-3xl">
               <div className="flex h-12 w-full items-center rounded-full border border-neutral-700 bg-neutral-950 pr-2 pl-5 transition-all focus-within:border-orange-600">
@@ -543,45 +684,11 @@ export function HeaderContent() {
               {/* RESULTADOS */}
               {showResults && searchQuery.length >= 2 && (
                 <div className="absolute top-14 right-0 left-0 z-50 max-h-[60vh] overflow-y-auto rounded-xl border border-neutral-200 bg-white shadow-xl">
-                  {searchResults.length > 0 ? (
-                    <div className="flex flex-col py-2">
-                      {searchResults.map((product) => (
-                        <Link
-                          key={product.id}
-                          href={`/produto/${product.id}`}
-                          onClick={closeSearch}
-                          className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-neutral-50"
-                        >
-                          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border border-neutral-100 bg-neutral-50">
-                            {product.images?.[0] ? (
-                              <Image
-                                src={product.images[0]}
-                                alt={product.name}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <ShoppingCart className="m-auto mt-3 h-6 w-6 text-neutral-300" />
-                            )}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="line-clamp-1 font-medium text-neutral-900">
-                              {product.name}
-                            </span>
-                            <span className="text-sm font-bold text-orange-600">
-                              {formatPrice(
-                                product.discountPrice || product.price,
-                              )}
-                            </span>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-8 text-center text-sm text-neutral-500">
-                      Nenhum produto encontrado.
-                    </div>
-                  )}
+                  <SearchResultsList
+                    results={searchResults}
+                    formatPrice={formatPrice}
+                    onSelect={closeSearch}
+                  />
                 </div>
               )}
             </div>
