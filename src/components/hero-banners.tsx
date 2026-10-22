@@ -12,7 +12,7 @@ export function HeroBanners() {
           alt="Banner Principal"
           fill
           priority
-          className="h-full w-full object-cover object-center"
+          className="h-full w-full scale-105 object-cover object-center md:scale-100"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/20 to-transparent" />
       </div>
