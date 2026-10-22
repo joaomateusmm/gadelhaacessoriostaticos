@@ -15,7 +15,7 @@ export default async function AdminPedidosPage() {
   const pedidosList = await obterPedidosSistemaAction();
 
   return (
-    <div className="space-y-8 p-2 pt-6">
+    <div className="space-y-6 p-1 pt-4 sm:p-4 sm:pt-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-clash-display text-3xl font-medium text-white">
@@ -37,7 +37,9 @@ export default async function AdminPedidosPage() {
         </div>
       </div>
 
-      <Suspense fallback={<div className="text-white">Carregando pedidos...</div>}>
+      <Suspense
+        fallback={<div className="text-white">Carregando pedidos...</div>}
+      >
         <TabelaPedidosSistema initialPedidos={pedidosList} />
       </Suspense>
     </div>

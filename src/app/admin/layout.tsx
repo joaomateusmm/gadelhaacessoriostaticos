@@ -34,7 +34,7 @@ export default async function AdminLayout({
               Área Administrativa
             </span>
           </header>
-          <main className="flex-1 bg-neutral-950 p-6 pb-20 text-white md:p-8">
+          <main className="flex-1 bg-neutral-950 sm:p-6 p-2 pb-20 text-white md:p-8">
             {children}
           </main>
         </SidebarInset>

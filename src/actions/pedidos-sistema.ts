@@ -175,11 +175,19 @@ export async function obterProdutosParaPedidoAction() {
 
 export async function obterPedidosSistemaAction(): Promise<PedidoSistema[]> {
   try {
-    const resultado = await db.query.pedidos.findMany({
-      orderBy: [desc(pedidos.createdAt)],
-      with: {
-        itens: true,
-      },
+    const [resultado, produtosList] = await Promise.all([
+      db.query.pedidos.findMany({
+        orderBy: [desc(pedidos.createdAt)],
+        with: {
+          itens: true,
+        },
+      }),
+      db.select().from(product),
+    ]);
+
+    const productMap = new Map<string, string>();
+    produtosList.forEach((prod) => {
+      if (prod.id) productMap.set(prod.id, prod.name);
     });
 
     return resultado.map((p) => {
@@ -200,17 +208,24 @@ export async function obterPedidosSistemaAction(): Promise<PedidoSistema[]> {
         statusPagamento: p.statusPagamento as StatusPagamento,
         statusPedido: p.statusPedido as StatusPedido,
         statusPacote: p.statusPacote as StatusPacote,
-        itens: p.itens.map((item) => ({
-          id: item.id,
-          produtoId: item.produtoId || undefined,
-          nome: item.nome,
-          tamanho: item.tamanho,
-          cor: item.cor || "",
-          quantidade: item.quantidade,
-          precoUnitario: Number(item.precoUnitario),
-          separado: item.separado,
-          observacao: item.observacao || undefined,
-        })),
+        itens: p.itens.map((item) => {
+          const nomeAtual =
+            item.produtoId && productMap.has(item.produtoId)
+              ? productMap.get(item.produtoId)!
+              : item.nome;
+
+          return {
+            id: item.id,
+            produtoId: item.produtoId || undefined,
+            nome: nomeAtual,
+            tamanho: item.tamanho,
+            cor: item.cor || "",
+            quantidade: item.quantidade,
+            precoUnitario: Number(item.precoUnitario),
+            separado: item.separado,
+            observacao: item.observacao || undefined,
+          };
+        }),
       };
     });
   } catch (error) {
@@ -223,14 +238,22 @@ export async function obterPedidoSistemaPorIdAction(
   id: string,
 ): Promise<PedidoSistema | null> {
   try {
-    const p = await db.query.pedidos.findFirst({
-      where: eq(pedidos.id, id),
-      with: {
-        itens: true,
-      },
-    });
+    const [p, produtosList] = await Promise.all([
+      db.query.pedidos.findFirst({
+        where: eq(pedidos.id, id),
+        with: {
+          itens: true,
+        },
+      }),
+      db.select().from(product),
+    ]);
 
     if (!p) return null;
+
+    const productMap = new Map<string, string>();
+    produtosList.forEach((prod) => {
+      if (prod.id) productMap.set(prod.id, prod.name);
+    });
 
     const dataStr = formatarDataBR(p.dataPedido);
 
@@ -249,17 +272,24 @@ export async function obterPedidoSistemaPorIdAction(
       statusPagamento: p.statusPagamento as StatusPagamento,
       statusPedido: p.statusPedido as StatusPedido,
       statusPacote: p.statusPacote as StatusPacote,
-      itens: p.itens.map((item) => ({
-        id: item.id,
-        produtoId: item.produtoId || undefined,
-        nome: item.nome,
-        tamanho: item.tamanho,
-        cor: item.cor || "",
-        quantidade: item.quantidade,
-        precoUnitario: Number(item.precoUnitario),
-        separado: item.separado,
-        observacao: item.observacao || undefined,
-      })),
+      itens: p.itens.map((item) => {
+        const nomeAtual =
+          item.produtoId && productMap.has(item.produtoId)
+            ? productMap.get(item.produtoId)!
+            : item.nome;
+
+        return {
+          id: item.id,
+          produtoId: item.produtoId || undefined,
+          nome: nomeAtual,
+          tamanho: item.tamanho,
+          cor: item.cor || "",
+          quantidade: item.quantidade,
+          precoUnitario: Number(item.precoUnitario),
+          separado: item.separado,
+          observacao: item.observacao || undefined,
+        };
+      }),
     };
   } catch (error) {
     console.error("Erro ao buscar pedido por ID:", error);

@@ -464,8 +464,8 @@ export function TabelaPedidosSistema({
         )}
       </div>
       {/* Header da Página */}
-      <div className="flex w-full flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center justify-center gap-2">
+      <div className="w-full">
+        <div className="flex w-full flex-wrap items-center gap-2 lg:gap-3">
           {/* Filtro por Produto (Dropdown Shadcn com Busca) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -506,7 +506,7 @@ export function TabelaPedidosSistema({
               </div>
 
               <div
-                className="max-h-60 space-y-1 overflow-x-hidden overflow-y-auto custom-scrollbar"
+                className="custom-scrollbar max-h-60 space-y-1 overflow-x-hidden overflow-y-auto"
                 onWheel={(e) => e.stopPropagation()}
               >
                 <DropdownMenuItem
@@ -581,7 +581,7 @@ export function TabelaPedidosSistema({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="max-h-60 w-48 overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl custom-scrollbar"
+              className="custom-scrollbar max-h-60 w-48 overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
               onWheel={(e) => e.stopPropagation()}
             >
               <DropdownMenuItem
@@ -645,7 +645,7 @@ export function TabelaPedidosSistema({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="max-h-60 w-48 overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl custom-scrollbar"
+              className="custom-scrollbar max-h-60 w-48 overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
               onWheel={(e) => e.stopPropagation()}
             >
               <DropdownMenuItem
@@ -708,7 +708,7 @@ export function TabelaPedidosSistema({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="max-h-60 w-48 overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl custom-scrollbar"
+              className="custom-scrollbar max-h-60 w-48 overflow-x-hidden overflow-y-auto rounded-none border-neutral-800 bg-neutral-950 p-2 font-mono text-xs text-neutral-300 shadow-2xl"
               onWheel={(e) => e.stopPropagation()}
             >
               <DropdownMenuItem
@@ -728,21 +728,21 @@ export function TabelaPedidosSistema({
                 <DropdownMenuLabel className="px-2 py-1 font-mono text-[10px] font-bold text-neutral-500 uppercase">
                   Status do Pacote
                 </DropdownMenuLabel>
-                {(
-                  ["Não criado", "Criado", "Lacrado"] as StatusPacote[]
-                ).map((status) => (
-                  <DropdownMenuItem
-                    key={status}
-                    onClick={() => setFiltroPacote(status)}
-                    className={`cursor-pointer font-mono text-xs uppercase ${
-                      filtroPacote === status
-                        ? "bg-neutral-800 font-bold text-emerald-400"
-                        : "focus:bg-neutral-900 focus:text-white"
-                    }`}
-                  >
-                    {status}
-                  </DropdownMenuItem>
-                ))}
+                {(["Não criado", "Criado", "Lacrado"] as StatusPacote[]).map(
+                  (status) => (
+                    <DropdownMenuItem
+                      key={status}
+                      onClick={() => setFiltroPacote(status)}
+                      className={`cursor-pointer font-mono text-xs uppercase ${
+                        filtroPacote === status
+                          ? "bg-neutral-800 font-bold text-emerald-400"
+                          : "focus:bg-neutral-900 focus:text-white"
+                      }`}
+                    >
+                      {status}
+                    </DropdownMenuItem>
+                  ),
+                )}
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -892,7 +892,7 @@ export function TabelaPedidosSistema({
                       return (
                         <div
                           key={pedido.id}
-                          className={`rounded- space-y-4 border p-5 transition-colors ${
+                          className={`space-y-4 border p-3 transition-colors sm:p-5 ${
                             isChecked
                               ? "border-neutral-700 bg-neutral-900/40"
                               : "border-neutral-800 bg-neutral-950"

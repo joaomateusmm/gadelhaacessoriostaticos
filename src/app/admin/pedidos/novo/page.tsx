@@ -115,7 +115,7 @@ export default function RegistrarPedidoPage() {
   // Form states
   const [corporacao, setCorporacao] = useState<
     "Polícia Militar" | "Polícia Penal"
-  >("Polícia Militar");
+  >("Polícia Penal");
   const [nome, setNome] = useState("");
   const [unidade, setUnidade] = useState("");
   const [contato, setContato] = useState("");
@@ -296,14 +296,24 @@ export default function RegistrarPedidoPage() {
     setItens((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const total = itens.reduce(
+  const totalPago = (Number(volus) || 0) + (Number(porFora) || 0);
+  const totalItens = itens.reduce(
     (soma, i) => soma + i.precoUnitario * i.quantidade,
     0,
   );
+  const diferenca = totalPago - totalItens;
 
   const handleSalvar = async () => {
     if (!nome.trim()) {
-      toast.error("Preencha o nome do agente/cliente.");
+      toast.error("Preencha o Nome Completo do cliente.");
+      return;
+    }
+    if (!corporacao) {
+      toast.error("Selecione a Corporação.");
+      return;
+    }
+    if (!contato.trim()) {
+      toast.error("Preencha o Telefone de Contato.");
       return;
     }
     // Allow saving without items
@@ -938,8 +948,16 @@ export default function RegistrarPedidoPage() {
                   Total do Pedido:
                 </span>
                 <p className="font-mono text-3xl font-bold text-white">
-                  {formatBrl(total)}
+                  {formatBrl(totalPago)}
                 </p>
+                <div className="mt-2 space-y-1 font-mono text-xs">
+                  <div className="text-neutral-400">
+                    Soma dos Itens: <span className="text-white">{formatBrl(totalItens)}</span>
+                  </div>
+                  <div className={`font-bold ${diferenca >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    Diferença: {formatBrl(diferenca)}
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2 border-t border-white/10 pt-4 text-xs text-neutral-300">
