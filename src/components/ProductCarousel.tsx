@@ -129,7 +129,7 @@ export function ProductCarousel({
       <button
         type="button"
         onClick={() => slide("prev")}
-        className="absolute top-1/2 left-0 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900/90 text-white shadow-lg backdrop-blur-sm transition hover:border-orange-500 hover:text-orange-500 active:scale-95"
+        className="absolute top-1/2 left-[-20px] z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900/90 text-white shadow-lg transition hover:border-orange-500 hover:text-orange-500 active:scale-95"
         aria-label="Anterior"
       >
         <ChevronLeft className="h-5 w-5" />
@@ -167,7 +167,7 @@ export function ProductCarousel({
       <button
         type="button"
         onClick={() => slide("next")}
-        className="absolute top-1/2 right-0 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900/90 text-white shadow-lg backdrop-blur-sm transition hover:border-orange-500 hover:text-orange-500 active:scale-95"
+        className="absolute top-1/2 right-[-20px] z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900/90 text-white shadow-lg transition hover:border-orange-500 hover:text-orange-500 active:scale-95"
         aria-label="Próximo"
       >
         <ChevronRight className="h-5 w-5" />
