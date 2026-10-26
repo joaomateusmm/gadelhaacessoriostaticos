@@ -320,7 +320,10 @@ export function HeaderContent() {
     };
   }, [showResults]);
 
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/authentication")) {
+  if (
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/authentication")
+  ) {
     return null;
   }
 
@@ -392,14 +395,29 @@ export function HeaderContent() {
               </span>
             </Link>
 
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {session && (session.user as any).role === "admin" && (
-              <Link href="/admin" className="hidden md:block">
-                <span className="text-sm font-semibold text-orange-500 duration-200 hover:underline">
-                  Admin
-                </span>
-              </Link>
-            )}
+            <div className="flex items-center gap-2">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {session && (session.user as any).role === "admin" && (
+                <Link href="/admin" className="hidden md:block">
+                  <span className="text-sm font-semibold text-orange-500 duration-200 hover:underline">
+                    Admin
+                  </span>
+                </Link>
+              )}
+
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {session && (session.user as any).role === "admin" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("toggle-volus-mode"));
+                  }}
+                  className="cursor-pointer text-sm font-semibold text-emerald-500 duration-200 hover:underline bg-transparent border-none p-0"
+                >
+                  Vólus
+                </button>
+              )}
+            </div>
           </div>
 
           {/* 2a. CENTRO (CELULAR): Formulário de pesquisa ocupando todo o espaço */}
@@ -524,130 +542,132 @@ export function HeaderContent() {
                     sideOffset={12}
                     className="z-[150] w-72 rounded-xl border border-neutral-100 bg-white p-2 shadow-xl ring-1 ring-neutral-900/5"
                   >
-                  {/* CABEÇALHO DO PERFIL */}
-                  <div className="mb-2 flex items-center gap-3 rounded-lg bg-neutral-50 p-3">
-                    <Avatar className="h-10 w-10 border border-neutral-200">
-                      <AvatarImage src={session.user.image || ""} />
-                      <AvatarFallback className="bg-white font-bold text-orange-600">
-                        {session.user.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col overflow-hidden">
-                      <span className="truncate text-sm font-bold text-neutral-900">
-                        {session.user.name}
-                      </span>
-                      <span className="truncate text-xs text-neutral-500">
-                        {session.user.email}
-                      </span>
+                    {/* CABEÇALHO DO PERFIL */}
+                    <div className="mb-2 flex items-center gap-3 rounded-lg bg-neutral-50 p-3">
+                      <Avatar className="h-10 w-10 border border-neutral-200">
+                        <AvatarImage src={session.user.image || ""} />
+                        <AvatarFallback className="bg-white font-bold text-orange-600">
+                          {session.user.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="truncate text-sm font-bold text-neutral-900">
+                          {session.user.name}
+                        </span>
+                        <span className="truncate text-xs text-neutral-500">
+                          {session.user.email}
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <DropdownMenuSeparator className="my-1 bg-neutral-100" />
+                    <DropdownMenuSeparator className="my-1 bg-neutral-100" />
 
-                  <DropdownMenuLabel className="px-3 py-1.5 text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">
-                    Minha Conta
-                  </DropdownMenuLabel>
+                    <DropdownMenuLabel className="px-3 py-1.5 text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">
+                      Minha Conta
+                    </DropdownMenuLabel>
 
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {session && (session.user as any).role === "admin" && (
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {session && (session.user as any).role === "admin" && (
+                      <DropdownMenuItem
+                        className={menuItemClass}
+                        onClick={() => router.push("/admin")}
+                      >
+                        <LayoutDashboard className="h-4 w-4 text-orange-600" />
+                        <span className="font-bold text-orange-600">
+                          Painel Admin
+                        </span>
+                      </DropdownMenuItem>
+                    )}
+
                     <DropdownMenuItem
                       className={menuItemClass}
-                      onClick={() => router.push("/admin")}
+                      onClick={() => router.push("/minha-conta/compras")}
                     >
-                      <LayoutDashboard className="h-4 w-4 text-orange-600" />
-                      <span className="font-bold text-orange-600">
-                        Painel Admin
-                      </span>
+                      <Package className="h-4 w-4" />
+                      <span>{t.header.account.orders}</span>
                     </DropdownMenuItem>
-                  )}
 
-                  <DropdownMenuItem
-                    className={menuItemClass}
-                    onClick={() => router.push("/minha-conta/compras")}
-                  >
-                    <Package className="h-4 w-4" />
-                    <span>{t.header.account.orders}</span>
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className={menuItemClass}
+                      onClick={() => router.push("/minha-conta/servicos")}
+                    >
+                      <Drill className="h-4 w-4" />
+                      <span>Meus Serviços</span>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuItem
-                    className={menuItemClass}
-                    onClick={() => router.push("/minha-conta/servicos")}
-                  >
-                    <Drill className="h-4 w-4" />
-                    <span>Meus Serviços</span>
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className={menuItemClass}
+                      onClick={() => router.push("/minha-conta/favoritos")}
+                    >
+                      <Heart className="h-4 w-4" />
+                      <span>Lista de Desejos</span>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuItem
-                    className={menuItemClass}
-                    onClick={() => router.push("/minha-conta/favoritos")}
-                  >
-                    <Heart className="h-4 w-4" />
-                    <span>Lista de Desejos</span>
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className={menuItemClass}
+                      onClick={() => router.push("/minha-conta/carrinho")}
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      <span>Meu Carrinho</span>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuItem
-                    className={menuItemClass}
-                    onClick={() => router.push("/minha-conta/carrinho")}
-                  >
-                    <ShoppingCart className="h-4 w-4" />
-                    <span>Meu Carrinho</span>
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className={menuItemClass}
+                      onClick={() => router.push("/minha-conta/avaliacoes")}
+                    >
+                      <Star className="h-4 w-4" />
+                      <span>Minhas Avaliações</span>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuItem
-                    className={menuItemClass}
-                    onClick={() => router.push("/minha-conta/avaliacoes")}
-                  >
-                    <Star className="h-4 w-4" />
-                    <span>Minhas Avaliações</span>
-                  </DropdownMenuItem>
+                    <DropdownMenuSeparator className="my-1 bg-neutral-100" />
 
-                  <DropdownMenuSeparator className="my-1 bg-neutral-100" />
+                    <DropdownMenuLabel className="px-3 py-1.5 text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">
+                      Meu Perfil
+                    </DropdownMenuLabel>
 
-                  <DropdownMenuLabel className="px-3 py-1.5 text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">
-                    Meu Perfil
-                  </DropdownMenuLabel>
+                    <DropdownMenuItem
+                      className={menuItemClass}
+                      onClick={() => router.push("/painel-prestador")}
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>Painel do Prestador</span>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuItem
-                    className={menuItemClass}
-                    onClick={() => router.push("/painel-prestador")}
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>Painel do Prestador</span>
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className={menuItemClass}
+                      onClick={() =>
+                        router.push("/minha-conta/trabalhe-conosco")
+                      }
+                    >
+                      <Hammer className="h-4 w-4" />
+                      <span>Prestar Serviço</span>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuItem
-                    className={menuItemClass}
-                    onClick={() => router.push("/minha-conta/trabalhe-conosco")}
-                  >
-                    <Hammer className="h-4 w-4" />
-                    <span>Prestar Serviço</span>
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className={menuItemClass}
+                      onClick={() => router.push("/minha-conta")}
+                    >
+                      <User className="h-4 w-4" />
+                      <span>Dados Pessoais</span>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuItem
-                    className={menuItemClass}
-                    onClick={() => router.push("/minha-conta")}
-                  >
-                    <User className="h-4 w-4" />
-                    <span>Dados Pessoais</span>
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className={menuItemClass}
+                      onClick={() => router.push("/faq")}
+                    >
+                      <LifeBuoy className="h-4 w-4" />
+                      <span>Central de Ajuda</span>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuItem
-                    className={menuItemClass}
-                    onClick={() => router.push("/faq")}
-                  >
-                    <LifeBuoy className="h-4 w-4" />
-                    <span>Central de Ajuda</span>
-                  </DropdownMenuItem>
+                    <DropdownMenuSeparator className="my-1 bg-neutral-100" />
 
-                  <DropdownMenuSeparator className="my-1 bg-neutral-100" />
-
-                  <DropdownMenuItem
-                    className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-red-600 transition-colors focus:bg-red-50 focus:text-red-700"
-                    onClick={handleSignOut}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>{t.header.account.logout}</span>
-                  </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-red-600 transition-colors focus:bg-red-50 focus:text-red-700"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>{t.header.account.logout}</span>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

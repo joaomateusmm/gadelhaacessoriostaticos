@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -276,9 +277,10 @@ export function ProductsTable({
                   </TableRow>
                   {section.products.map((item) => {
                     const mainImage =
-                      item.images && item.images.length > 0
+                      (item as any).thumbnail ||
+                      (item.images && item.images.length > 0
                         ? item.images[0]
-                        : null;
+                        : null);
 
                     return (
                       <TableRow

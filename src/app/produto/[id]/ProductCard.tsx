@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ interface ProductCardProps {
     images: string[] | null;
     /** URL da capa definida explicitamente pelo admin — prioridade máxima */
     thumbnail?: string | null;
+    volusPrice?: number | null;
     variants?: Array<{
       images?: string[] | null;
       image?: string | null;
@@ -37,6 +38,13 @@ interface ProductCardProps {
 export function ProductCard({ data, categoryName }: ProductCardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [useVolus, setUseVolus] = useState(false);
+
+  useEffect(() => {
+    const handleToggleVolus = () => setUseVolus((prev) => !prev);
+    window.addEventListener("toggle-volus-mode", handleToggleVolus);
+    return () => window.removeEventListener("toggle-volus-mode", handleToggleVolus);
+  }, []);
 
   const addItemToCart = useCartStore((state) => state.addItem);
   const {
@@ -63,7 +71,15 @@ export function ProductCard({ data, categoryName }: ProductCardProps) {
       ? Math.round(((data.price - data.discountPrice) / data.price) * 100)
       : 0;
 
-  const finalPrice = data.discountPrice || data.price;
+  // Quando modo Vólus está ativo:
+  // - Prioriza volusPrice do admin se preenchido
+  // - Senão, soma R$20 (2000 centavos) ao preço original
+  const volusDisplayPrice =
+    data.volusPrice != null && data.volusPrice > 0
+      ? data.volusPrice
+      : data.price + 2000;
+
+  const finalPrice = useVolus ? volusDisplayPrice : data.discountPrice || data.price;
 
   const isFree = finalPrice === 0;
 
@@ -146,8 +162,12 @@ export function ProductCard({ data, categoryName }: ProductCardProps) {
 
       {/* --- ÁREA DA IMAGEM (Fundo clean com cantos arredondados) --- */}
       <div className="relative aspect-square w-full overflow-hidden bg-white">
-        {/* Badge Lançamento / Desconto no canto superior esquerdo */}
-        {discountPercentage > 0 && (
+        {/* Badge Vólus ou Desconto */}
+        {useVolus ? (
+          <span className="absolute top-3 left-3 z-10 rounded-full bg-emerald-600 px-3.5 py-1 text-[11px] font-extrabold tracking-wide text-white uppercase shadow-sm">
+            Vólus
+          </span>
+        ) : discountPercentage > 0 && (
           <span className="absolute top-3 left-3 z-10 rounded-full bg-[#FF4500] px-3.5 py-1 text-[11px] font-extrabold tracking-wide text-white uppercase shadow-sm">
             -{discountPercentage}%
           </span>
@@ -176,7 +196,11 @@ export function ProductCard({ data, categoryName }: ProductCardProps) {
               Grátis
             </span>
           ) : (
-            <span className="text-lg font-extrabold text-white">
+            <span
+              className={`text-lg font-extrabold ${
+                useVolus ? "text-emerald-400" : "text-white"
+              }`}
+            >
               {formatPrice(finalPrice)}
             </span>
           )}

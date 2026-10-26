@@ -887,6 +887,9 @@ export function TabelaPedidosSistema({
                           acc + item.precoUnitario * item.quantidade,
                         0,
                       );
+                      const totalPago =
+                        (pedido.saldoVolus || 0) + (pedido.saldoPorFora || 0);
+                      const diferenca = totalPago - totalValor;
                       const isChecked = selecionados.includes(pedido.id);
 
                       return (
@@ -1037,9 +1040,38 @@ export function TabelaPedidosSistema({
                                   ? "A ENTREGAR"
                                   : pedido.statusPedido}
                               </span>
-                              <span className="ml-2 text-sm font-bold text-white">
-                                {brl(totalValor)}
-                              </span>
+                              <div className="ml-2 flex flex-col items-end text-right font-mono">
+                                <div
+                                  title="Total do dinheiro pago"
+                                  className="text-xs text-neutral-400"
+                                >
+                                  Total pago:{" "}
+                                  <span className="text-sm font-bold text-white">
+                                    {brl(totalPago)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3 text-[11px]">
+                                  <span
+                                    title="Total soma dos itens"
+                                    className="text-neutral-400"
+                                  >
+                                    Itens:{" "}
+                                    <span className="text-white">
+                                      {brl(totalValor)}
+                                    </span>
+                                  </span>
+                                  <span
+                                    title="Diferença dos itens (+ ou -) valor pago"
+                                    className={`font-semibold ${
+                                      diferenca >= 0
+                                        ? "text-emerald-400"
+                                        : "text-red-400"
+                                    }`}
+                                  >
+                                    Dif: {brl(diferenca)}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
 
@@ -1109,67 +1141,75 @@ export function TabelaPedidosSistema({
                               </span>
                             </div>
 
-                            <ul className="space-y-1.5 font-mono text-xs">
-                              {pedido.itens.map((item) => {
-                                const isProdutoDestacado =
-                                  filtroProduto !== "todos" &&
-                                  item.nome.trim().toLowerCase() ===
-                                    filtroProduto.toLowerCase();
+                            {pedido.itens && pedido.itens.length > 0 ? (
+                              <ul className="space-y-1.5 font-mono text-xs">
+                                {pedido.itens.map((item) => {
+                                  const isProdutoDestacado =
+                                    filtroProduto !== "todos" &&
+                                    item.nome.trim().toLowerCase() ===
+                                      filtroProduto.toLowerCase();
 
-                                return (
-                                  <li
-                                    key={item.id}
-                                    onClick={() =>
-                                      handleToggleItem(
-                                        pedido.id,
-                                        item.id!,
-                                        !!item.separado,
-                                      )
-                                    }
-                                    className={`flex cursor-pointer items-center justify-between rounded-lg border p-2.5 transition-colors ${
-                                      isProdutoDestacado
-                                        ? item.separado
-                                          ? "border-emerald-500/20 bg-emerald-950/10 text-emerald-400/40 line-through ring-1 ring-emerald-500/20"
-                                          : "border-emerald-500/60 bg-emerald-950/30 font-semibold text-emerald-400 ring-1 ring-emerald-500/40"
-                                        : item.separado
-                                          ? "border-neutral-800 bg-neutral-900/40 text-neutral-500 line-through"
-                                          : "border-neutral-800 bg-neutral-900 text-white hover:border-neutral-700"
-                                    }`}
-                                  >
-                                    <div className="flex items-center space-x-3">
-                                      <input
-                                        type="checkbox"
-                                        checked={!!item.separado}
-                                        onChange={() => {}}
-                                        className="h-4 w-4 cursor-pointer rounded border-2 border-neutral-700 bg-neutral-950 text-white"
-                                      />
-                                      <span className="inline-flex items-center gap-3">
-                                        <span>
-                                          {item.quantidade}x {item.nome} —{" "}
-                                          {item.tamanho} ({item.cor})
+                                  return (
+                                    <li
+                                      key={item.id}
+                                      onClick={() =>
+                                        handleToggleItem(
+                                          pedido.id,
+                                          item.id!,
+                                          !!item.separado,
+                                        )
+                                      }
+                                      className={`flex cursor-pointer items-center justify-between rounded-lg border p-2.5 transition-colors ${
+                                        isProdutoDestacado
+                                          ? item.separado
+                                            ? "border-emerald-500/20 bg-emerald-950/10 text-emerald-400/40 line-through ring-1 ring-emerald-500/20"
+                                            : "border-emerald-500/60 bg-emerald-950/30 font-semibold text-emerald-400 ring-1 ring-emerald-500/40"
+                                          : item.separado
+                                            ? "border-neutral-800 bg-neutral-900/40 text-neutral-500 line-through"
+                                            : "border-neutral-800 bg-neutral-900 text-white hover:border-neutral-700"
+                                      }`}
+                                    >
+                                      <div className="flex items-center space-x-3">
+                                        <input
+                                          type="checkbox"
+                                          checked={!!item.separado}
+                                          onChange={() => {}}
+                                          className="h-4 w-4 cursor-pointer rounded border-2 border-neutral-700 bg-neutral-950 text-white"
+                                        />
+                                        <span className="inline-flex items-center gap-3">
+                                          <span>
+                                            {item.quantidade}x {item.nome} —{" "}
+                                            {item.tamanho} ({item.cor})
+                                          </span>
+                                          {getCorHex(item.cor) && (
+                                            <span
+                                              className="inline-block h-4 w-4 shrink-0 rounded-full border border-neutral-700 shadow-sm"
+                                              style={{
+                                                backgroundColor: getCorHex(
+                                                  item.cor,
+                                                )!,
+                                              }}
+                                              title={item.cor}
+                                            />
+                                          )}
                                         </span>
-                                        {getCorHex(item.cor) && (
-                                          <span
-                                            className="inline-block h-4 w-4 shrink-0 rounded-full border border-neutral-700 shadow-sm"
-                                            style={{
-                                              backgroundColor: getCorHex(
-                                                item.cor,
-                                              )!,
-                                            }}
-                                            title={item.cor}
-                                          />
+                                      </div>
+                                      <span className="font-bold tabular-nums">
+                                        {brl(
+                                          item.precoUnitario * item.quantidade,
                                         )}
                                       </span>
-                                    </div>
-                                    <span className="font-bold tabular-nums">
-                                      {brl(
-                                        item.precoUnitario * item.quantidade,
-                                      )}
-                                    </span>
-                                  </li>
-                                );
-                              })}
-                            </ul>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-neutral-900 p-6 text-center font-mono text-xs">
+                                <span className="text-neutral-600 italic">
+                                  *nenhum item adicionado*
+                                </span>
+                              </div>
+                            )}
                           </div>
 
                           {/* Ações Rápidas */}

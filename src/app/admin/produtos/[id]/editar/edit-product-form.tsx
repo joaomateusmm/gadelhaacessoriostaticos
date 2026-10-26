@@ -127,6 +127,7 @@ const formSchema = z.object({
 
   price: z.number().min(0, "O preço não pode ser negativo"),
   discountPrice: z.number().optional(),
+  volusPrice: z.number().optional(),
 
   currency: z.literal("BRL"),
 
@@ -183,6 +184,7 @@ interface ProductData {
   description?: string | null;
   price: number;
   discountPrice?: number | null;
+  volusPrice?: number | null;
   currency: string;
   categories: string[] | null;
   status: string;
@@ -321,6 +323,9 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
       discountPrice: initialData.discountPrice
         ? initialData.discountPrice / 100
         : 0,
+      volusPrice: initialData.volusPrice
+        ? initialData.volusPrice / 100
+        : 0,
       stock: initialData.stock || 0,
       isStockUnlimited: initialData.isStockUnlimited,
       shippingType:
@@ -404,6 +409,10 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
         discountPrice:
           data.discountPrice && data.discountPrice > 0
             ? Math.round(data.discountPrice * 100)
+            : null,
+        volusPrice:
+          data.volusPrice && data.volusPrice > 0
+            ? Math.round(data.volusPrice * 100)
             : null,
         currency: data.currency,
         categories: data.categories,
@@ -1773,6 +1782,27 @@ export default function EditProductForm({ initialData }: EditProductFormProps) {
                           placeholder={`${CURRENCY_SYMBOLS[watchCurrency]} 0,00`}
                           className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-lg text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-lg"
                           value={formatCurrency(field.value, watchCurrency)}
+                          onChange={(e) => handlePriceChange(e, field.onChange)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="volusPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-mono text-[11px] tracking-normal text-neutral-400 uppercase">
+                        Valor do Vólus ({CURRENCY_SYMBOLS[watchCurrency]})
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={`${CURRENCY_SYMBOLS[watchCurrency]} 0,00`}
+                          className="rounded-none border-neutral-800 bg-neutral-900 font-mono text-lg text-white placeholder:text-neutral-500 focus-visible:border-neutral-600 focus-visible:ring-0 md:text-lg"
+                          value={formatCurrency(field.value || 0, watchCurrency)}
                           onChange={(e) => handlePriceChange(e, field.onChange)}
                         />
                       </FormControl>

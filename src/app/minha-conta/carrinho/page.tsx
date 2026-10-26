@@ -30,6 +30,7 @@ import { useCartStore } from "@/store/cart-store";
 // 2. COMPONENTE INTERNO COM A LÓGICA
 function CartContent() {
   const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   // ESTADO PARA ARMAZENAR A DATA ESCOLHIDA
@@ -77,6 +78,7 @@ function CartContent() {
     }).format(value / 100);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function handleCheckout() {
     if (!session) {
       toast.error("Você precisa estar logado para finalizar a compra.");
@@ -280,19 +282,11 @@ function CartContent() {
                 </div>
 
                 <Button
-                  onClick={handleCheckout}
-                  disabled={isCheckingOut}
+                  disabled={true}
                   size="lg"
-                  className="mt-6 w-full cursor-pointer bg-orange-600 py-6 text-base font-bold text-white hover:bg-orange-700 disabled:bg-neutral-300"
+                  className="mt-6 w-full cursor-not-allowed bg-neutral-300 py-6 text-base font-bold text-neutral-600 opacity-60"
                 >
-                  {isCheckingOut ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Iniciando...
-                    </>
-                  ) : (
-                    <>Comprar Agora</>
-                  )}
+                  EM BREVE
                 </Button>
 
                 {/* SESSÃO DO CALENDÁRIO ABAIXO DO BOTÃO */}

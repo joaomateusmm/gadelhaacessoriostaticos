@@ -47,6 +47,7 @@ interface ProductPurchaseCardProps {
     name: string;
     price: number;
     discountPrice?: number | null;
+    volusPrice?: number | null;
     images: string[] | null;
     deliveryMode: string;
     isStockUnlimited: boolean | null;
@@ -261,10 +262,29 @@ export function ProductPurchaseCard({
     product.images,
   ]);
 
+  const [useVolus, setUseVolus] = useState(false);
+
+  useEffect(() => {
+    const handleToggleVolus = () => {
+      setUseVolus((prev) => !prev);
+    };
+    window.addEventListener("toggle-volus-mode", handleToggleVolus);
+    return () => {
+      window.removeEventListener("toggle-volus-mode", handleToggleVolus);
+    };
+  }, []);
+
   // Preço e estoque
-  const activePrice = selectedVariant?.price ?? product.price;
-  const activeDiscountPrice =
+  const basePrice = selectedVariant?.price ?? product.price;
+  const baseDiscountPrice =
     selectedVariant?.discountPrice ?? product.discountPrice;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const productVolusPrice = (product as any).volusPrice;
+
+  const activePrice =
+    useVolus && productVolusPrice != null ? productVolusPrice : basePrice;
+  const activeDiscountPrice =
+    useVolus && productVolusPrice != null ? null : baseDiscountPrice;
   const activeStock = selectedVariant
     ? selectedVariant.stock
     : (product.stock ?? 0);
@@ -424,10 +444,12 @@ export function ProductPurchaseCard({
             {(() => {
               const sortedCores = [...coresDisponiveis].sort((a, b) => {
                 const matchA = customColors.find(
-                  (item) => item.name.toLowerCase().trim() === a.toLowerCase().trim(),
+                  (item) =>
+                    item.name.toLowerCase().trim() === a.toLowerCase().trim(),
                 );
                 const matchB = customColors.find(
-                  (item) => item.name.toLowerCase().trim() === b.toLowerCase().trim(),
+                  (item) =>
+                    item.name.toLowerCase().trim() === b.toLowerCase().trim(),
                 );
                 const hasImgA = !!matchA?.imageUrl;
                 const hasImgB = !!matchB?.imageUrl;
@@ -485,7 +507,9 @@ export function ProductPurchaseCard({
                   >
                     <span
                       className="relative block h-8 w-8 overflow-hidden rounded-sm shadow-md shadow-black/30"
-                      style={{ backgroundColor: imageUrl ? "transparent" : hex }}
+                      style={{
+                        backgroundColor: imageUrl ? "transparent" : hex,
+                      }}
                     >
                       {imageUrl && (
                         <Image

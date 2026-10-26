@@ -3,7 +3,7 @@ import { and, desc, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { category, product } from "@/db/schema";
 
-import { ProductCard } from "../app/produto/[id]/ProductCard";
+import { ProductCarousel } from "./ProductCarousel";
 
 export default async function ProductCatalog() {
   const allCategories = await db.select().from(category);
@@ -53,15 +53,10 @@ export default async function ProductCatalog() {
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-5">
-                  {catSection.products.map((item) => (
-                    <ProductCard
-                      key={item.id}
-                      data={item}
-                      categoryName={catSection.name}
-                    />
-                  ))}
-                </div>
+                <ProductCarousel
+                  products={catSection.products}
+                  categoryName={catSection.name}
+                />
               </div>
             ))}
           </div>

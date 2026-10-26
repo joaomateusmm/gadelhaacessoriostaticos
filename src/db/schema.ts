@@ -117,6 +117,7 @@ export const product = pgTable("product", {
   description: text("description"),
   price: integer("price").notNull(), // Em centavos
   discountPrice: integer("discountPrice"), // Em centavos
+  volusPrice: integer("volusPrice"), // Em centavos - Valor do Vólus
   currency: text("currency").notNull().default("BRL"),
   images: text("images").array(),
   /** URL da imagem de capa do produto. Pode vir da galeria geral OU das fotos de variantes. É independente das duas galerias. */
@@ -139,6 +140,8 @@ export const product = pgTable("product", {
   // Informações úteis originais do banco X
 
   brand: text("brand"), // Texto livre mantido por compatibilidade com X
+  downloadUrl: text("downloadUrl"),
+  paymentLink: text("paymentLink"),
 
   // --- NOVOS CAMPOS: ADICIONADOS DO BANCO Y ---
   code: text("code"),

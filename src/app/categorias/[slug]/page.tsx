@@ -108,23 +108,23 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-5">
             {categoryProducts.map((prod) => (
-              <ProductCard
-                key={prod.id}
-                data={{
-                  id: prod.id,
-                  name: prod.name,
-                  description: prod.description,
-                  price: prod.price,
-                  discountPrice: prod.discountPrice,
-                  images: prod.images,
-                  variants: prod.variants,
-                  stock: prod.stock,
-                  isStockUnlimited: prod.isStockUnlimited ?? false,
-                  // IMPORTANTE: Adicionei a moeda aqui
-                  currency: prod.currency,
-                }}
-                categoryName={currentCategory!.name}
-              />
+               <ProductCard
+                 key={prod.id}
+                 data={{
+                   id: prod.id,
+                   name: prod.name,
+                   description: prod.description,
+                   price: prod.price,
+                   discountPrice: prod.discountPrice,
+                   images: prod.images,
+                   thumbnail: prod.thumbnail,
+                   variants: prod.variants,
+                   stock: prod.stock,
+                   isStockUnlimited: prod.isStockUnlimited ?? false,
+                   currency: prod.currency,
+                 }}
+                 categoryName={currentCategory!.name}
+               />
             ))}
           </div>
         )}

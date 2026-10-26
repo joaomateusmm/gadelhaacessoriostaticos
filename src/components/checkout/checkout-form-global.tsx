@@ -548,19 +548,11 @@ export function CheckoutForm({
           </div>
 
           <Button
-            disabled={isButtonDisabled}
-            type="submit"
-            className="text-md mt-4 h-12 w-full cursor-pointer bg-emerald-500 font-bold text-white hover:bg-emerald-600 disabled:bg-neutral-300 disabled:text-neutral-800"
+            disabled={true}
+            type="button"
+            className="text-md mt-4 h-12 w-full cursor-not-allowed bg-neutral-300 font-bold text-neutral-600 opacity-60"
           >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            ) : paymentMethod === "card" ? (
-              <>
-                <Lock className="mr-2 h-4 w-4" /> Comprar Agora
-              </>
-            ) : (
-              "Concluir Pedido"
-            )}
+            EM BREVE
           </Button>
 
           {/* ÁREA DO CALENDÁRIO COM BOTÃO DE LIMPAR (NOVO) */}

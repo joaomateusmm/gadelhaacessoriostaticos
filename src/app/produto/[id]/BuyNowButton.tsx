@@ -1,6 +1,5 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -40,13 +39,18 @@ export function BuyNowButton({
   user: initialUser,
   couponCode,
 }: BuyNowButtonProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(false);
 
   // Verifica sessão no cliente (mais seguro) ou usa a inicial
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: session } = authClient.useSession();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const user = session?.user || initialUser;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     clearCart,
     addItem,
@@ -54,127 +58,42 @@ export function BuyNowButton({
     coupon: storeCoupon,
   } = useCartStore();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const finalPrice = customPrice ?? product.price;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const isFree = finalPrice === 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const isOutOfStock = !product.isStockUnlimited && (product.stock ?? 0) <= 0;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const attributeSuffix = selectedAttributes
     ? Object.values(selectedAttributes).filter(Boolean).join(" / ")
     : "";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const displayName = attributeSuffix
     ? `${product.name} (${attributeSuffix})`
     : product.name;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const cartItemId = variantId ? `${product.id}-${variantId}` : product.id;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const chosenImage = selectedImage || product.image;
 
-  const handleBuyNow = async () => {
-    if (isOutOfStock) return;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleBuyNow = async () => {};
 
-    // --- FLUXO 1: PRODUTO PAGO ---
-    if (!isFree) {
-      setLoading(true);
-      try {
-        // 1. Lógica do Cupom (Backup)
-        const backupCoupon =
-          storeCoupon?.code === couponCode ? storeCoupon : null;
-
-        // 2. Limpa e adiciona
-        clearCart();
-        addItem({
-          id: cartItemId,
-          productId: product.id,
-          variantId: variantId || undefined,
-          selectedAttributes: selectedAttributes || undefined,
-          name: displayName,
-          price: finalPrice,
-          quantity: 1,
-          image: chosenImage,
-        });
-
-        // 3. Restaura cupom
-        if (backupCoupon) {
-          applyCoupon(backupCoupon);
-        }
-
-        // 4. Vai para checkout (Lá o login será exigido pelo CheckoutForm)
-        router.push("/checkout");
-      } catch (error) {
-        console.error(error);
-        toast.error("Erro ao redirecionar para o checkout.");
-        setLoading(false);
-      }
-      return;
-    }
-
-    // --- FLUXO 2: PRODUTO GRATUITO ---
-
-    // Se não estiver logado, manda para o login
-    if (!user) {
-      toast.info("Você precisa entrar na sua conta para baixar este item.");
-      // Redireciona para login e volta para a página do produto depois
-      router.push(`/login?callbackUrl=${window.location.pathname}`);
-      return;
-    }
-
-    await processFreeCheckout();
-  };
-
-  const processFreeCheckout = async () => {
-    try {
-      setLoading(true);
-
-      // AQUI ESTAVA O ERRO: Removemos o argumento guestData
-      await createFreeOrder(
-        [
-          {
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            quantity: 1,
-            image: product.image,
-          },
-        ],
-        couponCode, // Agora o segundo argumento é o cupom
-      );
-
-      toast.success("Produto resgatado com sucesso! Verifique seu e-mail.");
-      router.push("/checkout/sucesso");
-    } catch (error) {
-      console.error(error);
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("Erro ao processar o pedido. Tente novamente.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const processFreeCheckout = async () => {};
 
   return (
     <Button
       size="lg"
       className={cn(
-        "text-md h-15 w-full cursor-pointer rounded-[3px] font-medium text-white shadow-lg",
-        isOutOfStock
-          ? "cursor-not-allowed bg-[#676767] hover:bg-[#676767]"
-          : "bg-emerald-600 hover:bg-emerald-700 hover:shadow-xl",
+        "text-md h-15 w-full cursor-not-allowed rounded-[3px] font-medium text-white opacity-60 shadow-lg",
+        "bg-[#676767] hover:bg-[#676767]",
       )}
-      onClick={handleBuyNow}
-      disabled={loading || isOutOfStock}
+      disabled={true}
     >
-      {loading ? (
-        <>
-          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          PROCESSANDO...
-        </>
-      ) : isOutOfStock ? (
-        "ESGOTADO"
-      ) : isFree ? (
-        "BAIXAR AGORA"
-      ) : (
-        <span className="flex items-center gap-2">COMPRAR AGORA</span>
-      )}
+      EM BREVE
     </Button>
   );
 }
